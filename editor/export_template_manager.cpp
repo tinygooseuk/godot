@@ -69,6 +69,9 @@ void ExportTemplateManager::_update_template_list() {
 	memdelete(d);
 
 	String current_version = VERSION_FULL_CONFIG;
+	// Downloadable export templates are only available for stable, alpha, beta and RC versions.
+	// Therefore, don't display download-related features when using a development version
+	const bool downloads_available = String(VERSION_STATUS) != String("dev");
 
 	Label *current = memnew(Label);
 	current->set_h_size_flags(SIZE_EXPAND_FILL);
@@ -76,10 +79,14 @@ void ExportTemplateManager::_update_template_list() {
 
 	if (templates.has(current_version)) {
 		current->add_color_override("font_color", get_color("success_color", "Editor"));
-		Button *redownload = memnew(Button);
-		redownload->set_text(TTR("Re-Download"));
-		current_hb->add_child(redownload);
-		redownload->connect("pressed", this, "_download_template", varray(current_version));
+
+		// Only display a redownload button if it can be downloaded in the first place
+		if (downloads_available) {
+			Button *redownload = memnew(Button);
+			redownload->set_text(TTR("Redownload"));
+			current_hb->add_child(redownload);
+			redownload->connect("pressed", this, "_download_template", varray(current_version));
+		}
 
 		Button *uninstall = memnew(Button);
 		uninstall->set_text(TTR("Uninstall"));
@@ -91,6 +98,12 @@ void ExportTemplateManager::_update_template_list() {
 		current->add_color_override("font_color", get_color("error_color", "Editor"));
 		Button *redownload = memnew(Button);
 		redownload->set_text(TTR("Download"));
+
+		if (!downloads_available) {
+			redownload->set_disabled(true);
+			redownload->set_tooltip(TTR("Official export templates aren't available for development builds."));
+		}
+
 		redownload->connect("pressed", this, "_download_template", varray(current_version));
 		current_hb->add_child(redownload);
 		current->set_text(current_version + " " + TTR("(Missing)"));
@@ -308,8 +321,7 @@ bool ExportTemplateManager::_install_from_file(const String &p_file, bool p_use_
 		if (!f) {
 			ret = unzGoToNextFile(pkg);
 			fc++;
-			ERR_EXPLAIN("Can't open file from path: " + String(to_write));
-			ERR_CONTINUE(true);
+			ERR_CONTINUE_MSG(true, "Can't open file from path: " + String(to_write) + ".");
 		}
 
 		f->store_buffer(data.ptr(), data.size());
@@ -578,8 +590,7 @@ Error ExportTemplateManager::install_android_template() {
 	zlib_filefunc_def io = zipio_create_io_from_file(&src_f);
 
 	unzFile pkg = unzOpen2(source_zip.utf8().get_data(), &io);
-	ERR_EXPLAIN("Android sources not in zip format");
-	ERR_FAIL_COND_V(!pkg, ERR_CANT_OPEN);
+	ERR_FAIL_COND_V_MSG(!pkg, ERR_CANT_OPEN, "Android sources not in ZIP format.");
 
 	int ret = unzGoToFirstFile(pkg);
 

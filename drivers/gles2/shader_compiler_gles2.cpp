@@ -758,11 +758,13 @@ String ShaderCompilerGLES2::_dump_node_code(SL::Node *p_node, int p_level, Gener
 				} break;
 
 				case SL::OP_SELECT_IF: {
+					code += "(";
 					code += _dump_node_code(op_node->arguments[0], p_level, r_gen_code, p_actions, p_default_actions, p_assigning);
 					code += " ? ";
 					code += _dump_node_code(op_node->arguments[1], p_level, r_gen_code, p_actions, p_default_actions, p_assigning);
 					code += " : ";
 					code += _dump_node_code(op_node->arguments[2], p_level, r_gen_code, p_actions, p_default_actions, p_assigning);
+					code += ")";
 				} break;
 
 				case SL::OP_MOD: {
@@ -802,6 +804,14 @@ String ShaderCompilerGLES2::_dump_node_code(SL::Node *p_node, int p_level, Gener
 					code += "else\n";
 					code += _dump_node_code(cf_node->blocks[1], p_level + 1, r_gen_code, p_actions, p_default_actions, p_assigning);
 				}
+			} else if (cf_node->flow_op == SL::FLOW_OP_DO) {
+				code += _mktab(p_level);
+				code += "do";
+				code += _dump_node_code(cf_node->blocks[0], p_level + 1, r_gen_code, p_actions, p_default_actions, p_assigning);
+				code += _mktab(p_level);
+				code += "while (";
+				code += _dump_node_code(cf_node->expressions[0], p_level, r_gen_code, p_actions, p_default_actions, p_assigning);
+				code += ");";
 			} else if (cf_node->flow_op == SL::FLOW_OP_WHILE) {
 				code += _mktab(p_level);
 				code += "while (";

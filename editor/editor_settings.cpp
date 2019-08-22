@@ -324,8 +324,8 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 	_initial_set("interface/editor/code_font_size", 14);
 	hints["interface/editor/code_font_size"] = PropertyInfo(Variant::INT, "interface/editor/code_font_size", PROPERTY_HINT_RANGE, "8,48,1", PROPERTY_USAGE_DEFAULT);
 	_initial_set("interface/editor/font_antialiased", true);
-	_initial_set("interface/editor/font_hinting", 2);
-	hints["interface/editor/font_hinting"] = PropertyInfo(Variant::INT, "interface/editor/font_hinting", PROPERTY_HINT_ENUM, "None,Light,Normal", PROPERTY_USAGE_DEFAULT);
+	_initial_set("interface/editor/font_hinting", 0);
+	hints["interface/editor/font_hinting"] = PropertyInfo(Variant::INT, "interface/editor/font_hinting", PROPERTY_HINT_ENUM, "Auto,None,Light,Normal", PROPERTY_USAGE_DEFAULT);
 	_initial_set("interface/editor/main_font", "");
 	hints["interface/editor/main_font"] = PropertyInfo(Variant::STRING, "interface/editor/main_font", PROPERTY_HINT_GLOBAL_FILE, "*.ttf,*.otf", PROPERTY_USAGE_DEFAULT);
 	_initial_set("interface/editor/main_font_bold", "");
@@ -334,9 +334,9 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 	hints["interface/editor/code_font"] = PropertyInfo(Variant::STRING, "interface/editor/code_font", PROPERTY_HINT_GLOBAL_FILE, "*.ttf,*.otf", PROPERTY_USAGE_DEFAULT);
 	_initial_set("interface/editor/dim_editor_on_dialog_popup", true);
 	_initial_set("interface/editor/low_processor_mode_sleep_usec", 6900); // ~144 FPS
-	hints["interface/editor/low_processor_mode_sleep_usec"] = PropertyInfo(Variant::REAL, "interface/editor/low_processor_mode_sleep_usec", PROPERTY_HINT_RANGE, "1,100000,1", PROPERTY_USAGE_DEFAULT);
+	hints["interface/editor/low_processor_mode_sleep_usec"] = PropertyInfo(Variant::REAL, "interface/editor/low_processor_mode_sleep_usec", PROPERTY_HINT_RANGE, "1,100000,1", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_RESTART_IF_CHANGED);
 	_initial_set("interface/editor/unfocused_low_processor_mode_sleep_usec", 50000); // 20 FPS
-	hints["interface/editor/unfocused_low_processor_mode_sleep_usec"] = PropertyInfo(Variant::REAL, "interface/editor/unfocused_low_processor_mode_sleep_usec", PROPERTY_HINT_RANGE, "1,100000,1", PROPERTY_USAGE_DEFAULT);
+	hints["interface/editor/unfocused_low_processor_mode_sleep_usec"] = PropertyInfo(Variant::REAL, "interface/editor/unfocused_low_processor_mode_sleep_usec", PROPERTY_HINT_RANGE, "1,100000,1", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_RESTART_IF_CHANGED);
 	_initial_set("interface/editor/separate_distraction_mode", false);
 	_initial_set("interface/editor/automatically_open_screenshots", true);
 	_initial_set("interface/editor/hide_console_window", false);
@@ -607,6 +607,18 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 	_initial_set("run/output/always_clear_output_on_play", true);
 	_initial_set("run/output/always_open_output_on_play", true);
 	_initial_set("run/output/always_close_output_on_stop", false);
+
+	/* Network */
+
+	// Debug
+	_initial_set("network/debug/remote_host", "127.0.0.1"); // Hints provided in setup_network
+
+	_initial_set("network/debug/remote_port", 6007);
+	hints["network/debug/remote_port"] = PropertyInfo(Variant::INT, "network/debug/remote_port", PROPERTY_HINT_RANGE, "1,65535,1");
+
+	// SSL
+	_initial_set("network/ssl/editor_ssl_certificates", _SYSTEM_CERTS_PATH);
+	hints["network/ssl/editor_ssl_certificates"] = PropertyInfo(Variant::STRING, "network/ssl/editor_ssl_certificates", PROPERTY_HINT_GLOBAL_FILE, "*.crt,*.pem");
 
 	/* Extra config */
 
@@ -993,11 +1005,11 @@ void EditorSettings::setup_network() {
 
 	List<IP_Address> local_ip;
 	IP::get_singleton()->get_local_addresses(&local_ip);
-	String lip = "127.0.0.1";
 	String hint;
 	String current = has_setting("network/debug/remote_host") ? get("network/debug/remote_host") : "";
-	int port = has_setting("network/debug/remote_port") ? (int)get("network/debug/remote_port") : 6007;
+	String selected = "127.0.0.1";
 
+	// Check that current remote_host is a valid interface address and populate hints.
 	for (List<IP_Address>::Element *E = local_ip.front(); E; E = E->next()) {
 
 		String ip = E->get();
@@ -1008,22 +1020,18 @@ void EditorSettings::setup_network() {
 		// Same goes for IPv4 link-local (APIPA) addresses.
 		if (ip.begins_with("169.254.")) // 169.254.0.0/16
 			continue;
+		// Select current IP (found)
 		if (ip == current)
-			lip = current; //so it saves
+			selected = ip;
 		if (hint != "")
 			hint += ",";
 		hint += ip;
 	}
 
-	_initial_set("network/debug/remote_host", lip);
+	// Add hints with valid IP addresses to remote_host property.
 	add_property_hint(PropertyInfo(Variant::STRING, "network/debug/remote_host", PROPERTY_HINT_ENUM, hint));
-
-	_initial_set("network/debug/remote_port", port);
-	add_property_hint(PropertyInfo(Variant::INT, "network/debug/remote_port", PROPERTY_HINT_RANGE, "1,65535,1"));
-
-	// Editor SSL certificates override
-	_initial_set("network/ssl/editor_ssl_certificates", _SYSTEM_CERTS_PATH);
-	add_property_hint(PropertyInfo(Variant::STRING, "network/ssl/editor_ssl_certificates", PROPERTY_HINT_GLOBAL_FILE, "*.crt,*.pem"));
+	// Fix potentially invalid remote_host due to network change.
+	set("network/debug/remote_host", selected);
 }
 
 void EditorSettings::save() {
@@ -1216,7 +1224,7 @@ void EditorSettings::set_project_metadata(const String &p_section, const String 
 	String path = get_project_settings_dir().plus_file("project_metadata.cfg");
 	Error err;
 	err = cf->load(path);
-	ERR_FAIL_COND(err != OK);
+	ERR_FAIL_COND(err != OK && err != ERR_FILE_NOT_FOUND);
 	cf->set_value(p_section, p_key, p_data);
 	err = cf->save(path);
 	ERR_FAIL_COND(err != OK);
@@ -1451,10 +1459,7 @@ void EditorSettings::add_shortcut(const String &p_name, Ref<ShortCut> &p_shortcu
 bool EditorSettings::is_shortcut(const String &p_name, const Ref<InputEvent> &p_event) const {
 
 	const Map<String, Ref<ShortCut> >::Element *E = shortcuts.find(p_name);
-	if (!E) {
-		ERR_EXPLAIN("Unknown Shortcut: " + p_name);
-		ERR_FAIL_V(false);
-	}
+	ERR_FAIL_COND_V_MSG(!E, false, "Unknown Shortcut: " + p_name + ".");
 
 	return E->get()->is_shortcut(p_event);
 }
@@ -1483,10 +1488,8 @@ Ref<ShortCut> ED_GET_SHORTCUT(const String &p_path) {
 	}
 
 	Ref<ShortCut> sc = EditorSettings::get_singleton()->get_shortcut(p_path);
-	if (!sc.is_valid()) {
-		ERR_EXPLAIN("Used ED_GET_SHORTCUT with invalid shortcut: " + p_path);
-		ERR_FAIL_COND_V(!sc.is_valid(), sc);
-	}
+
+	ERR_FAIL_COND_V_MSG(!sc.is_valid(), sc, "Used ED_GET_SHORTCUT with invalid shortcut: " + p_path + ".");
 
 	return sc;
 }

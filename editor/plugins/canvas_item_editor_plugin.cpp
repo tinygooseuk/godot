@@ -2918,10 +2918,15 @@ void CanvasItemEditor::_draw_selection() {
 		Point2 bsfrom = transform.xform(drag_from);
 		Point2 bsto = transform.xform(box_selecting_to);
 
-		VisualServer::get_singleton()->canvas_item_add_rect(
-				ci,
+		viewport->draw_rect(
 				Rect2(bsfrom, bsto - bsfrom),
-				get_color("accent_color", "Editor") * Color(1, 1, 1, 0.375));
+				get_color("box_selection_fill_color", "Editor"));
+
+		viewport->draw_rect(
+				Rect2(bsfrom, bsto - bsfrom),
+				get_color("box_selection_stroke_color", "Editor"),
+				false,
+				Math::round(EDSCALE));
 	}
 
 	if (drag_type == DRAG_ROTATE) {
@@ -3314,6 +3319,10 @@ void CanvasItemEditor::_draw_viewport() {
 void CanvasItemEditor::update_viewport() {
 	_update_scrollbars();
 	viewport->update();
+}
+
+void CanvasItemEditor::set_current_tool(Tool p_tool) {
+	_button_tool_select(p_tool);
 }
 
 void CanvasItemEditor::_notification(int p_what) {
@@ -4998,10 +5007,12 @@ CanvasItemEditor::CanvasItemEditor(EditorNode *p_editor) {
 	p->set_hide_on_checkable_item_selection(false);
 	p->add_check_shortcut(ED_SHORTCUT("canvas_item_editor/snap_grid", TTR("Snap to Grid")), SNAP_USE_GRID);
 	p->add_check_shortcut(ED_SHORTCUT("canvas_item_editor/use_rotation_snap", TTR("Use Rotation Snap")), SNAP_USE_ROTATION);
-	p->add_shortcut(ED_SHORTCUT("canvas_item_editor/configure_snap", TTR("Configure Snap...")), SNAP_CONFIGURE);
 	p->add_check_shortcut(ED_SHORTCUT("canvas_item_editor/snap_relative", TTR("Snap Relative")), SNAP_RELATIVE);
 	p->add_check_shortcut(ED_SHORTCUT("canvas_item_editor/use_pixel_snap", TTR("Use Pixel Snap")), SNAP_USE_PIXEL);
 	p->add_submenu_item(TTR("Smart Snapping"), "SmartSnapping");
+
+	p->add_separator();
+	p->add_shortcut(ED_SHORTCUT("canvas_item_editor/configure_snap", TTR("Configure Snap...")), SNAP_CONFIGURE);
 
 	smartsnap_config_popup = memnew(PopupMenu);
 	p->add_child(smartsnap_config_popup);
