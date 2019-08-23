@@ -448,6 +448,9 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 	_initial_set("text_editor/line_numbers/show_info_gutter", true);
 	_initial_set("text_editor/line_numbers/code_folding", true);
 	_initial_set("text_editor/line_numbers/word_wrap", false);
+	_initial_set("text_editor/line_numbers/draw_minimap", true);
+	_initial_set("text_editor/line_numbers/minimap_width", 80);
+	hints["text_editor/line_numbers/minimap_width"] = PropertyInfo(Variant::INT, "text_editor/line_numbers/minimap_width", PROPERTY_HINT_RANGE, "50,250,1");
 	_initial_set("text_editor/line_numbers/show_line_length_guideline", false);
 	_initial_set("text_editor/line_numbers/line_length_guideline_column", 80);
 	hints["text_editor/line_numbers/line_length_guideline_column"] = PropertyInfo(Variant::INT, "text_editor/line_numbers/line_length_guideline_column", PROPERTY_HINT_RANGE, "20, 160, 1");
@@ -561,6 +564,7 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 	// 2D
 	_initial_set("editors/2d/grid_color", Color(1.0, 1.0, 1.0, 0.07));
 	_initial_set("editors/2d/guides_color", Color(0.6, 0.0, 0.8));
+	_initial_set("editors/2d/smart_snapping_line_color", Color(0.9, 0.1, 0.1));
 	_initial_set("editors/2d/bone_width", 5);
 	_initial_set("editors/2d/bone_color1", Color(1.0, 1.0, 1.0, 0.9));
 	_initial_set("editors/2d/bone_color2", Color(0.6, 0.6, 0.6, 0.9));
@@ -1205,6 +1209,11 @@ String EditorSettings::get_script_templates_dir() const {
 	return get_settings_dir().plus_file("script_templates");
 }
 
+String EditorSettings::get_project_script_templates_dir() const {
+
+	return ProjectSettings::get_singleton()->get("editor/script_templates_search_path");
+}
+
 // Cache directory
 
 String EditorSettings::get_cache_dir() const {
@@ -1425,10 +1434,14 @@ bool EditorSettings::is_default_text_editor_theme() {
 	return _is_default_text_editor_theme(p_file.get_file().to_lower());
 }
 
-Vector<String> EditorSettings::get_script_templates(const String &p_extension) {
+Vector<String> EditorSettings::get_script_templates(const String &p_extension, const String &p_custom_path) {
 
 	Vector<String> templates;
-	DirAccess *d = DirAccess::open(get_script_templates_dir());
+	String template_dir = get_script_templates_dir();
+	if (!p_custom_path.empty()) {
+		template_dir = p_custom_path;
+	}
+	DirAccess *d = DirAccess::open(template_dir);
 	if (d) {
 		d->list_dir_begin();
 		String file = d->get_next();
