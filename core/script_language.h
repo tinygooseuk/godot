@@ -109,6 +109,12 @@ protected:
 	friend class PlaceHolderScriptInstance;
 	virtual void _placeholder_erased(PlaceHolderScriptInstance *p_placeholder) {}
 
+	Variant _get_property_default_value(const StringName &p_property);
+	Array _get_script_property_list();
+	Array _get_script_method_list();
+	Array _get_script_signal_list();
+	Dictionary _get_script_constant_map();
+
 public:
 	virtual bool can_instance() const = 0;
 
@@ -461,7 +467,7 @@ public:
 	void clear_breakpoints();
 	const Map<int, Set<StringName> > &get_breakpoints() const { return breakpoints; }
 
-	virtual void debug(ScriptLanguage *p_script, bool p_can_continue = true) = 0;
+	virtual void debug(ScriptLanguage *p_script, bool p_can_continue = true, bool p_is_error_breakpoint = false) = 0;
 	virtual void idle_poll();
 	virtual void line_poll();
 
