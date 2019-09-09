@@ -5,7 +5,7 @@ if %errorlevel%==1 goto error
 
 git push origin master
 
-exit
+exit /B
 
 error:
 echo There was an error :(
