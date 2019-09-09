@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  editor_vcs_interface.h                                               */
+/*  resource_importer_csv.cpp                                            */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,56 +28,53 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef EDITOR_VCS_INTERFACE_H
-#define EDITOR_VCS_INTERFACE_H
+#include "resource_importer_csv.h"
 
-#include "core/object.h"
-#include "core/ustring.h"
-#include "scene/gui/panel_container.h"
+#include "core/io/resource_saver.h"
+#include "core/os/file_access.h"
 
-class EditorVCSInterface : public Object {
+String ResourceImporterCSV::get_importer_name() const {
 
-	GDCLASS(EditorVCSInterface, Object)
+	return "csv";
+}
 
-	bool is_initialized;
+String ResourceImporterCSV::get_visible_name() const {
 
-protected:
-	static EditorVCSInterface *singleton;
+	return "CSV";
+}
+void ResourceImporterCSV::get_recognized_extensions(List<String> *p_extensions) const {
 
-	static void _bind_methods();
+	p_extensions->push_back("csv");
+}
 
-	// Implemented by addons as end points for the proxy functions
-	bool _initialize(String p_project_root_path);
-	bool _get_is_vcs_intialized();
-	Dictionary _get_modified_files_data();
-	void _stage_file(String p_file_path);
-	void _unstage_file(String p_file_path);
-	void _commit(String p_msg);
-	Array _get_file_diff(String p_file_path);
-	bool _shut_down();
-	String _get_project_name();
-	String _get_vcs_name();
+String ResourceImporterCSV::get_save_extension() const {
+	return ""; //does not save a single resource
+}
 
-public:
-	static EditorVCSInterface *get_singleton();
-	static void set_singleton(EditorVCSInterface *p_singleton);
+String ResourceImporterCSV::get_resource_type() const {
 
-	bool is_addon_ready();
+	return "TextFile";
+}
 
-	// Proxy functions to the editor for use
-	bool initialize(String p_project_root_path);
-	bool get_is_vcs_intialized();
-	Dictionary get_modified_files_data();
-	void stage_file(String p_file_path);
-	void unstage_file(String p_file_path);
-	void commit(String p_msg);
-	Array get_file_diff(String p_file_path);
-	bool shut_down();
-	String get_project_name();
-	String get_vcs_name();
+bool ResourceImporterCSV::get_option_visibility(const String &p_option, const Map<StringName, Variant> &p_options) const {
 
-	EditorVCSInterface();
-	virtual ~EditorVCSInterface();
-};
+	return true;
+}
 
-#endif // !EDITOR_VCS_INTERFACE_H
+int ResourceImporterCSV::get_preset_count() const {
+	return 0;
+}
+String ResourceImporterCSV::get_preset_name(int p_idx) const {
+
+	return "";
+}
+
+void ResourceImporterCSV::get_import_options(List<ImportOption> *r_options, int p_preset) const {
+}
+
+Error ResourceImporterCSV::import(const String &p_source_file, const String &p_save_path, const Map<StringName, Variant> &p_options, List<String> *r_platform_variants, List<String> *r_gen_files, Variant *r_metadata) {
+	return OK;
+}
+
+ResourceImporterCSV::ResourceImporterCSV() {
+}

@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  editor_vcs_interface.h                                               */
+/*  editor_network_profiler.h                                            */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,56 +28,45 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef EDITOR_VCS_INTERFACE_H
-#define EDITOR_VCS_INTERFACE_H
+#ifndef EDITORNETWORKPROFILER_H
+#define EDITORNETWORKPROFILER_H
 
-#include "core/object.h"
-#include "core/ustring.h"
-#include "scene/gui/panel_container.h"
+#include "scene/gui/box_container.h"
+#include "scene/gui/button.h"
+#include "scene/gui/label.h"
+#include "scene/gui/split_container.h"
+#include "scene/gui/tree.h"
 
-class EditorVCSInterface : public Object {
+class EditorNetworkProfiler : public VBoxContainer {
 
-	GDCLASS(EditorVCSInterface, Object)
+	GDCLASS(EditorNetworkProfiler, VBoxContainer)
 
-	bool is_initialized;
+private:
+	Button *activate;
+	Button *clear_button;
+	Tree *counters_display;
+	LineEdit *incoming_bandwidth_text;
+	LineEdit *outgoing_bandwidth_text;
+
+	Timer *frame_delay;
+
+	Map<ObjectID, MultiplayerAPI::ProfilingInfo> nodes_data;
+
+	void _update_frame();
+
+	void _activate_pressed();
+	void _clear_pressed();
 
 protected:
-	static EditorVCSInterface *singleton;
-
+	void _notification(int p_what);
 	static void _bind_methods();
 
-	// Implemented by addons as end points for the proxy functions
-	bool _initialize(String p_project_root_path);
-	bool _get_is_vcs_intialized();
-	Dictionary _get_modified_files_data();
-	void _stage_file(String p_file_path);
-	void _unstage_file(String p_file_path);
-	void _commit(String p_msg);
-	Array _get_file_diff(String p_file_path);
-	bool _shut_down();
-	String _get_project_name();
-	String _get_vcs_name();
-
 public:
-	static EditorVCSInterface *get_singleton();
-	static void set_singleton(EditorVCSInterface *p_singleton);
+	void add_node_frame_data(const MultiplayerAPI::ProfilingInfo p_frame);
+	void set_bandwidth(int p_incoming, int p_outgoing);
+	bool is_profiling();
 
-	bool is_addon_ready();
-
-	// Proxy functions to the editor for use
-	bool initialize(String p_project_root_path);
-	bool get_is_vcs_intialized();
-	Dictionary get_modified_files_data();
-	void stage_file(String p_file_path);
-	void unstage_file(String p_file_path);
-	void commit(String p_msg);
-	Array get_file_diff(String p_file_path);
-	bool shut_down();
-	String get_project_name();
-	String get_vcs_name();
-
-	EditorVCSInterface();
-	virtual ~EditorVCSInterface();
+	EditorNetworkProfiler();
 };
 
-#endif // !EDITOR_VCS_INTERFACE_H
+#endif //EDITORNETWORKPROFILER_H
