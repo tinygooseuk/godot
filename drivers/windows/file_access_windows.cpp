@@ -167,7 +167,8 @@ void FileAccessWindows::close() {
 				rename_error = !ReplaceFileW(save_path.c_str(), (save_path + ".tmp").c_str(), NULL, 2 | 4, NULL, NULL);
 			}
 			if (rename_error) {
-				LPWSTR lpFilePart;
+				// TGI: Checkout from p4 (if using p4!)
+				/*LPWSTR lpFilePart;
 				WCHAR filename[MAX_PATH]; 
 
 				if(SearchPathW(NULL, L"p4", L".exe", MAX_PATH, filename, &lpFilePart)) {
@@ -182,7 +183,7 @@ void FileAccessWindows::close() {
 					if (result == Error::OK) {
 						OS::get_singleton()->print("p4: checked out '%s' successfully.", save_path.c_str());
 					}					
-				}
+				}*/
 
 				attempts--;
 				OS::get_singleton()->delay_usec(100000); // wait 100msec and try again
