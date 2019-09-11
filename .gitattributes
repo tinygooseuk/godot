@@ -11,4 +11,3 @@ thirdparty/* linguist-vendored
 *.jar binary
 *.png binary
 *.ttf binary
-*.exe filter=lfs diff=lfs merge=lfs -text
