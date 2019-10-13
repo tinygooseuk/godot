@@ -44,7 +44,7 @@ void GridContainer::_notification(int p_what) {
 			int hsep = get_constant("hseparation");
 			int vsep = get_constant("vseparation");
 			int max_col = MIN(get_child_count(), columns);
-			int max_row = get_child_count() / columns;
+			int max_row = ceil((float)get_child_count() / (float)columns);
 
 			// Compute the per-column/per-row data.
 			int valid_controls_index = 0;
@@ -210,7 +210,7 @@ Size2 GridContainer::get_minimum_size() const {
 	for (int i = 0; i < get_child_count(); i++) {
 
 		Control *c = Object::cast_to<Control>(get_child(i));
-		if (!c || !c->is_visible_in_tree())
+		if (!c || !c->is_visible())
 			continue;
 		int row = valid_controls_index / columns;
 		int col = valid_controls_index % columns;
