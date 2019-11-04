@@ -1,6 +1,6 @@
 @echo off
 
-scons p=windows vcproj=yes -j8
+scons p=windows vcproj=yes -j16
 if %errorlevel%==1 goto error
 
 exit /B
