@@ -1,13 +1,7 @@
 #pragma once
 #include <scene/3d/mesh_instance.h>
 
-#define DEFINE_PROPERTY(cpp_type, name, default_value)			\
-	private:													\
-		cpp_type name = default_value;							\
-																\
-	public:														\
-		void set_##name(cpp_type p_##name) { name = p_##name; }	\
-		cpp_type get_##name() const { return name; }				
+#include <core/tg_util.h>			
 
 class PerlinLandscape : public MeshInstance
 {
