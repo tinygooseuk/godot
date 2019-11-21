@@ -515,6 +515,7 @@ void TileMapEditor::_update_palette() {
 		sel_tile = selected.get(Math::rand() % selected.size());
 	} else if (palette->get_item_count() > 0) {
 		palette->select(0);
+		sel_tile = palette->get_selected_items().get(0);
 	}
 
 	if (sel_tile != TileMap::INVALID_CELL && ((manual_autotile && tileset->tile_get_tile_mode(sel_tile) == TileSet::AUTO_TILE) || (!priority_atlastile && tileset->tile_get_tile_mode(sel_tile) == TileSet::ATLAS_TILE))) {
@@ -1996,6 +1997,7 @@ TileMapEditor::TileMapEditor(EditorNode *p_editor) {
 	info_message->set_valign(Label::VALIGN_CENTER);
 	info_message->set_align(Label::ALIGN_CENTER);
 	info_message->set_autowrap(true);
+	info_message->set_custom_minimum_size(Size2(100 * EDSCALE, 0));
 	info_message->set_anchors_and_margins_preset(PRESET_WIDE, PRESET_MODE_KEEP_SIZE, 8 * EDSCALE);
 	palette->add_child(info_message);
 

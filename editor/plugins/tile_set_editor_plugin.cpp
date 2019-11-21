@@ -584,6 +584,7 @@ TileSetEditor::TileSetEditor(EditorNode *p_editor) {
 	empty_message->set_valign(Label::VALIGN_CENTER);
 	empty_message->set_align(Label::ALIGN_CENTER);
 	empty_message->set_autowrap(true);
+	empty_message->set_custom_minimum_size(Size2(100 * EDSCALE, 0));
 	empty_message->set_v_size_flags(SIZE_EXPAND_FILL);
 	main_vb->add_child(empty_message);
 
@@ -3234,8 +3235,8 @@ void TileSetEditor::update_workspace_minsize() {
 	delete tiles;
 
 	workspace->set_custom_minimum_size(workspace_min_size + WORKSPACE_MARGIN * 2);
-	workspace_container->set_custom_minimum_size(workspace_min_size + WORKSPACE_MARGIN * 2);
-	workspace_overlay->set_custom_minimum_size(workspace_min_size + WORKSPACE_MARGIN * 2);
+	workspace_container->set_custom_minimum_size(workspace_min_size * workspace->get_scale() + WORKSPACE_MARGIN * 2);
+	workspace_overlay->set_custom_minimum_size(workspace_min_size * workspace->get_scale() + WORKSPACE_MARGIN * 2);
 }
 
 void TileSetEditor::update_edited_region(const Vector2 &end_point) {

@@ -1234,7 +1234,7 @@ int Tree::draw_item(const Point2i &p_pos, const Point2 &p_draw_ofs, const Size2 
 				}
 			}
 
-			if (select_mode != SELECT_ROW && (p_item->cells[i].selected || selected_item == p_item)) {
+			if ((select_mode == SELECT_ROW && selected_item == p_item) || p_item->cells[i].selected) {
 				Rect2i r(cell_rect.position, cell_rect.size);
 
 				if (p_item->cells[i].text.size() > 0) {
@@ -2224,8 +2224,9 @@ void Tree::_go_down() {
 	TreeItem *next = NULL;
 	if (!selected_item) {
 
-		next = hide_root ? root->get_next_visible() : root;
-		selected_item = 0;
+		if (root) {
+			next = hide_root ? root->get_next_visible() : root;
+		}
 	} else {
 
 		next = selected_item->get_next_visible();
@@ -2765,7 +2766,6 @@ bool Tree::edit_selected() {
 		return false;
 
 	Rect2 rect = s->get_meta("__focus_rect");
-
 	popup_edited_item = s;
 	popup_edited_item_col = col;
 
@@ -4050,6 +4050,7 @@ Tree::Tree() {
 	drop_mode_section = 0;
 	single_select_defer = NULL;
 
+	scrolling = false;
 	allow_rmb_select = false;
 	force_edit_checkbox_only_on_checkbox = false;
 
