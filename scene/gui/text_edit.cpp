@@ -417,7 +417,6 @@ void TextEdit::_update_scrollbars() {
 		cursor.line_ofs = 0;
 		cursor.wrap_ofs = 0;
 		v_scroll->set_value(0);
-		v_scroll->set_max(0);
 		v_scroll->hide();
 	}
 
@@ -436,7 +435,6 @@ void TextEdit::_update_scrollbars() {
 
 		cursor.x_ofs = 0;
 		h_scroll->set_value(0);
-		h_scroll->set_max(0);
 		h_scroll->hide();
 	}
 
@@ -4440,7 +4438,6 @@ int TextEdit::get_line_wrap_index_at_col(int p_line, int p_column) const {
 }
 
 void TextEdit::cursor_set_column(int p_col, bool p_adjust_viewport) {
-
 	if (p_col < 0)
 		p_col = 0;
 
@@ -4593,6 +4590,7 @@ void TextEdit::_scroll_moved(double p_to_val) {
 					break;
 			}
 		}
+		n_line = MIN(n_line, text.size() - 1);
 		int line_wrap_amount = times_line_wraps(n_line);
 		int wi = line_wrap_amount - (sc - v_scroll_i - 1);
 		wi = CLAMP(wi, 0, line_wrap_amount);
@@ -7142,6 +7140,7 @@ TextEdit::TextEdit() {
 	max_chars = 0;
 	clear();
 	wrap_enabled = false;
+	wrap_at = 0;
 	wrap_right_offset = 10;
 	set_focus_mode(FOCUS_ALL);
 	syntax_highlighter = NULL;

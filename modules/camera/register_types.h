@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  camera_osx.h                                                         */
+/*  register_types.h                                                     */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,20 +28,5 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef CAMERAOSX_H
-#define CAMERAOSX_H
-
-///@TODO this is a near duplicate of CameraIOS, we should find a way to combine those to minimise code duplication!!!!
-// If you fix something here, make sure you fix it there as wel!
-
-#include "servers/camera_server.h"
-
-class CameraOSX : public CameraServer {
-public:
-	CameraOSX();
-	~CameraOSX();
-
-	void update_feeds();
-};
-
-#endif /* CAMERAOSX_H */
+void register_camera_types();
+void unregister_camera_types();

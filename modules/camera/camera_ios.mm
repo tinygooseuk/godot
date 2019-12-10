@@ -28,7 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-///@TODO this is a near duplicate of CameraOSX, we should find a way to combine those to minimise code duplication!!!!
+///@TODO this is a near duplicate of CameraOSX, we should find a way to combine those to minimize code duplication!!!!
 // If you fix something here, make sure you fix it there as wel!
 
 #include "camera_ios.h"
@@ -359,7 +359,7 @@ void CameraIOS::update_feeds() {
 	// this way of doing things is deprecated but still works,
 	// rewrite to using AVCaptureDeviceDiscoverySession
 
-	AVCaptureDeviceDiscoverySession *session = [AVCaptureDeviceDiscoverySession discoverySessionWithDeviceTypes:[NSArray arrayWithObjects:AVCaptureDeviceTypeBuiltInTelephotoCamera, AVCaptureDeviceTypeBuiltInDualCamera, AVCaptureDeviceTypeBuiltInTrueDepthCamera, AVCaptureDeviceTypeBuiltInWideAngleCamera] mediaType:AVMediaTypeVideo position:AVCaptureDevicePositionUnspecified];
+	AVCaptureDeviceDiscoverySession *session = [AVCaptureDeviceDiscoverySession discoverySessionWithDeviceTypes:[NSArray arrayWithObjects:AVCaptureDeviceTypeBuiltInTelephotoCamera, AVCaptureDeviceTypeBuiltInDualCamera, AVCaptureDeviceTypeBuiltInTrueDepthCamera, AVCaptureDeviceTypeBuiltInWideAngleCamera, nil] mediaType:AVMediaTypeVideo position:AVCaptureDevicePositionUnspecified];
 
 	// remove devices that are gone..
 	for (int i = feeds.size() - 1; i >= 0; i--) {
