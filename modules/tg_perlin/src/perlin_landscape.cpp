@@ -27,9 +27,7 @@ void PerlinLandscape::_notification(int p_what) {
 			_process(get_process_delta_time());
 			break;
 		default:
-			printf("Got note %i\n", p_what);
-
-		break;
+			break;
 	}
 }
 
