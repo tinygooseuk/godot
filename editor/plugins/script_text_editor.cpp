@@ -966,6 +966,12 @@ void ScriptTextEditor::_lookup_symbol(const String &p_symbol, int p_row, int p_c
 	}
 }
 
+void ScriptTextEditor::update_toggle_scripts_button() {
+	if (code_editor != NULL) {
+		code_editor->update_toggle_scripts_button();
+	}
+}
+
 void ScriptTextEditor::_update_connected_methods() {
 	TextEdit *text_edit = code_editor->get_text_edit();
 	text_edit->clear_info_icons();
@@ -1760,6 +1766,7 @@ ScriptTextEditor::ScriptTextEditor() {
 	code_editor->get_text_edit()->connect("symbol_lookup", this, "_lookup_symbol");
 	code_editor->get_text_edit()->connect("info_clicked", this, "_lookup_connections");
 	code_editor->set_v_size_flags(SIZE_EXPAND_FILL);
+	code_editor->show_toggle_scripts_button();
 
 	warnings_panel = memnew(RichTextLabel);
 	editor_box->add_child(warnings_panel);
