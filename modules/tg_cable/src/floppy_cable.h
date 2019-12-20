@@ -34,20 +34,20 @@ private:
 	int get_vert_index(int along_idx, int around_idx) const;
 
 	// Exports
-	DEFINE_PROPERTY(bool, is_start_attached, true);
-	DEFINE_PROPERTY(Vector3, start_location, {});
+	DECLARE_PROPERTY(bool, is_start_attached, true);
+	DECLARE_PROPERTY(Vector3, start_location, {});
 
-	DEFINE_PROPERTY(bool, is_end_attached, false);
-	DEFINE_PROPERTY(Vector3, end_location, {});
+	DECLARE_PROPERTY(bool, is_end_attached, false);
+	DECLARE_PROPERTY(Vector3, end_location, {});
 
-	DEFINE_PROPERTY(bool, use_stiffness, false);
+	DECLARE_PROPERTY(bool, use_stiffness, false);
 
-	DEFINE_PROPERTY(float, cable_length, 1.0f);
-	DEFINE_PROPERTY(float, cable_width, 0.2f);
-	DEFINE_PROPERTY(int, cable_num_segments, 8);
-	DEFINE_PROPERTY(int, cable_num_sides, 8);
+	DECLARE_PROPERTY(float, cable_length, 1.0f);
+	DECLARE_PROPERTY(float, cable_width, 0.2f);
+	DECLARE_PROPERTY(int, cable_num_segments, 8);
+	DECLARE_PROPERTY(int, cable_num_sides, 8);
 
-	DEFINE_PROPERTY(Ref<Material>, cable_material, {});
+	DECLARE_PROPERTY(Ref<Material>, cable_material, {});
 
 	// State	
 	std::vector<CableParticle> particles;

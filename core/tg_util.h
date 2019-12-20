@@ -15,7 +15,7 @@ constexpr T clamp(T value, T min_v, T max_v) {
 	return max(min_v, min(max_v, value));
 }
 
-#define DEFINE_PROPERTY(cpp_type, name, default_value)      \
+#define DECLARE_PROPERTY(cpp_type, name, default_value)     \
 private:                                                    \
 	cpp_type name = default_value;                          \
                                                             \
