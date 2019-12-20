@@ -9,7 +9,7 @@ call bin\godot.windows.tools.64.mono.exe --generate-mono-glue modules/mono/glue
 if %errorlevel%==1 goto error
 
 echo Building mono editor
-call scons p=windows tools=yes module_mono_enabled=yes mono_glue=yes vcproj=yes -j16
+call scons p=windows tools=yes module_mono_enabled=yes mono_glue=yes vsproj=yes -j16
 
 if %errorlevel%==1 goto error
 exit /B
