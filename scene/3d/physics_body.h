@@ -336,6 +336,7 @@ public:
 	bool is_on_wall() const;
 	bool is_on_ceiling() const;
 	Vector3 get_floor_velocity() const;
+	PhysicsBody *get_floor_body() const;
 
 	int get_slide_count() const;
 	Collision get_slide_collision(int p_bounce) const;
