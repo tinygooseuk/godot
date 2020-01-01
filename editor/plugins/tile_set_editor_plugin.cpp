@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -32,6 +32,7 @@
 
 #include "core/os/input.h"
 #include "core/os/keyboard.h"
+#include "editor/editor_scale.h"
 #include "editor/plugins/canvas_item_editor_plugin.h"
 #include "scene/2d/physics_body_2d.h"
 #include "scene/2d/sprite.h"
@@ -404,10 +405,15 @@ TileSetEditor::TileSetEditor(EditorNode *p_editor) {
 	HBoxContainer *tool_hb = memnew(HBoxContainer);
 	Ref<ButtonGroup> g(memnew(ButtonGroup));
 
-	String workspace_label[WORKSPACE_MODE_MAX] = { "Edit", "New Single Tile", "New Autotile", "New Atlas" };
+	String workspace_label[WORKSPACE_MODE_MAX] = {
+		TTR("Edit"),
+		TTR("New Single Tile"),
+		TTR("New Autotile"),
+		TTR("New Atlas")
+	};
 	for (int i = 0; i < (int)WORKSPACE_MODE_MAX; i++) {
 		tool_workspacemode[i] = memnew(Button);
-		tool_workspacemode[i]->set_text(TTR(workspace_label[i]));
+		tool_workspacemode[i]->set_text(workspace_label[i]);
 		tool_workspacemode[i]->set_toggle_mode(true);
 		tool_workspacemode[i]->set_button_group(g);
 		tool_workspacemode[i]->connect("pressed", this, "_on_workspace_mode_changed", varray(i));
@@ -445,7 +451,16 @@ TileSetEditor::TileSetEditor(EditorNode *p_editor) {
 	tool_hb = memnew(HBoxContainer);
 
 	g = Ref<ButtonGroup>(memnew(ButtonGroup));
-	String label[EDITMODE_MAX] = { "Region", "Collision", "Occlusion", "Navigation", "Bitmask", "Priority", "Icon", "Z Index" };
+	String label[EDITMODE_MAX] = {
+		TTR("Region"),
+		TTR("Collision"),
+		TTR("Occlusion"),
+		TTR("Navigation"),
+		TTR("Bitmask"),
+		TTR("Priority"),
+		TTR("Icon"),
+		TTR("Z Index")
+	};
 	for (int i = 0; i < (int)EDITMODE_MAX; i++) {
 		tool_editmode[i] = memnew(Button);
 		tool_editmode[i]->set_text(label[i]);
@@ -2022,10 +2037,10 @@ void TileSetEditor::_update_toggle_shape_button() {
 		tools[SHAPE_TOGGLE_TYPE]->hide();
 	} else if (concave.is_valid()) {
 		tools[SHAPE_TOGGLE_TYPE]->set_icon(get_icon("ConvexPolygonShape2D", "EditorIcons"));
-		tools[SHAPE_TOGGLE_TYPE]->set_text("Make Convex");
+		tools[SHAPE_TOGGLE_TYPE]->set_text(TTR("Make Convex"));
 	} else if (convex.is_valid()) {
 		tools[SHAPE_TOGGLE_TYPE]->set_icon(get_icon("ConcavePolygonShape2D", "EditorIcons"));
-		tools[SHAPE_TOGGLE_TYPE]->set_text("Make Concave");
+		tools[SHAPE_TOGGLE_TYPE]->set_text(TTR("Make Concave"));
 	} else {
 		// Shouldn't happen
 		separator_shape_toggle->hide();

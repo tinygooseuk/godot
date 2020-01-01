@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -1573,6 +1573,7 @@ void CodeTextEditor::goto_next_bookmark() {
 	if (line >= bmarks[bmarks.size() - 1]) {
 		text_editor->unfold_line(bmarks[0]);
 		text_editor->cursor_set_line(bmarks[0]);
+		text_editor->center_viewport_to_cursor();
 	} else {
 		for (List<int>::Element *E = bmarks.front(); E; E = E->next()) {
 			int bline = E->get();
@@ -1598,6 +1599,7 @@ void CodeTextEditor::goto_prev_bookmark() {
 	if (line <= bmarks[0]) {
 		text_editor->unfold_line(bmarks[bmarks.size() - 1]);
 		text_editor->cursor_set_line(bmarks[bmarks.size() - 1]);
+		text_editor->center_viewport_to_cursor();
 	} else {
 		for (List<int>::Element *E = bmarks.back(); E; E = E->prev()) {
 			int bline = E->get();

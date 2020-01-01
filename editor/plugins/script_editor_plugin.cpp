@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -37,7 +37,10 @@
 #include "core/os/os.h"
 #include "core/project_settings.h"
 #include "editor/editor_node.h"
+#include "editor/editor_run_script.h"
+#include "editor/editor_scale.h"
 #include "editor/editor_settings.h"
+#include "editor/filesystem_dock.h"
 #include "editor/find_in_files.h"
 #include "editor/node_dock.h"
 #include "editor/plugins/shader_editor_plugin.h"
@@ -1225,7 +1228,7 @@ void ScriptEditor::_menu_option(int p_option) {
 
 				Ref<Script> scr = current->get_edited_resource();
 				if (scr == NULL || scr.is_null()) {
-					EditorNode::get_singleton()->show_warning("Can't obtain the script for running.");
+					EditorNode::get_singleton()->show_warning(TTR("Can't obtain the script for running."));
 					break;
 				}
 
@@ -1233,18 +1236,18 @@ void ScriptEditor::_menu_option(int p_option) {
 				Error err = scr->reload(false); //hard reload script before running always
 
 				if (err != OK) {
-					EditorNode::get_singleton()->show_warning("Script failed reloading, check console for errors.");
+					EditorNode::get_singleton()->show_warning(TTR("Script failed reloading, check console for errors."));
 					return;
 				}
 				if (!scr->is_tool()) {
 
-					EditorNode::get_singleton()->show_warning("Script is not in tool mode, will not be able to run.");
+					EditorNode::get_singleton()->show_warning(TTR("Script is not in tool mode, will not be able to run."));
 					return;
 				}
 
 				if (!ClassDB::is_parent_class(scr->get_instance_base_type(), "EditorScript")) {
 
-					EditorNode::get_singleton()->show_warning("To run this script, it must inherit EditorScript and be set to tool mode.");
+					EditorNode::get_singleton()->show_warning(TTR("To run this script, it must inherit EditorScript and be set to tool mode."));
 					return;
 				}
 
@@ -1267,12 +1270,15 @@ void ScriptEditor::_menu_option(int p_option) {
 				_copy_script_path();
 			} break;
 			case SHOW_IN_FILE_SYSTEM: {
-				RES script = current->get_edited_resource();
-				FileSystemDock *file_system_dock = EditorNode::get_singleton()->get_filesystem_dock();
-				file_system_dock->navigate_to_path(script->get_path());
-				// Ensure that the FileSystem dock is visible.
-				TabContainer *tab_container = (TabContainer *)file_system_dock->get_parent_control();
-				tab_container->set_current_tab(file_system_dock->get_position_in_parent());
+				const RES script = current->get_edited_resource();
+				const String path = script->get_path();
+				if (!path.empty()) {
+					FileSystemDock *file_system_dock = EditorNode::get_singleton()->get_filesystem_dock();
+					file_system_dock->navigate_to_path(path);
+					// Ensure that the FileSystem dock is visible.
+					TabContainer *tab_container = (TabContainer *)file_system_dock->get_parent_control();
+					tab_container->set_current_tab(file_system_dock->get_position_in_parent());
+				}
 			} break;
 			case CLOSE_DOCS: {
 				_close_docs_tab();

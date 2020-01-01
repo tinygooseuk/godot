@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -37,6 +37,7 @@
 #include "core/variant.h"
 #include "editor/editor_node.h"
 #include "editor/editor_resource_preview.h"
+#include "editor/editor_scale.h"
 #include "scene/main/viewport.h"
 #include "visual_script_expression.h"
 #include "visual_script_flow_control.h"
@@ -572,7 +573,7 @@ void VisualScriptEditor::_update_graph(int p_only_id) {
 				if (nd_list->is_input_port_editable()) {
 					has_gnode_text = true;
 					Button *btn = memnew(Button);
-					btn->set_text("Add Input Port");
+					btn->set_text(TTR("Add Input Port"));
 					hbnc->add_child(btn);
 					btn->connect("pressed", this, "_add_input_port", varray(E->get()));
 				}
@@ -581,7 +582,7 @@ void VisualScriptEditor::_update_graph(int p_only_id) {
 						hbnc->add_spacer();
 					has_gnode_text = true;
 					Button *btn = memnew(Button);
-					btn->set_text("Add Output Port");
+					btn->set_text(TTR("Add Output Port"));
 					hbnc->add_child(btn);
 					btn->connect("pressed", this, "_add_output_port", varray(E->get()));
 				}

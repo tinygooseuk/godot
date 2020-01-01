@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -33,6 +33,7 @@
 #include "core/math/expression.h"
 #include "core/os/keyboard.h"
 #include "editor/editor_node.h"
+#include "editor/editor_scale.h"
 #include "editor/editor_settings.h"
 #include "editor/script_editor_debugger.h"
 
@@ -1309,6 +1310,7 @@ void ScriptTextEditor::_edit_option(int p_op) {
 			if (line >= bpoints[bpoints.size() - 1]) {
 				tx->unfold_line(bpoints[0]);
 				tx->cursor_set_line(bpoints[0]);
+				tx->center_viewport_to_cursor();
 			} else {
 				for (List<int>::Element *E = bpoints.front(); E; E = E->next()) {
 					int bline = E->get();
@@ -1335,6 +1337,7 @@ void ScriptTextEditor::_edit_option(int p_op) {
 			if (line <= bpoints[0]) {
 				tx->unfold_line(bpoints[bpoints.size() - 1]);
 				tx->cursor_set_line(bpoints[bpoints.size() - 1]);
+				tx->center_viewport_to_cursor();
 			} else {
 				for (List<int>::Element *E = bpoints.back(); E; E = E->prev()) {
 					int bline = E->get();
@@ -1557,7 +1560,7 @@ void ScriptTextEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data
 		Node *sn = _find_script_node(get_tree()->get_edited_scene_root(), get_tree()->get_edited_scene_root(), script);
 
 		if (!sn) {
-			EditorNode::get_singleton()->show_warning("Can't drop nodes because script '" + get_name() + "' is not used in this scene.");
+			EditorNode::get_singleton()->show_warning(vformat(TTR("Can't drop nodes because script '%s' is not used in this scene."), get_name()));
 			return;
 		}
 

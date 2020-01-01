@@ -1,6 +1,6 @@
 # Bengali translation of the Godot Engine editor
-# Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.
-# Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)
+# Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.
+# Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).
 # This file is distributed under the same license as the Godot source code.
 # Abu Md. Maruf Sarker <maruf.webdev@gmail.com>, 2016-2017.
 # Abdullah Zubair <abdullahzubair109@gmail.com>, 2017.
@@ -26,6 +26,10 @@ msgstr ""
 #: modules/visual_script/visual_script_builtin_funcs.cpp
 msgid "Invalid type argument to convert(), use TYPE_* constants."
 msgstr "অবৈধ প্রকার রূপান্তর করার যুক্তি(),use TYPE_* constants."
+
+#: core/math/expression.cpp modules/gdscript/gdscript_functions.cpp
+msgid "Expected a string of length 1 (a character)."
+msgstr ""
 
 #: core/math/expression.cpp modules/gdscript/gdscript_functions.cpp
 #: modules/mono/glue/gd_glue.cpp
@@ -453,6 +457,10 @@ msgid "Not possible to add a new track without a root"
 msgstr ""
 
 #: editor/animation_track_editor.cpp
+msgid "Invalid track for Bezier (no suitable sub-properties)"
+msgstr ""
+
+#: editor/animation_track_editor.cpp
 #, fuzzy
 msgid "Add Bezier Track"
 msgstr "অ্যানিমেশন (Anim) ট্র্যাক যোগ করুন"
@@ -565,8 +573,9 @@ msgstr "এফ পি এস"
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 #: editor/plugins/script_text_editor.cpp
 #: editor/plugins/shader_editor_plugin.cpp editor/plugins/text_editor.cpp
-#: editor/project_manager.cpp editor/project_settings_editor.cpp
-#: editor/property_editor.cpp modules/visual_script/visual_script_editor.cpp
+#: editor/plugins/tile_set_editor_plugin.cpp editor/project_manager.cpp
+#: editor/project_settings_editor.cpp editor/property_editor.cpp
+#: modules/visual_script/visual_script_editor.cpp
 msgid "Edit"
 msgstr "সম্পাদন করুন (Edit)"
 
@@ -761,6 +770,11 @@ msgstr "শুধুমাত্র নির্বাচিতসমূহ"
 msgid "Standard"
 msgstr ""
 
+#: editor/code_editor.cpp editor/plugins/script_editor_plugin.cpp
+#, fuzzy
+msgid "Toggle Scripts Panel"
+msgstr "ফেবরিট/প্রিয়-সমূহ অদলবদল/টগল করুন"
+
 #: editor/code_editor.cpp editor/plugins/canvas_item_editor_plugin.cpp
 #: editor/plugins/texture_region_editor_plugin.cpp
 #: editor/plugins/tile_set_editor_plugin.cpp scene/gui/graph_edit.cpp
@@ -776,11 +790,6 @@ msgstr "সংকুচিত করুন (জুম্ আউট)"
 #: editor/code_editor.cpp
 msgid "Reset Zoom"
 msgstr "সম্প্রসারন/সংকোচন অপসারণ করুন (রিসেট জুম্)"
-
-#: editor/code_editor.cpp
-#, fuzzy
-msgid "Toggle Scripts Panel"
-msgstr "ফেবরিট/প্রিয়-সমূহ অদলবদল/টগল করুন"
 
 #: editor/code_editor.cpp
 #, fuzzy
@@ -849,6 +858,11 @@ msgstr "ডাকযোগ্য অতিরিক্ত মান/আর্গ
 #: editor/connections_dialog.cpp
 msgid "Extra Call Arguments:"
 msgstr "ডাকযোগ্য অতিরিক্ত মান/আর্গুমেন্ট-সমূহ:"
+
+#: editor/connections_dialog.cpp
+#, fuzzy
+msgid "Receiver Method:"
+msgstr "মেথড/পদ্ধতি বাছাই করুন"
 
 #: editor/connections_dialog.cpp
 #, fuzzy
@@ -2115,6 +2129,15 @@ msgid "Search Help"
 msgstr "সাহায্য অনুসন্ধান করুন"
 
 #: editor/editor_help_search.cpp
+msgid "Case Sensitive"
+msgstr "অক্ষরের মাত্রা (বড়/ছোট-হাতের) সংবেদনশীল"
+
+#: editor/editor_help_search.cpp
+#, fuzzy
+msgid "Show Hierarchy"
+msgstr "বোন্‌/হাড় দেখান"
+
+#: editor/editor_help_search.cpp
 #, fuzzy
 msgid "Display All"
 msgstr "Normal প্রদর্শন"
@@ -2158,6 +2181,30 @@ msgstr "সদস্যগণ (Members):"
 #, fuzzy
 msgid "Class"
 msgstr "ক্লাস:"
+
+#: editor/editor_help_search.cpp
+#, fuzzy
+msgid "Method"
+msgstr "মেথডের তালিকা:"
+
+#: editor/editor_help_search.cpp editor/plugins/script_text_editor.cpp
+#, fuzzy
+msgid "Signal"
+msgstr "সংকেতসমূহ"
+
+#: editor/editor_help_search.cpp editor/plugins/theme_editor_plugin.cpp
+msgid "Constant"
+msgstr "ধ্রুবক/কন্সট্যান্ট"
+
+#: editor/editor_help_search.cpp
+#, fuzzy
+msgid "Property"
+msgstr "প্রপার্টি:"
+
+#: editor/editor_help_search.cpp
+#, fuzzy
+msgid "Theme Property"
+msgstr "প্রোপার্টি-সমূহ:"
 
 #: editor/editor_inspector.cpp editor/project_settings_editor.cpp
 msgid "Property:"
@@ -3261,6 +3308,11 @@ msgstr "এডিটরে খুলুন"
 msgid "Open the previous Editor"
 msgstr "এডিটরে খুলুন"
 
+#: editor/editor_node.h
+#, fuzzy
+msgid "Warning!"
+msgstr "সতর্কতা"
+
 #: editor/editor_path.cpp
 #, fuzzy
 msgid "No sub-resources found."
@@ -3598,6 +3650,15 @@ msgstr "এক্সপোর্ট টেমপ্লেটসমূহ লো�
 #: editor/export_template_manager.cpp
 msgid "Importing:"
 msgstr "ইম্পোর্ট হচ্ছে:"
+
+#: editor/export_template_manager.cpp
+#, fuzzy
+msgid "Error getting the list of mirrors."
+msgstr "স্বাক্ষরিত বস্তু (signature object) তৈরিতে সমস্যা হয়েছে।"
+
+#: editor/export_template_manager.cpp
+msgid "Error parsing JSON of mirror list. Please report this issue!"
+msgstr ""
 
 #: editor/export_template_manager.cpp
 msgid ""
@@ -4922,6 +4983,11 @@ msgstr "মোড (Mode) সরান"
 
 #: editor/plugins/animation_state_machine_editor.cpp
 #, fuzzy
+msgid "Transition exists!"
+msgstr "ট্র্যানজিশন/স্থানান্তরণ"
+
+#: editor/plugins/animation_state_machine_editor.cpp
+#, fuzzy
 msgid "Add Transition"
 msgstr "অনুবাদ সংযোগ করুন"
 
@@ -5008,6 +5074,11 @@ msgstr ""
 #, fuzzy
 msgid "Transition: "
 msgstr "ট্র্যানজিশন/স্থানান্তরণ"
+
+#: editor/plugins/animation_state_machine_editor.cpp
+#, fuzzy
+msgid "Play Mode:"
+msgstr "প্যান মোড"
 
 #: editor/plugins/animation_tree_editor_plugin.cpp
 #: editor/plugins/animation_tree_player_editor_plugin.cpp
@@ -6312,9 +6383,25 @@ msgstr "প্রান্তরেখা মেস তৈরি করুন"
 msgid "Outline Size:"
 msgstr "প্রান্তরেখার আকার:"
 
+#: editor/plugins/mesh_instance_editor_plugin.cpp
+msgid "UV Channel Debug"
+msgstr ""
+
 #: editor/plugins/mesh_library_editor_plugin.cpp
 msgid "Remove item %d?"
 msgstr "%d টি বস্তু অপসারণ করবেন?"
+
+#: editor/plugins/mesh_library_editor_plugin.cpp
+#, fuzzy
+msgid ""
+"Update from existing scene?:\n"
+"%s"
+msgstr "দৃশ্য হতে হালনাগাদ করুন"
+
+#: editor/plugins/mesh_library_editor_plugin.cpp
+#, fuzzy
+msgid "Mesh Library"
+msgstr "MeshLibrary (মেস-লাইব্রেরি)..."
 
 #: editor/plugins/mesh_library_editor_plugin.cpp
 #: editor/plugins/theme_editor_plugin.cpp
@@ -6998,6 +7085,23 @@ msgid "Save File As..."
 msgstr "এইরূপে সংরক্ষণ করুন..."
 
 #: editor/plugins/script_editor_plugin.cpp
+msgid "Can't obtain the script for running."
+msgstr ""
+
+#: editor/plugins/script_editor_plugin.cpp
+msgid "Script failed reloading, check console for errors."
+msgstr ""
+
+#: editor/plugins/script_editor_plugin.cpp
+msgid "Script is not in tool mode, will not be able to run."
+msgstr ""
+
+#: editor/plugins/script_editor_plugin.cpp
+msgid ""
+"To run this script, it must inherit EditorScript and be set to tool mode."
+msgstr ""
+
+#: editor/plugins/script_editor_plugin.cpp
 msgid "Import Theme"
 msgstr "থিম ইম্পোর্ট করুন"
 
@@ -7232,11 +7336,6 @@ msgid "Source"
 msgstr "উৎস:"
 
 #: editor/plugins/script_text_editor.cpp
-#, fuzzy
-msgid "Signal"
-msgstr "সংকেতসমূহ"
-
-#: editor/plugins/script_text_editor.cpp
 msgid "Target"
 msgstr "টার্গেট"
 
@@ -7263,6 +7362,11 @@ msgstr "ফাংশনে যান..."
 #: editor/plugins/script_text_editor.cpp
 msgid "Only resources from filesystem can be dropped."
 msgstr "শুধুমাত্র ফাইল সিস্টেম থেকে রিসোর্স ড্রপ করা সম্ভব।"
+
+#: editor/plugins/script_text_editor.cpp
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Can't drop nodes because script '%s' is not used in this scene."
+msgstr ""
 
 #: editor/plugins/script_text_editor.cpp
 #, fuzzy
@@ -7956,8 +8060,17 @@ msgstr "প্রান্তরেখা মেস তৈরি করুন"
 
 #: editor/plugins/sprite_editor_plugin.cpp
 #, fuzzy
+msgid "Mesh2D Preview"
+msgstr "মেস লাইব্রেরি তৈরি হচ্ছে"
+
+#: editor/plugins/sprite_editor_plugin.cpp
+#, fuzzy
 msgid "Create Polygon2D"
 msgstr "Poly তৈরি করুন"
+
+#: editor/plugins/sprite_editor_plugin.cpp
+msgid "Polygon2D Preview"
+msgstr ""
 
 #: editor/plugins/sprite_editor_plugin.cpp
 #, fuzzy
@@ -7966,7 +8079,17 @@ msgstr "Navigation Polygon তৈরি করুন"
 
 #: editor/plugins/sprite_editor_plugin.cpp
 #, fuzzy
+msgid "CollisionPolygon2D Preview"
+msgstr "Navigation Polygon তৈরি করুন"
+
+#: editor/plugins/sprite_editor_plugin.cpp
+#, fuzzy
 msgid "Create LightOccluder2D"
+msgstr "অকলুডার (occluder) পলিগন তৈরি করুন"
+
+#: editor/plugins/sprite_editor_plugin.cpp
+#, fuzzy
+msgid "LightOccluder2D Preview"
 msgstr "অকলুডার (occluder) পলিগন তৈরি করুন"
 
 #: editor/plugins/sprite_editor_plugin.cpp
@@ -8056,6 +8179,11 @@ msgstr "ফ্রেম যোগ করুন"
 #: editor/plugins/sprite_frames_editor_plugin.cpp
 msgid "Add Frame"
 msgstr "ফ্রেম যোগ করুন"
+
+#: editor/plugins/sprite_frames_editor_plugin.cpp
+#, fuzzy
+msgid "Unable to load images"
+msgstr "ছবি লোড করা সম্ভব হচ্ছে না:"
 
 #: editor/plugins/sprite_frames_editor_plugin.cpp
 msgid "ERROR: Couldn't load frame resource!"
@@ -8361,6 +8489,7 @@ msgid "Data Type:"
 msgstr "ডাটার ধরণ:"
 
 #: editor/plugins/theme_editor_plugin.cpp
+#: editor/plugins/tile_set_editor_plugin.cpp
 msgid "Icon"
 msgstr "আইকন"
 
@@ -8375,10 +8504,6 @@ msgstr "ফন্ট"
 #: editor/plugins/theme_editor_plugin.cpp
 msgid "Color"
 msgstr "রঙ"
-
-#: editor/plugins/theme_editor_plugin.cpp
-msgid "Constant"
-msgstr "ধ্রুবক/কন্সট্যান্ট"
 
 #: editor/plugins/theme_editor_plugin.cpp
 #, fuzzy
@@ -8508,6 +8633,20 @@ msgid "Merge from Scene"
 msgstr "দৃশ্য হতে একত্রিত করবেন"
 
 #: editor/plugins/tile_set_editor_plugin.cpp
+msgid "New Single Tile"
+msgstr ""
+
+#: editor/plugins/tile_set_editor_plugin.cpp
+#, fuzzy
+msgid "New Autotile"
+msgstr "স্বয়ংক্রিয় টুকরো"
+
+#: editor/plugins/tile_set_editor_plugin.cpp
+#, fuzzy
+msgid "New Atlas"
+msgstr "এটলাস/মানচিত্রাবলী:"
+
+#: editor/plugins/tile_set_editor_plugin.cpp
 #, fuzzy
 msgid "Next Coordinate"
 msgstr "পরবর্তী স্ক্রিপ্ট"
@@ -8524,6 +8663,41 @@ msgstr "পূর্বের ট্যাব"
 #: editor/plugins/tile_set_editor_plugin.cpp
 msgid "Select the previous shape, subtile, or Tile."
 msgstr ""
+
+#: editor/plugins/tile_set_editor_plugin.cpp
+#, fuzzy
+msgid "Region"
+msgstr "চালানোর মোড:"
+
+#: editor/plugins/tile_set_editor_plugin.cpp
+#, fuzzy
+msgid "Collision"
+msgstr "অ্যানিমেশনের নোড"
+
+#: editor/plugins/tile_set_editor_plugin.cpp
+#, fuzzy
+msgid "Occlusion"
+msgstr "Poly সম্পাদন করুন"
+
+#: editor/plugins/tile_set_editor_plugin.cpp
+#, fuzzy
+msgid "Navigation"
+msgstr "Navigation Mesh তৈরি করুন"
+
+#: editor/plugins/tile_set_editor_plugin.cpp
+#, fuzzy
+msgid "Bitmask"
+msgstr "ঘূর্ণায়ন মোড"
+
+#: editor/plugins/tile_set_editor_plugin.cpp
+#, fuzzy
+msgid "Priority"
+msgstr "এক্সপোর্ট মোড:"
+
+#: editor/plugins/tile_set_editor_plugin.cpp
+#, fuzzy
+msgid "Z Index"
+msgstr "ইন্ডেক্স:"
 
 #: editor/plugins/tile_set_editor_plugin.cpp
 #, fuzzy
@@ -8765,6 +8939,16 @@ msgstr "নোড ফিল্টারসমূহ সম্পাদন কর
 #: editor/plugins/tile_set_editor_plugin.cpp
 msgid "Edit Tile Z Index"
 msgstr ""
+
+#: editor/plugins/tile_set_editor_plugin.cpp
+#, fuzzy
+msgid "Make Convex"
+msgstr "পলিগন সরান"
+
+#: editor/plugins/tile_set_editor_plugin.cpp
+#, fuzzy
+msgid "Make Concave"
+msgstr "পলিগন সরান"
 
 #: editor/plugins/tile_set_editor_plugin.cpp
 #, fuzzy
@@ -11669,10 +11853,6 @@ msgid "GDNative"
 msgstr "জিডিন্যাটিভ"
 
 #: modules/gdscript/gdscript_functions.cpp
-msgid "Expected a string of length 1 (a character)."
-msgstr ""
-
-#: modules/gdscript/gdscript_functions.cpp
 #, fuzzy
 msgid "Step argument is zero!"
 msgstr "ধাপ মান/আর্গুমেন্ট শূন্য!"
@@ -11821,6 +12001,11 @@ msgstr ""
 #: modules/gridmap/grid_map_editor_plugin.cpp
 msgid "Cursor Clear Rotation"
 msgstr ""
+
+#: modules/gridmap/grid_map_editor_plugin.cpp
+#, fuzzy
+msgid "Paste Selects"
+msgstr "নির্বাচিতসমূহ মুছে ফেলুন"
 
 #: modules/gridmap/grid_map_editor_plugin.cpp
 #, fuzzy
@@ -11990,6 +12175,16 @@ msgstr "চলক/ভেরিয়েবল সম্পাদন করুন:"
 
 #: modules/visual_script/visual_script_editor.cpp
 #, fuzzy
+msgid "Add Input Port"
+msgstr "ইনপুট যোগ করুন"
+
+#: modules/visual_script/visual_script_editor.cpp
+#, fuzzy
+msgid "Add Output Port"
+msgstr "ইনপুট যোগ করুন"
+
+#: modules/visual_script/visual_script_editor.cpp
+#, fuzzy
 msgid "Override an existing built-in function."
 msgstr ""
 "অগ্রহনযোগ্য নাম। নামটি অবশ্যই বিদ্যমান পূর্বনির্মিত ধরণের নামের সাথে পরম্পরবিরোধী "
@@ -12057,16 +12252,6 @@ msgstr "সংকেত/সিগন্যাল সংযোজন করুন
 
 #: modules/visual_script/visual_script_editor.cpp
 #, fuzzy
-msgid "Add Input Port"
-msgstr "ইনপুট যোগ করুন"
-
-#: modules/visual_script/visual_script_editor.cpp
-#, fuzzy
-msgid "Add Output Port"
-msgstr "ইনপুট যোগ করুন"
-
-#: modules/visual_script/visual_script_editor.cpp
-#, fuzzy
 msgid "Remove Input Port"
 msgstr "পথের বিন্দু অপসারণ করুন"
 
@@ -12126,10 +12311,6 @@ msgstr ""
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Add Preload Node"
 msgstr "প্রিলোড নোড যুক্ত করুন"
-
-#: modules/visual_script/visual_script_editor.cpp
-msgid "Can't drop nodes because script '%s' is not used in this scene."
-msgstr ""
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Add Node(s) From Tree"
@@ -13669,9 +13850,6 @@ msgstr ""
 #~ msgid "Rotate 270 degrees"
 #~ msgstr "২৭০ ডিগ্রি ঘোরান্‌"
 
-#~ msgid "Warning"
-#~ msgstr "সতর্কতা"
-
 #~ msgid "Variable"
 #~ msgstr "চলক/ভেরিয়েবল"
 
@@ -14011,9 +14189,6 @@ msgstr ""
 
 #~ msgid "Replace By"
 #~ msgstr "এর দ্বারা প্রতিস্থাপন করুন"
-
-#~ msgid "Case Sensitive"
-#~ msgstr "অক্ষরের মাত্রা (বড়/ছোট-হাতের) সংবেদনশীল"
 
 #~ msgid "Backwards"
 #~ msgstr "পিছনের/অতীতের দিকে"
@@ -14455,9 +14630,6 @@ msgstr ""
 #~ msgid "Loading Image:"
 #~ msgstr "ছবি লোড করা হচ্ছে:"
 
-#~ msgid "Couldn't load image:"
-#~ msgstr "ছবি লোড করা সম্ভব হচ্ছে না:"
-
 #~ msgid "Converting Images"
 #~ msgstr "ছবিসমূহ রূপান্তর করা হচ্ছে"
 
@@ -14636,9 +14808,6 @@ msgstr ""
 #~ msgstr ""
 #~ "সার্টিফিকেট ফাইলটি পড়া সম্ভব হচ্ছে না। ফাইলের পথ এবং পাসওয়ার্ড দুটোই কি সঠিক "
 #~ "দেয়া হয়েছে?"
-
-#~ msgid "Error creating the signature object."
-#~ msgstr "স্বাক্ষরিত বস্তু (signature object) তৈরিতে সমস্যা হয়েছে।"
 
 #~ msgid "Error creating the package signature."
 #~ msgstr "প্যাকেজের স্বাক্ষর (package signature) তৈরিতে সমস্যা হয়েছে।"
@@ -14842,9 +15011,6 @@ msgstr ""
 
 #~ msgid "Lossy Quality:"
 #~ msgstr "ধ্বংসাত্মক গুণের:"
-
-#~ msgid "Atlas:"
-#~ msgstr "এটলাস/মানচিত্রাবলী:"
 
 #~ msgid "Shrink By:"
 #~ msgstr "সঙ্কোচন দ্বারা:"

@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -5812,10 +5812,11 @@ void RasterizerStorageGLES2::initialize() {
 	config.support_npot_repeat_mipmap = config.extensions.has("GL_OES_texture_npot");
 
 #ifdef JAVASCRIPT_ENABLED
-	// no way of detecting 32 or 16 bit support for renderbuffer, so default to 32
+	// RenderBuffer internal format must be 16 bits in WebGL,
+	// but depth_texture should default to 32 always
 	// if the implementation doesn't support 32, it should just quietly use 16 instead
 	// https://www.khronos.org/registry/webgl/extensions/WEBGL_depth_texture/
-	config.depth_buffer_internalformat = GL_DEPTH_COMPONENT;
+	config.depth_buffer_internalformat = GL_DEPTH_COMPONENT16;
 	config.depth_type = GL_UNSIGNED_INT;
 #else
 	// on mobile check for 24 bit depth support for RenderBufferStorage
