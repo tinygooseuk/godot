@@ -55,7 +55,7 @@ out highp vec2 pixel_size_interp;
 #endif
 
 #ifdef USE_SKELETON
-uniform mediump sampler2D skeleton_texture; // texunit:-1
+uniform mediump sampler2D skeleton_texture; // texunit:-4
 uniform highp mat4 skeleton_transform;
 uniform highp mat4 skeleton_transform_inverse;
 #endif
@@ -419,7 +419,7 @@ float map_ninepatch_axis(float pixel, float draw_size, float tex_pixel_size, flo
 			// Scale to source texture.
 			return (margin_begin + ratio * dst_area) * tex_pixel_size;
 		} else { // Shouldn't happen, but silences compiler warning.
-			return 0;
+			return 0.0;
 		}
 	}
 }

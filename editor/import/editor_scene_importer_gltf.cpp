@@ -1479,9 +1479,16 @@ Error EditorSceneImporterGLTF::_parse_materials(GLTFState &state) {
 
 		if (d.has("alphaMode")) {
 			const String &am = d["alphaMode"];
-			if (am != "OPAQUE") {
+			if (am == "BLEND") {
 				material->set_feature(SpatialMaterial::FEATURE_TRANSPARENT, true);
 				material->set_depth_draw_mode(SpatialMaterial::DEPTH_DRAW_ALPHA_OPAQUE_PREPASS);
+			} else if (am == "MASK") {
+				material->set_flag(SpatialMaterial::FLAG_USE_ALPHA_SCISSOR, true);
+				if (d.has("alphaCutoff")) {
+					material->set_alpha_scissor_threshold(d["alphaCutoff"]);
+				} else {
+					material->set_alpha_scissor_threshold(0.5f);
+				}
 			}
 		}
 
@@ -2322,7 +2329,11 @@ Error EditorSceneImporterGLTF::_parse_animations(GLTFState &state) {
 		Array samplers = d["samplers"];
 
 		if (d.has("name")) {
-			animation.name = _sanitize_scene_name(d["name"]);
+			String name = d["name"];
+			if (name.begins_with("loop") || name.ends_with("loop") || name.begins_with("cycle") || name.ends_with("cycle")) {
+				animation.loop = true;
+			}
+			animation.name = _sanitize_scene_name(name);
 		}
 
 		for (int j = 0; j < channels.size(); j++) {
@@ -2727,6 +2738,10 @@ void EditorSceneImporterGLTF::_import_animation(GLTFState &state, AnimationPlaye
 	Ref<Animation> animation;
 	animation.instance();
 	animation->set_name(name);
+
+	if (anim.loop) {
+		animation->set_loop(true);
+	}
 
 	float length = 0;
 

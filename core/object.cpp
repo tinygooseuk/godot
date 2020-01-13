@@ -1517,9 +1517,11 @@ void Object::_disconnect(const StringName &p_signal, Object *p_to_object, const 
 
 	ERR_FAIL_NULL(p_to_object);
 	Signal *s = signal_map.getptr(p_signal);
-	ERR_FAIL_COND_MSG(!s, "Nonexistent signal: " + p_signal + ".");
+	ERR_FAIL_COND_MSG(!s, vformat("Nonexistent signal '%s' in %s.", p_signal, to_string()));
 
-	ERR_FAIL_COND_MSG(s->lock > 0, "Attempt to disconnect signal '" + p_signal + "' while in emission callback. Use CONNECT_DEFERRED (to be able to safely disconnect) or CONNECT_ONESHOT (for automatic disconnection) as connection flags.");
+	ERR_FAIL_COND_MSG(s->lock > 0,
+			vformat("Attempt to disconnect %s signal '%s' while in emission callback '%s' (in target %s). Use CONNECT_DEFERRED (to be able to safely disconnect) or CONNECT_ONESHOT (for automatic disconnection) as connection flags.",
+					to_string(), p_signal, p_to_method, p_to_object->to_string()));
 
 	Signal::Target target(p_to_object->get_instance_id(), p_to_method);
 
@@ -1686,7 +1688,7 @@ void Object::_bind_methods() {
 		mi.name = "emit_signal";
 		mi.arguments.push_back(PropertyInfo(Variant::STRING, "signal"));
 
-		ClassDB::bind_vararg_method(METHOD_FLAGS_DEFAULT, "emit_signal", &Object::_emit_signal, mi);
+		ClassDB::bind_vararg_method(METHOD_FLAGS_DEFAULT, "emit_signal", &Object::_emit_signal, mi, varray(), false);
 	}
 
 	{
@@ -1702,7 +1704,7 @@ void Object::_bind_methods() {
 		mi.name = "call_deferred";
 		mi.arguments.push_back(PropertyInfo(Variant::STRING, "method"));
 
-		ClassDB::bind_vararg_method(METHOD_FLAGS_DEFAULT, "call_deferred", &Object::_call_deferred_bind, mi);
+		ClassDB::bind_vararg_method(METHOD_FLAGS_DEFAULT, "call_deferred", &Object::_call_deferred_bind, mi, varray(), false);
 	}
 
 	ClassDB::bind_method(D_METHOD("set_deferred", "property", "value"), &Object::set_deferred);
