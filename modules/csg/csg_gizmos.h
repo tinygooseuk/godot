@@ -57,8 +57,25 @@ public:
 class EditorPluginCSG : public EditorPlugin {
 	GDCLASS(EditorPluginCSG, EditorPlugin);
 
+	CSGShape *csg_shape;
+
+	ToolButton *bake;
+	EditorNode *editor;
+
+	void _bake();
+
+protected:
+	static void _bind_methods();
+
 public:
+	virtual String get_name() const { return "CSGShapes"; }
+	bool has_main_screen() const { return false; }
+	virtual void edit(Object *p_object);
+	virtual bool handles(Object *p_object) const;
+	virtual void make_visible(bool p_visible);
+
 	EditorPluginCSG(EditorNode *p_editor);
+	~EditorPluginCSG();
 };
 
 #endif // CSG_GIZMOS_H
