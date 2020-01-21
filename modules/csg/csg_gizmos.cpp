@@ -432,8 +432,8 @@ void EditorPluginCSG::_bake() {
 	const Ref<ArrayMesh> mesh = meshes[1];
 
 	MeshInstance *mesh_instance = memnew(MeshInstance);
-	mesh_instance->set_name(String("Bake ") + csg_shape->get_name());
-	mesh_instance->set_transform(xform);
+	mesh_instance->set_name(String("Baked ") + csg_shape->get_name());
+	mesh_instance->set_transform(csg_shape->get_transform() * xform);
 	mesh_instance->set_mesh(mesh);
 
 	Node *owner = csg_shape->get_owner();
