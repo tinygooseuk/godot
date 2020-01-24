@@ -36,7 +36,7 @@ void FloppyCable::_bind_methods() {
 	IMPLEMENT_PROPERTY(FloppyCable, BOOL, is_end_attached);
 	IMPLEMENT_PROPERTY(FloppyCable, VECTOR3, end_location);
 
-	IMPLEMENT_PROPERTY(FloppyCable, BOOL, use_stiffness)
+	IMPLEMENT_PROPERTY(FloppyCable, REAL, stiffness_coefficient);
 
 	IMPLEMENT_PROPERTY(FloppyCable, REAL, cable_length);
 	IMPLEMENT_PROPERTY(FloppyCable, REAL, cable_width);
@@ -152,13 +152,13 @@ void FloppyCable::solve_constraints() {
 	}
 
 	// If desired, solve stiffness constraints(distance constraints between every other particle)
-	if (use_stiffness) {
+	if (stiffness_coefficient > 1.0f) {
 		for (int i = 0; i < cable_num_segments; i++) {
 			CableParticle &particle1 = particles[i];
 			CableParticle &particle2 = particles[i + 1];
 
 			// Solve for this pair of particles
-			solve_distance_constraint(particle1, particle2, 2.0f * segment_length);
+			solve_distance_constraint(particle1, particle2, stiffness_coefficient * segment_length);
 		}
 	}
 }

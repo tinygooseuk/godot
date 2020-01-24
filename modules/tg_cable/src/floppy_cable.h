@@ -40,7 +40,7 @@ private:
 	DECLARE_PROPERTY(bool, is_end_attached, false);
 	DECLARE_PROPERTY(Vector3, end_location, {});
 
-	DECLARE_PROPERTY(bool, use_stiffness, false);
+	DECLARE_PROPERTY(float, stiffness_coefficient, 1.0f);
 
 	DECLARE_PROPERTY(float, cable_length, 1.0f);
 	DECLARE_PROPERTY(float, cable_width, 0.2f);
