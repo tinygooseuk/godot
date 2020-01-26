@@ -2033,38 +2033,8 @@ msgstr "Podedovano od:"
 
 #: editor/editor_help.cpp
 #, fuzzy
-msgid "Brief Description"
-msgstr "Kratek Opis:"
-
-#: editor/editor_help.cpp
-msgid "Properties"
-msgstr "Lastnosti"
-
-#: editor/editor_help.cpp
-msgid "Methods"
-msgstr "Metode"
-
-#: editor/editor_help.cpp
-#, fuzzy
-msgid "Theme Properties"
-msgstr "Lastnosti"
-
-#: editor/editor_help.cpp
-msgid "Enumerations"
-msgstr "Oštevilčenja"
-
-#: editor/editor_help.cpp
-msgid "enum  "
-msgstr "oštevil  "
-
-#: editor/editor_help.cpp
-msgid "Constants"
-msgstr "Konstante"
-
-#: editor/editor_help.cpp
-#, fuzzy
-msgid "Class Description"
-msgstr "Opis"
+msgid "Description"
+msgstr "Opis:"
 
 #: editor/editor_help.cpp
 #, fuzzy
@@ -2081,9 +2051,44 @@ msgstr ""
 "url][/color] ali [color=$color][url=$url2]zahtevate enega[/url][/color]."
 
 #: editor/editor_help.cpp
+msgid "Properties"
+msgstr "Lastnosti"
+
+#: editor/editor_help.cpp
+msgid "override:"
+msgstr ""
+
+#: editor/editor_help.cpp
+#, fuzzy
+msgid "default:"
+msgstr "Prevzeto"
+
+#: editor/editor_help.cpp
+msgid "Methods"
+msgstr "Metode"
+
+#: editor/editor_help.cpp
+#, fuzzy
+msgid "Theme Properties"
+msgstr "Lastnosti"
+
+#: editor/editor_help.cpp
+msgid "Enumerations"
+msgstr "Oštevilčenja"
+
+#: editor/editor_help.cpp
+msgid "Constants"
+msgstr "Konstante"
+
+#: editor/editor_help.cpp
 #, fuzzy
 msgid "Property Descriptions"
 msgstr "Opis lastnosti:"
+
+#: editor/editor_help.cpp
+#, fuzzy
+msgid "(value)"
+msgstr "Novo ime:"
 
 #: editor/editor_help.cpp
 msgid ""
@@ -4736,7 +4741,6 @@ msgid "Animation Tools"
 msgstr "Animacijska Orodja"
 
 #: editor/plugins/animation_player_editor_plugin.cpp
-#: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Animation"
 msgstr "Animacija"
 
@@ -5872,6 +5876,11 @@ msgid "Auto Insert Key"
 msgstr "V Animacijo Vstavi Ključ"
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
+#, fuzzy
+msgid "Animation Key and Pose Options"
+msgstr "Dolžina animacije (v sekundah)."
+
+#: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Insert Key (Existing Tracks)"
 msgstr ""
 
@@ -6163,7 +6172,6 @@ msgid "No mesh to debug."
 msgstr ""
 
 #: editor/plugins/mesh_instance_editor_plugin.cpp
-#: editor/plugins/sprite_editor_plugin.cpp
 msgid "Model has no UV in this layer"
 msgstr ""
 
@@ -7594,6 +7602,10 @@ msgstr "Spremeni Dolžino Animacije"
 #, fuzzy
 msgid "Cinematic Preview"
 msgstr "Ustvari Predogled Modela"
+
+#: editor/plugins/spatial_editor_plugin.cpp
+msgid "Not available when using the GLES2 renderer."
+msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Freelook Left"
@@ -12872,6 +12884,17 @@ msgstr ""
 #: servers/visual/shader_language.cpp
 msgid "Constants cannot be modified."
 msgstr "Konstante ni možno spreminjati."
+
+#~ msgid "enum  "
+#~ msgstr "oštevil  "
+
+#, fuzzy
+#~ msgid "Brief Description"
+#~ msgstr "Kratek Opis:"
+
+#, fuzzy
+#~ msgid "Class Description"
+#~ msgstr "Opis"
 
 #~ msgid "Project export failed with error code %d."
 #~ msgstr "Izvoz projekta ni uspelo s kodno napako %d."

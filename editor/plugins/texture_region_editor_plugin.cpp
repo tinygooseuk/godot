@@ -178,6 +178,7 @@ void TextureRegionEditor::_region_draw() {
 	scroll_rect.size += scroll_margin * 2;
 
 	updating_scroll = true;
+
 	hscroll->set_min(scroll_rect.position.x);
 	hscroll->set_max(scroll_rect.position.x + scroll_rect.size.x);
 	if (ABS(scroll_rect.position.x - (scroll_rect.position.x + scroll_rect.size.x)) <= scroll_margin.x) {
@@ -198,6 +199,14 @@ void TextureRegionEditor::_region_draw() {
 		vscroll->set_page(scroll_margin.y);
 		vscroll->set_value(draw_ofs.y);
 	}
+
+	Size2 hmin = hscroll->get_combined_minimum_size();
+	Size2 vmin = vscroll->get_combined_minimum_size();
+
+	// Avoid scrollbar overlapping.
+	hscroll->set_anchor_and_margin(MARGIN_RIGHT, ANCHOR_END, vscroll->is_visible() ? -vmin.width : 0);
+	vscroll->set_anchor_and_margin(MARGIN_BOTTOM, ANCHOR_END, hscroll->is_visible() ? -hmin.height : 0);
+
 	updating_scroll = false;
 
 	if (node_ninepatch || obj_styleBox.is_valid()) {
@@ -727,6 +736,9 @@ void TextureRegionEditor::_notification(int p_what) {
 			zoom_out->set_icon(get_icon("ZoomLess", "EditorIcons"));
 			zoom_reset->set_icon(get_icon("ZoomReset", "EditorIcons"));
 			zoom_in->set_icon(get_icon("ZoomMore", "EditorIcons"));
+
+			vscroll->set_anchors_and_margins_preset(PRESET_RIGHT_WIDE);
+			hscroll->set_anchors_and_margins_preset(PRESET_BOTTOM_WIDE);
 		} break;
 		case NOTIFICATION_VISIBILITY_CHANGED: {
 			if (snap_mode == SNAP_AUTOSLICE && is_visible() && autoslice_is_dirty) {
@@ -1001,25 +1013,22 @@ TextureRegionEditor::TextureRegionEditor(EditorNode *p_editor) {
 	zoom_hb->add_child(zoom_out);
 
 	zoom_reset = memnew(ToolButton);
-	zoom_out->set_tooltip(TTR("Zoom Reset"));
+	zoom_reset->set_tooltip(TTR("Zoom Reset"));
 	zoom_reset->connect("pressed", this, "_zoom_reset");
 	zoom_hb->add_child(zoom_reset);
 
 	zoom_in = memnew(ToolButton);
-	zoom_out->set_tooltip(TTR("Zoom In"));
+	zoom_in->set_tooltip(TTR("Zoom In"));
 	zoom_in->connect("pressed", this, "_zoom_in");
 	zoom_hb->add_child(zoom_in);
 
 	vscroll = memnew(VScrollBar);
 	vscroll->set_step(0.001);
 	edit_draw->add_child(vscroll);
-	vscroll->set_anchors_and_margins_preset(PRESET_RIGHT_WIDE);
 	vscroll->connect("value_changed", this, "_scroll_changed");
 	hscroll = memnew(HScrollBar);
 	hscroll->set_step(0.001);
 	edit_draw->add_child(hscroll);
-	hscroll->set_anchors_and_margins_preset(PRESET_BOTTOM_WIDE);
-	hscroll->set_margin(MARGIN_RIGHT, -vscroll->get_size().x * EDSCALE);
 	hscroll->connect("value_changed", this, "_scroll_changed");
 
 	updating_scroll = false;

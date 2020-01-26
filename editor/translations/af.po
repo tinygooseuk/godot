@@ -2014,38 +2014,8 @@ msgstr "Geërf deur:"
 
 #: editor/editor_help.cpp
 #, fuzzy
-msgid "Brief Description"
-msgstr "Kort Beskrywing:"
-
-#: editor/editor_help.cpp
-msgid "Properties"
-msgstr "Eienskappe"
-
-#: editor/editor_help.cpp
-msgid "Methods"
-msgstr "Metodes"
-
-#: editor/editor_help.cpp
-#, fuzzy
-msgid "Theme Properties"
-msgstr "Eienskappe"
-
-#: editor/editor_help.cpp
-msgid "Enumerations"
-msgstr "Opnoemings"
-
-#: editor/editor_help.cpp
-msgid "enum  "
-msgstr "enum  "
-
-#: editor/editor_help.cpp
-msgid "Constants"
-msgstr "Konstantes"
-
-#: editor/editor_help.cpp
-#, fuzzy
-msgid "Class Description"
-msgstr "Beskrywing"
+msgid "Description"
+msgstr "Beskrywing:"
 
 #: editor/editor_help.cpp
 msgid "Online Tutorials"
@@ -2062,9 +2032,43 @@ msgstr ""
 "[color=$color][url=$url]een by te dra[/url][/color]!"
 
 #: editor/editor_help.cpp
+msgid "Properties"
+msgstr "Eienskappe"
+
+#: editor/editor_help.cpp
+msgid "override:"
+msgstr ""
+
+#: editor/editor_help.cpp
+#, fuzzy
+msgid "default:"
+msgstr "Laai Verstek"
+
+#: editor/editor_help.cpp
+msgid "Methods"
+msgstr "Metodes"
+
+#: editor/editor_help.cpp
+#, fuzzy
+msgid "Theme Properties"
+msgstr "Eienskappe"
+
+#: editor/editor_help.cpp
+msgid "Enumerations"
+msgstr "Opnoemings"
+
+#: editor/editor_help.cpp
+msgid "Constants"
+msgstr "Konstantes"
+
+#: editor/editor_help.cpp
 #, fuzzy
 msgid "Property Descriptions"
 msgstr "Eienskap Beskrywing:"
+
+#: editor/editor_help.cpp
+msgid "(value)"
+msgstr ""
 
 #: editor/editor_help.cpp
 msgid ""
@@ -4599,7 +4603,6 @@ msgid "Animation Tools"
 msgstr ""
 
 #: editor/plugins/animation_player_editor_plugin.cpp
-#: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Animation"
 msgstr ""
 
@@ -5684,6 +5687,11 @@ msgid "Auto Insert Key"
 msgstr "Anim Voeg Sleutel by"
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
+#, fuzzy
+msgid "Animation Key and Pose Options"
+msgstr "Animasie lengte (in sekondes)."
+
+#: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Insert Key (Existing Tracks)"
 msgstr ""
 
@@ -5973,7 +5981,6 @@ msgid "No mesh to debug."
 msgstr ""
 
 #: editor/plugins/mesh_instance_editor_plugin.cpp
-#: editor/plugins/sprite_editor_plugin.cpp
 msgid "Model has no UV in this layer"
 msgstr ""
 
@@ -7387,6 +7394,10 @@ msgstr "Verander Anim Lente"
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Cinematic Preview"
+msgstr ""
+
+#: editor/plugins/spatial_editor_plugin.cpp
+msgid "Not available when using the GLES2 renderer."
 msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
@@ -12538,6 +12549,17 @@ msgstr ""
 #: servers/visual/shader_language.cpp
 msgid "Constants cannot be modified."
 msgstr ""
+
+#~ msgid "enum  "
+#~ msgstr "enum  "
+
+#, fuzzy
+#~ msgid "Brief Description"
+#~ msgstr "Kort Beskrywing:"
+
+#, fuzzy
+#~ msgid "Class Description"
+#~ msgstr "Beskrywing"
 
 #, fuzzy
 #~ msgid "Methods:"

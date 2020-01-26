@@ -1961,36 +1961,8 @@ msgstr "Heretat per:"
 
 #: editor/editor_help.cpp
 #, fuzzy
-msgid "Brief Description"
-msgstr "Descripció breu:"
-
-#: editor/editor_help.cpp
-msgid "Properties"
-msgstr "Propietats"
-
-#: editor/editor_help.cpp
-msgid "Methods"
-msgstr "Mètodes"
-
-#: editor/editor_help.cpp
-msgid "Theme Properties"
-msgstr "Propietats del tema"
-
-#: editor/editor_help.cpp
-msgid "Enumerations"
-msgstr "Enumeracions"
-
-#: editor/editor_help.cpp
-msgid "enum  "
-msgstr "enum  "
-
-#: editor/editor_help.cpp
-msgid "Constants"
-msgstr "Constants"
-
-#: editor/editor_help.cpp
-msgid "Class Description"
-msgstr "Descripció de la classe"
+msgid "Description"
+msgstr "Descripció:"
 
 #: editor/editor_help.cpp
 #, fuzzy
@@ -2008,8 +1980,43 @@ msgstr ""
 "$url2]sol·licitant-lo[/url][/color]."
 
 #: editor/editor_help.cpp
+msgid "Properties"
+msgstr "Propietats"
+
+#: editor/editor_help.cpp
+#, fuzzy
+msgid "override:"
+msgstr "Sobreescriu"
+
+#: editor/editor_help.cpp
+#, fuzzy
+msgid "default:"
+msgstr "Predeterminat"
+
+#: editor/editor_help.cpp
+msgid "Methods"
+msgstr "Mètodes"
+
+#: editor/editor_help.cpp
+msgid "Theme Properties"
+msgstr "Propietats del tema"
+
+#: editor/editor_help.cpp
+msgid "Enumerations"
+msgstr "Enumeracions"
+
+#: editor/editor_help.cpp
+msgid "Constants"
+msgstr "Constants"
+
+#: editor/editor_help.cpp
 msgid "Property Descriptions"
 msgstr "Descripcions de la Propietat"
+
+#: editor/editor_help.cpp
+#, fuzzy
+msgid "(value)"
+msgstr "Valor"
 
 #: editor/editor_help.cpp
 msgid ""
@@ -4594,7 +4601,6 @@ msgid "Animation Tools"
 msgstr "Eines d'Animació"
 
 #: editor/plugins/animation_player_editor_plugin.cpp
-#: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Animation"
 msgstr "Animació"
 
@@ -5717,6 +5723,11 @@ msgid "Auto Insert Key"
 msgstr "Inserir Clau Automàticament"
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
+#, fuzzy
+msgid "Animation Key and Pose Options"
+msgstr "S'ha insertit una Clau d'Animació."
+
+#: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Insert Key (Existing Tracks)"
 msgstr "Insereix una Clau (Pistes existents)"
 
@@ -6010,7 +6021,6 @@ msgid "No mesh to debug."
 msgstr "Cap malla per depurar."
 
 #: editor/plugins/mesh_instance_editor_plugin.cpp
-#: editor/plugins/sprite_editor_plugin.cpp
 msgid "Model has no UV in this layer"
 msgstr "El model no té UVs en aquesta capa"
 
@@ -7424,6 +7434,10 @@ msgstr "Habilitar Filtració"
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Cinematic Preview"
 msgstr "Previsualització Cinemàtica"
+
+#: editor/plugins/spatial_editor_plugin.cpp
+msgid "Not available when using the GLES2 renderer."
+msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Freelook Left"
@@ -12976,6 +12990,16 @@ msgstr ""
 #: servers/visual/shader_language.cpp
 msgid "Constants cannot be modified."
 msgstr "Les constants no es poden modificar."
+
+#~ msgid "enum  "
+#~ msgstr "enum  "
+
+#, fuzzy
+#~ msgid "Brief Description"
+#~ msgstr "Descripció breu:"
+
+#~ msgid "Class Description"
+#~ msgstr "Descripció de la classe"
 
 #~ msgid "Project export failed with error code %d."
 #~ msgstr "L'exportació del projecte ha fallat amb el codi d'error %d."

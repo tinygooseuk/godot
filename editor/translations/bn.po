@@ -2066,41 +2066,7 @@ msgstr "গৃহীত হয়েছে:"
 
 #: editor/editor_help.cpp
 #, fuzzy
-msgid "Brief Description"
-msgstr "সংক্ষিপ্ত বর্ণনা:"
-
-#: editor/editor_help.cpp
-#, fuzzy
-msgid "Properties"
-msgstr "প্রোপার্টি-সমূহ:"
-
-#: editor/editor_help.cpp
-#, fuzzy
-msgid "Methods"
-msgstr "মেথডের তালিকা:"
-
-#: editor/editor_help.cpp
-#, fuzzy
-msgid "Theme Properties"
-msgstr "প্রোপার্টি-সমূহ:"
-
-#: editor/editor_help.cpp
-#, fuzzy
-msgid "Enumerations"
-msgstr "অ্যানিমেশনসমূহ"
-
-#: editor/editor_help.cpp
-msgid "enum  "
-msgstr "enum  "
-
-#: editor/editor_help.cpp
-#, fuzzy
-msgid "Constants"
-msgstr "ধ্রুবকসমূহ:"
-
-#: editor/editor_help.cpp
-#, fuzzy
-msgid "Class Description"
+msgid "Description"
 msgstr "বর্ণনা:"
 
 #: editor/editor_help.cpp
@@ -2121,8 +2087,48 @@ msgstr ""
 
 #: editor/editor_help.cpp
 #, fuzzy
+msgid "Properties"
+msgstr "প্রোপার্টি-সমূহ:"
+
+#: editor/editor_help.cpp
+#, fuzzy
+msgid "override:"
+msgstr "ওভাররাইড..."
+
+#: editor/editor_help.cpp
+#, fuzzy
+msgid "default:"
+msgstr "সাধারণ/ডিফল্ট"
+
+#: editor/editor_help.cpp
+#, fuzzy
+msgid "Methods"
+msgstr "মেথডের তালিকা:"
+
+#: editor/editor_help.cpp
+#, fuzzy
+msgid "Theme Properties"
+msgstr "প্রোপার্টি-সমূহ:"
+
+#: editor/editor_help.cpp
+#, fuzzy
+msgid "Enumerations"
+msgstr "অ্যানিমেশনসমূহ"
+
+#: editor/editor_help.cpp
+#, fuzzy
+msgid "Constants"
+msgstr "ধ্রুবকসমূহ:"
+
+#: editor/editor_help.cpp
+#, fuzzy
 msgid "Property Descriptions"
 msgstr "মান/প্রোপার্টির বর্ণনা:"
+
+#: editor/editor_help.cpp
+#, fuzzy
+msgid "(value)"
+msgstr "মান"
 
 #: editor/editor_help.cpp
 msgid ""
@@ -4882,7 +4888,6 @@ msgid "Animation Tools"
 msgstr "অ্যানিমেশনের সরঞ্জামসমূহ"
 
 #: editor/plugins/animation_player_editor_plugin.cpp
-#: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Animation"
 msgstr "অ্যানিমেশন"
 
@@ -6036,6 +6041,11 @@ msgid "Auto Insert Key"
 msgstr "অ্যানিমেশনে (Anim) চাবি যোগ করুন"
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
+#, fuzzy
+msgid "Animation Key and Pose Options"
+msgstr "অ্যানিমেশনের চাবি সন্নিবেশিত হয়েছে।"
+
+#: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Insert Key (Existing Tracks)"
 msgstr "চাবি সন্নিবেশ করুন (বিদ্যমান ট্র্যাক/পথসমূহ)"
 
@@ -6345,7 +6355,6 @@ msgid "No mesh to debug."
 msgstr ""
 
 #: editor/plugins/mesh_instance_editor_plugin.cpp
-#: editor/plugins/sprite_editor_plugin.cpp
 msgid "Model has no UV in this layer"
 msgstr ""
 
@@ -7837,6 +7846,10 @@ msgstr "সম্পাদনযোগ্য অংশীদারীসমূ�
 #, fuzzy
 msgid "Cinematic Preview"
 msgstr "মেস লাইব্রেরি তৈরি হচ্ছে"
+
+#: editor/plugins/spatial_editor_plugin.cpp
+msgid "Not available when using the GLES2 renderer."
+msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Freelook Left"
@@ -13381,6 +13394,17 @@ msgstr ""
 #: servers/visual/shader_language.cpp
 msgid "Constants cannot be modified."
 msgstr ""
+
+#~ msgid "enum  "
+#~ msgstr "enum  "
+
+#, fuzzy
+#~ msgid "Brief Description"
+#~ msgstr "সংক্ষিপ্ত বর্ণনা:"
+
+#, fuzzy
+#~ msgid "Class Description"
+#~ msgstr "বর্ণনা:"
 
 #~ msgid "Password:"
 #~ msgstr "পাসওয়ার্ড:"

@@ -2037,38 +2037,8 @@ msgstr "Наслеђено од:"
 
 #: editor/editor_help.cpp
 #, fuzzy
-msgid "Brief Description"
-msgstr "Кратак опис:"
-
-#: editor/editor_help.cpp
-msgid "Properties"
-msgstr "Особине"
-
-#: editor/editor_help.cpp
-msgid "Methods"
-msgstr "Методе"
-
-#: editor/editor_help.cpp
-#, fuzzy
-msgid "Theme Properties"
-msgstr "Особине"
-
-#: editor/editor_help.cpp
-msgid "Enumerations"
-msgstr "Енумерације"
-
-#: editor/editor_help.cpp
-msgid "enum  "
-msgstr "enum  "
-
-#: editor/editor_help.cpp
-msgid "Constants"
-msgstr "Константе"
-
-#: editor/editor_help.cpp
-#, fuzzy
-msgid "Class Description"
-msgstr "Опис"
+msgid "Description"
+msgstr "Опис:"
 
 #: editor/editor_help.cpp
 #, fuzzy
@@ -2086,9 +2056,44 @@ msgstr ""
 "$color][url=$url]написати једну[/url][/color]!"
 
 #: editor/editor_help.cpp
+msgid "Properties"
+msgstr "Особине"
+
+#: editor/editor_help.cpp
+msgid "override:"
+msgstr ""
+
+#: editor/editor_help.cpp
+#, fuzzy
+msgid "default:"
+msgstr "Уобичајено"
+
+#: editor/editor_help.cpp
+msgid "Methods"
+msgstr "Методе"
+
+#: editor/editor_help.cpp
+#, fuzzy
+msgid "Theme Properties"
+msgstr "Особине"
+
+#: editor/editor_help.cpp
+msgid "Enumerations"
+msgstr "Енумерације"
+
+#: editor/editor_help.cpp
+msgid "Constants"
+msgstr "Константе"
+
+#: editor/editor_help.cpp
 #, fuzzy
 msgid "Property Descriptions"
 msgstr "Опис особине:"
+
+#: editor/editor_help.cpp
+#, fuzzy
+msgid "(value)"
+msgstr "Ново име:"
 
 #: editor/editor_help.cpp
 msgid ""
@@ -4761,7 +4766,6 @@ msgid "Animation Tools"
 msgstr "Анимационе алатке"
 
 #: editor/plugins/animation_player_editor_plugin.cpp
-#: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Animation"
 msgstr "Анимација"
 
@@ -5897,6 +5901,11 @@ msgid "Auto Insert Key"
 msgstr "Уметни кључ"
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
+#, fuzzy
+msgid "Animation Key and Pose Options"
+msgstr "Анимациони кључ убачен."
+
+#: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Insert Key (Existing Tracks)"
 msgstr "Убаци кључ (постојеће траке)"
 
@@ -6195,7 +6204,6 @@ msgid "No mesh to debug."
 msgstr ""
 
 #: editor/plugins/mesh_instance_editor_plugin.cpp
-#: editor/plugins/sprite_editor_plugin.cpp
 msgid "Model has no UV in this layer"
 msgstr ""
 
@@ -7661,6 +7669,10 @@ msgstr "Измени дужину анимације"
 #, fuzzy
 msgid "Cinematic Preview"
 msgstr "Направи приказ мрежа"
+
+#: editor/plugins/spatial_editor_plugin.cpp
+msgid "Not available when using the GLES2 renderer."
+msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Freelook Left"
@@ -12978,6 +12990,17 @@ msgstr ""
 #: servers/visual/shader_language.cpp
 msgid "Constants cannot be modified."
 msgstr ""
+
+#~ msgid "enum  "
+#~ msgstr "enum  "
+
+#, fuzzy
+#~ msgid "Brief Description"
+#~ msgstr "Кратак опис:"
+
+#, fuzzy
+#~ msgid "Class Description"
+#~ msgstr "Опис"
 
 #~ msgid "Password:"
 #~ msgstr "Лозинка:"

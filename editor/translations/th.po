@@ -2035,38 +2035,8 @@ msgstr "สืบทอดโดย:"
 
 #: editor/editor_help.cpp
 #, fuzzy
-msgid "Brief Description"
+msgid "Description"
 msgstr "รายละเอียด:"
-
-#: editor/editor_help.cpp
-msgid "Properties"
-msgstr "คุณสมบัติ"
-
-#: editor/editor_help.cpp
-msgid "Methods"
-msgstr "รายชื่อเมท็อด"
-
-#: editor/editor_help.cpp
-#, fuzzy
-msgid "Theme Properties"
-msgstr "คุณสมบัติ"
-
-#: editor/editor_help.cpp
-msgid "Enumerations"
-msgstr "ค่าคงที่"
-
-#: editor/editor_help.cpp
-msgid "enum  "
-msgstr "กลุ่มค่าคงที่  "
-
-#: editor/editor_help.cpp
-msgid "Constants"
-msgstr "ค่าคงที่"
-
-#: editor/editor_help.cpp
-#, fuzzy
-msgid "Class Description"
-msgstr "รายละเอียด"
 
 #: editor/editor_help.cpp
 #, fuzzy
@@ -2083,9 +2053,45 @@ msgstr ""
 "color] หรือ [color=$color][url=$url2]ขอให้จัดทำ[/url][/color]"
 
 #: editor/editor_help.cpp
+msgid "Properties"
+msgstr "คุณสมบัติ"
+
+#: editor/editor_help.cpp
+#, fuzzy
+msgid "override:"
+msgstr "กำหนดเฉพาะ..."
+
+#: editor/editor_help.cpp
+#, fuzzy
+msgid "default:"
+msgstr "ค่าเริ่มต้น"
+
+#: editor/editor_help.cpp
+msgid "Methods"
+msgstr "รายชื่อเมท็อด"
+
+#: editor/editor_help.cpp
+#, fuzzy
+msgid "Theme Properties"
+msgstr "คุณสมบัติ"
+
+#: editor/editor_help.cpp
+msgid "Enumerations"
+msgstr "ค่าคงที่"
+
+#: editor/editor_help.cpp
+msgid "Constants"
+msgstr "ค่าคงที่"
+
+#: editor/editor_help.cpp
 #, fuzzy
 msgid "Property Descriptions"
 msgstr "รายละเอียดตัวแปร:"
+
+#: editor/editor_help.cpp
+#, fuzzy
+msgid "(value)"
+msgstr "ค่า"
 
 #: editor/editor_help.cpp
 msgid ""
@@ -4683,7 +4689,6 @@ msgid "Animation Tools"
 msgstr "เครื่องมือแอนิเมชัน"
 
 #: editor/plugins/animation_player_editor_plugin.cpp
-#: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Animation"
 msgstr "แอนิเมชัน"
 
@@ -5816,6 +5821,11 @@ msgid "Auto Insert Key"
 msgstr "แทรกคีย์แอนิเมชัน"
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
+#, fuzzy
+msgid "Animation Key and Pose Options"
+msgstr "แทรกคีย์แอนิเมชัน"
+
+#: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Insert Key (Existing Tracks)"
 msgstr "เพิ่มคีย์ (แทร็กที่มีอยู่แล้ว)"
 
@@ -6115,7 +6125,6 @@ msgid "No mesh to debug."
 msgstr "ไม่มีพื้นผิวให้แก้ไขจุดบกพร่อง"
 
 #: editor/plugins/mesh_instance_editor_plugin.cpp
-#: editor/plugins/sprite_editor_plugin.cpp
 msgid "Model has no UV in this layer"
 msgstr "โมเดลไม่มี UV ในชั้นนี้"
 
@@ -7569,6 +7578,10 @@ msgstr "แก้ไขโหนดลูกได้"
 #, fuzzy
 msgid "Cinematic Preview"
 msgstr "กำลังสร้างภาพตัวอย่าง Mesh"
+
+#: editor/plugins/spatial_editor_plugin.cpp
+msgid "Not available when using the GLES2 renderer."
+msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Freelook Left"
@@ -12978,6 +12991,17 @@ msgstr ""
 #: servers/visual/shader_language.cpp
 msgid "Constants cannot be modified."
 msgstr ""
+
+#~ msgid "enum  "
+#~ msgstr "กลุ่มค่าคงที่  "
+
+#, fuzzy
+#~ msgid "Brief Description"
+#~ msgstr "รายละเอียด:"
+
+#, fuzzy
+#~ msgid "Class Description"
+#~ msgstr "รายละเอียด"
 
 #~ msgid "Password:"
 #~ msgstr "รหัสผ่าน:"

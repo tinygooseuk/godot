@@ -1959,36 +1959,7 @@ msgstr ""
 
 #: editor/editor_help.cpp
 #, fuzzy
-msgid "Brief Description"
-msgstr "Apraksts:"
-
-#: editor/editor_help.cpp
-msgid "Properties"
-msgstr ""
-
-#: editor/editor_help.cpp
-msgid "Methods"
-msgstr ""
-
-#: editor/editor_help.cpp
-msgid "Theme Properties"
-msgstr ""
-
-#: editor/editor_help.cpp
-msgid "Enumerations"
-msgstr ""
-
-#: editor/editor_help.cpp
-msgid "enum  "
-msgstr ""
-
-#: editor/editor_help.cpp
-msgid "Constants"
-msgstr ""
-
-#: editor/editor_help.cpp
-#, fuzzy
-msgid "Class Description"
+msgid "Description"
 msgstr "Apraksts:"
 
 #: editor/editor_help.cpp
@@ -2003,9 +1974,42 @@ msgid ""
 msgstr ""
 
 #: editor/editor_help.cpp
+msgid "Properties"
+msgstr ""
+
+#: editor/editor_help.cpp
+msgid "override:"
+msgstr ""
+
+#: editor/editor_help.cpp
+#, fuzzy
+msgid "default:"
+msgstr "Ielādēt Noklusējumu"
+
+#: editor/editor_help.cpp
+msgid "Methods"
+msgstr ""
+
+#: editor/editor_help.cpp
+msgid "Theme Properties"
+msgstr ""
+
+#: editor/editor_help.cpp
+msgid "Enumerations"
+msgstr ""
+
+#: editor/editor_help.cpp
+msgid "Constants"
+msgstr ""
+
+#: editor/editor_help.cpp
 #, fuzzy
 msgid "Property Descriptions"
 msgstr "Apraksts:"
+
+#: editor/editor_help.cpp
+msgid "(value)"
+msgstr ""
 
 #: editor/editor_help.cpp
 msgid ""
@@ -4488,7 +4492,6 @@ msgid "Animation Tools"
 msgstr ""
 
 #: editor/plugins/animation_player_editor_plugin.cpp
-#: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Animation"
 msgstr ""
 
@@ -5558,6 +5561,11 @@ msgid "Auto Insert Key"
 msgstr "Anim ievietot atslēgievietni"
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
+#, fuzzy
+msgid "Animation Key and Pose Options"
+msgstr "Animācijas Garums (sekundes)"
+
+#: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Insert Key (Existing Tracks)"
 msgstr ""
 
@@ -5846,7 +5854,6 @@ msgid "No mesh to debug."
 msgstr ""
 
 #: editor/plugins/mesh_instance_editor_plugin.cpp
-#: editor/plugins/sprite_editor_plugin.cpp
 msgid "Model has no UV in this layer"
 msgstr ""
 
@@ -7240,6 +7247,10 @@ msgstr "Nomainīt"
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Cinematic Preview"
+msgstr ""
+
+#: editor/plugins/spatial_editor_plugin.cpp
+msgid "Not available when using the GLES2 renderer."
 msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
@@ -12356,6 +12367,14 @@ msgstr ""
 #: servers/visual/shader_language.cpp
 msgid "Constants cannot be modified."
 msgstr ""
+
+#, fuzzy
+#~ msgid "Brief Description"
+#~ msgstr "Apraksts:"
+
+#, fuzzy
+#~ msgid "Class Description"
+#~ msgstr "Apraksts:"
 
 #, fuzzy
 #~ msgid "Class Description:"
