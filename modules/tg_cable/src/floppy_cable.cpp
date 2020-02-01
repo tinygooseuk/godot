@@ -53,8 +53,10 @@ void FloppyCable::_notification(int p_what) {
 			set_process(!Engine::get_singleton()->is_editor_hint()); 
 			break;
 		case NOTIFICATION_PROCESS:
-			
-			_process(get_process_delta_time());
+			if (!Engine::get_singleton()->is_editor_hint())
+			{
+				_process(get_process_delta_time());
+			}
 			break;
 		default:
 			break;
