@@ -46,6 +46,7 @@ private:
 	DECLARE_PROPERTY(float, cable_width, 0.2f);
 	DECLARE_PROPERTY(int, cable_num_segments, 8);
 	DECLARE_PROPERTY(int, cable_num_sides, 8);
+	DECLARE_PROPERTY(bool, reverse_winding_order, false);
 
 	DECLARE_PROPERTY(Ref<Material>, cable_material, {});
 

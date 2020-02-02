@@ -23,7 +23,7 @@ void solve_distance_constraint(CableParticle &particle1, CableParticle &particle
 
 const Vector3 VECTOR_X = Vector3(1.0f, 0.0f, 0.0f);
 const Vector3 VECTOR_Y = Vector3(0.0f, 1.0f, 0.0f);
-const Vector3 VECTOR_Z = Vector3(0.0f, 0.0f, -1.0f);
+const Vector3 VECTOR_Z = Vector3(0.0f, 0.0f, 1.0f);
 } // namespace
 
 void FloppyCable::_bind_methods() {
@@ -42,6 +42,7 @@ void FloppyCable::_bind_methods() {
 	IMPLEMENT_PROPERTY(FloppyCable, REAL, cable_width);
 	IMPLEMENT_PROPERTY(FloppyCable, INT, cable_num_segments);
 	IMPLEMENT_PROPERTY(FloppyCable, INT, cable_num_sides);
+	IMPLEMENT_PROPERTY(FloppyCable, BOOL, reverse_winding_order);
 
 	IMPLEMENT_PROPERTY_TYPEHINT(FloppyCable, OBJECT, Material, cable_material);
 }
@@ -207,41 +208,44 @@ void FloppyCable::rebuild_mesh() {
 	auto n_writer = normals.write();
 	uint32_t normal_idx = 0;
 
+	const float winding_inversion_factor = reverse_winding_order ? -1.0f : +1.0f;
+
 	// For each point along spline...
 	for (int point_idx = 0; point_idx < num_points; point_idx++) {
 		const float along_frac = float(point_idx) / float(num_points); // Distance along cable
 
 		// Find direction of cable at this point, by averaging previous and next points
-		const int next_idx = min(point_idx + 1, num_points - 1);
+		const int last_idx = point_idx - 1;
+		const int next_idx = point_idx + 1;
 
 		// Create basis
-		CableParticle &next_particle = particles[next_idx];
-		CableParticle &curr_particle = particles[point_idx];
+		CableParticle &next_particle = (point_idx == num_points - 1) ? particles[point_idx] : particles[next_idx];
+		CableParticle &curr_particle = (point_idx == num_points - 1) ? particles[last_idx] : particles[point_idx];
 
-		const Vector3 fwd_dir = (next_particle.translation - curr_particle.translation).normalized();
+		const Vector3 along_dir = (next_particle.translation - curr_particle.translation).normalized();
 		Vector3 up_dir = VECTOR_Y;
-		Vector3 right_dir = fwd_dir.cross(up_dir).normalized();
 
-		// Fwd is mostly on y/UP axis
-		if (abs(fwd_dir.y) > max(abs(fwd_dir.x), abs(fwd_dir.z))) {
-			if (abs(fwd_dir.x) > abs(fwd_dir.z)) {
-				up_dir = fwd_dir.cross(VECTOR_Z);
+		//TODO: twisty
+		// Along dir is mostly on y/UP axis - must use different up
+		if (abs(along_dir.y) > max(abs(along_dir.x), abs(along_dir.z))) {
+			if (abs(along_dir.x) > abs(along_dir.z)) {
+				up_dir = along_dir.cross(-VECTOR_Z);
 			} else {
-				up_dir = fwd_dir.cross(VECTOR_X);
+				up_dir = along_dir.cross(VECTOR_X);
 			}
-
-			right_dir = fwd_dir.cross(up_dir).normalized();
 		}
 
+		Vector3	right_dir = along_dir.cross(up_dir).normalized();
+		
 		// Generate a ring of verts
 		for (int vert_idx = 0; vert_idx < num_ring_verts; vert_idx++) {
-			const float around_frac = float(vert_idx) / float(cable_num_sides);
+			const float around_frac = fmod(float(vert_idx) / float(cable_num_sides), 1.0f);
 
 			// Find angle around the ring
 			const float rad_angle = 2.0f * Math_PI * around_frac;
 
 			// Find direction from center of cable to this vertex
-			const Vector3 out_dir = (cosf(rad_angle) * up_dir) + (sinf(rad_angle) * right_dir);
+			const Vector3 out_dir = (cosf(rad_angle) * up_dir) + (winding_inversion_factor * sinf(rad_angle) * right_dir);
 
 			v_writer[vertex_idx++] = to_local(curr_particle.translation + (out_dir * 0.5f * cable_width));
 			tc_writer[texcoord_idx++] = Vector2(along_frac, around_frac); // unreal had : FVector2D(AlongFrac * TileMaterial, AroundFrac);
@@ -251,13 +255,13 @@ void FloppyCable::rebuild_mesh() {
 
 	// Build triangles
 	PoolIntArray indices;
-	indices.resize(2 * 3 * num_points * num_ring_verts);
+	indices.resize(2 * 3 * cable_num_segments * cable_num_sides);
 
 	auto i_writer = indices.write();
 	uint32_t index_idx = 0;
 	
 	for (int seg_idx = 0; seg_idx < cable_num_segments; seg_idx++) {
-		for (int side_idx = 0; side_idx < num_ring_verts; side_idx++) {
+		for (int side_idx = 0; side_idx < cable_num_sides; side_idx++) {
 			const int tl = get_vert_index(seg_idx, side_idx);
 			const int bl = get_vert_index(seg_idx, side_idx + 1);
 			const int tr = get_vert_index(seg_idx + 1, side_idx);
