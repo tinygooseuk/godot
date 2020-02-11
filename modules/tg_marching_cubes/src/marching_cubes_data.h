@@ -12,12 +12,16 @@ public:
         IMPLEMENT_PROPERTY(MarchingCubesData, INT, height);
         IMPLEMENT_PROPERTY(MarchingCubesData, INT, depth);
 
+        IMPLEMENT_PROPERTY(MarchingCubesData, INT, random_seed);
+
         IMPLEMENT_PROPERTY(MarchingCubesData, POOL_REAL_ARRAY, data);
     }
 	
 	DECLARE_PUBLIC_PROPERTY(int, width, 8);
 	DECLARE_PUBLIC_PROPERTY(int, height, 8);
 	DECLARE_PUBLIC_PROPERTY(int, depth, 8);
+
+	DECLARE_PUBLIC_PROPERTY(int, random_seed, 8);
 
 	DECLARE_PUBLIC_PROPERTY(PoolRealArray, data, {});
 };

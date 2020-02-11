@@ -1,7 +1,7 @@
 #include "marching_cubes_terrain.h"
 #include "core/engine.h"
 #include "modules/opensimplex/open_simplex_noise.h"
-#include "scene/3d/immediate_geometry.h"
+#include "scene/resources/surface_tool.h"
 
 #include "marching_cubes_algorithm.h"
 
@@ -9,6 +9,8 @@ void MarchingCubesTerrain::_bind_methods() {
 	//ClassDB::bind_method(D_METHOD("get_position_on_cable", "distance_along_cable"), &MarchingCubesTerrain::get_position_on_cable);
 	//IMPLEMENT_PROPERTY(MarchingCubesTerrain, BOOL, is_start_attached);
 	IMPLEMENT_PROPERTY_TYPEHINT(MarchingCubesTerrain, OBJECT, MarchingCubesData, terrain_data);
+	IMPLEMENT_PROPERTY(MarchingCubesTerrain, REAL, scale);
+
 }
 
 void MarchingCubesTerrain::_notification(int p_what) {
@@ -101,7 +103,7 @@ void MarchingCubesTerrain::fill_with_noise() {
 	auto data_write = terrain_data->data.write(); 
 
 	OpenSimplexNoise noiser;
-	noiser.set_seed(Math::random(0.0f, 50000.0f)); //Hrm?	
+	noiser.set_seed(terrain_data->random_seed);
 	noiser.set_octaves(4);
 	noiser.set_period(20.0f);
 	noiser.set_persistence(0.8f);
@@ -118,9 +120,8 @@ void MarchingCubesTerrain::set_debug_mesh() {
 
 	auto data_read = terrain_data->data.read();
 	
-
-	ImmediateGeometry* imm = memnew(ImmediateGeometry);
-	imm->begin(Mesh::PrimitiveType::PRIMITIVE_TRIANGLES);
+	SurfaceTool st;
+	st.begin(Mesh::PrimitiveType::PRIMITIVE_TRIANGLES);
 	{
 		//Simple:
 		/*for (int index = 0; index < terrain_data->width * terrain_data->height * terrain_data->depth; index++) {
@@ -136,14 +137,14 @@ void MarchingCubesTerrain::set_debug_mesh() {
 			for (int y = 0; y < terrain_data->height; y++) {
 				for (int z = 0; z < terrain_data->depth; z++) {
 					GRIDCELL grid_cell;
-					grid_cell.p[0] = Vector3((float)(x + 0), (float)(y + 0), (float)(z + 0));
-					grid_cell.p[1] = Vector3((float)(x + 1), (float)(y + 0), (float)(z + 0));
-					grid_cell.p[2] = Vector3((float)(x + 1), (float)(y + 0), (float)(z + 1));
-					grid_cell.p[3] = Vector3((float)(x + 0), (float)(y + 0), (float)(z + 1));
-					grid_cell.p[4] = Vector3((float)(x + 0), (float)(y + 1), (float)(z + 0));
-					grid_cell.p[5] = Vector3((float)(x + 1), (float)(y + 1), (float)(z + 0));
-					grid_cell.p[6] = Vector3((float)(x + 1), (float)(y + 1), (float)(z + 1));
-					grid_cell.p[7] = Vector3((float)(x + 0), (float)(y + 1), (float)(z + 1));
+					grid_cell.p[0] = Vector3((float)(x + 0), (float)(y + 0), (float)(z + 0)) * scale;
+					grid_cell.p[1] = Vector3((float)(x + 1), (float)(y + 0), (float)(z + 0)) * scale;
+					grid_cell.p[2] = Vector3((float)(x + 1), (float)(y + 0), (float)(z + 1)) * scale;
+					grid_cell.p[3] = Vector3((float)(x + 0), (float)(y + 0), (float)(z + 1)) * scale;
+					grid_cell.p[4] = Vector3((float)(x + 0), (float)(y + 1), (float)(z + 0)) * scale;
+					grid_cell.p[5] = Vector3((float)(x + 1), (float)(y + 1), (float)(z + 0)) * scale;
+					grid_cell.p[6] = Vector3((float)(x + 1), (float)(y + 1), (float)(z + 1)) * scale;
+					grid_cell.p[7] = Vector3((float)(x + 0), (float)(y + 1), (float)(z + 1)) * scale;
 					
 					for (int i = 0; i < 8; i++)
 					{
@@ -163,24 +164,16 @@ void MarchingCubesTerrain::set_debug_mesh() {
 						Vector3 b = vertices[faces[face_idx].I[2]];
 						Vector3 c = vertices[faces[face_idx].I[1]];
 
-						Vector3 n = (b-a).cross(c-a);
-						
 						// Swap indices because GL is weird :)
-						imm->set_normal(n);
-						imm->add_vertex(a);
-
-						imm->set_normal(n);
-						imm->add_vertex(b);
-
-						imm->set_normal(n);
-						imm->add_vertex(c);
+						st.add_vertex(a);
+						st.add_vertex(b);
+						st.add_vertex(c);
 					}
 				}	
 			}	
 		}
 	}
-	imm->end();
-
-	add_child(imm);
-	imm->set_owner(get_owner());
+	st.generate_normals();
+	st.generate_tangents();
+	set_mesh(st.commit());
 }
