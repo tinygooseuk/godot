@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-VERSION=4.0.dev.mono
+VERSION=3.2.rc.mono
 
 echo **************************************************
 echo Preparing to build export templates for Win64...
