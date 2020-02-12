@@ -1,9 +1,9 @@
 @echo off
 
-git pull upstream master
+git pull upstream 3.2
 if %errorlevel%==1 goto error
 
-git push origin master
+git push origin 3.2
 
 exit /B
 
