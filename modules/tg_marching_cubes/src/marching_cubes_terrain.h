@@ -25,7 +25,7 @@ public:
 
 private:
 	// Exports
-	DECLARE_PROPERTY(float, scale, 1.0f);
+	DECLARE_PROPERTY(float, mesh_scale, 1.0f);
 	DECLARE_PROPERTY(Ref<MarchingCubesData>, terrain_data, {});
 	
 	int coord_to_index(const Vector3& p_position) const;

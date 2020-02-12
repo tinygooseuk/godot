@@ -2,26 +2,27 @@
 #include "core/math/vector3.h"
 // Adapted from https://graphics.stanford.edu/~mdfisher/MarchingCubes.html
 
-// From BaseMesh.h
-struct TriMeshFace
+namespace MarchingCubes {
+struct Face
 {
-    TriMeshFace() {}
-    TriMeshFace(uint32_t I0, uint32_t I1, uint32_t I2)
+    Face() {}
+    Face(uint32_t index1, uint32_t index2, uint32_t index3)
     {
-        I[0] = I0;
-        I[1] = I1;
-        I[2] = I2;
+        indices[0] = index1;
+        indices[1] = index2;
+        indices[2] = index3;
     }
 
-    uint32_t I[3];
+    uint32_t indices[3];
 };
 
 
 // From MarchingCubes.h
-struct GRIDCELL {
-   Vector3 p[8];	//position of each corner of the grid in world space
-   float val[8];	//value of the function at this grid corner
+struct GridCell {
+   Vector3 position[8];	//position of each corner of the grid in world space
+   float value[8];	    //value of the function at this grid corner
 };
 
 //given a grid cell, returns the set of triangles that approximates the region where val == 0.
-int Polygonise(GRIDCELL &Grid, TriMeshFace *Triangles, int &NewVertexCount, Vector3 *Vertices);
+int polygonise(GridCell& cell, Face* faces, int& new_vertex_count, Vector3* vertices);
+}

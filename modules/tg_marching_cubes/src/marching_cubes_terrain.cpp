@@ -9,7 +9,7 @@ void MarchingCubesTerrain::_bind_methods() {
 	//ClassDB::bind_method(D_METHOD("get_position_on_cable", "distance_along_cable"), &MarchingCubesTerrain::get_position_on_cable);
 	//IMPLEMENT_PROPERTY(MarchingCubesTerrain, BOOL, is_start_attached);
 	IMPLEMENT_PROPERTY_TYPEHINT(MarchingCubesTerrain, OBJECT, MarchingCubesData, terrain_data);
-	IMPLEMENT_PROPERTY(MarchingCubesTerrain, REAL, scale);
+	IMPLEMENT_PROPERTY(MarchingCubesTerrain, REAL, mesh_scale);
 
 }
 
@@ -120,49 +120,42 @@ void MarchingCubesTerrain::set_debug_mesh() {
 
 	auto data_read = terrain_data->data.read();
 	
+	/*Ref<ArrayMesh> new_mesh = memnew(ArrayMesh);
+
+	SurfaceTool sides;
+	SurfaceTool tops;*/
+
 	SurfaceTool st;
 	st.begin(Mesh::PrimitiveType::PRIMITIVE_TRIANGLES);
 	{
-		//Simple:
-		/*for (int index = 0; index < terrain_data->width * terrain_data->height * terrain_data->depth; index++) {
-			Vector3 position = index_to_coord(index);
-			if (data_read[index] == 0x00) continue;
-
-			imm->add_vertex(position + Vector3(0.0f, +0.4f, 0.0f));
-			imm->add_vertex(position + Vector3(+0.25f, -0.2f, +0.25f));
-			imm->add_vertex(position + Vector3(-0.25f, -0.2f, -0.25f));
-		}*/
-
 		for (int x = 0; x < terrain_data->width; x++) {
 			for (int y = 0; y < terrain_data->height; y++) {
 				for (int z = 0; z < terrain_data->depth; z++) {
-					GRIDCELL grid_cell;
-					grid_cell.p[0] = Vector3((float)(x + 0), (float)(y + 0), (float)(z + 0)) * scale;
-					grid_cell.p[1] = Vector3((float)(x + 1), (float)(y + 0), (float)(z + 0)) * scale;
-					grid_cell.p[2] = Vector3((float)(x + 1), (float)(y + 0), (float)(z + 1)) * scale;
-					grid_cell.p[3] = Vector3((float)(x + 0), (float)(y + 0), (float)(z + 1)) * scale;
-					grid_cell.p[4] = Vector3((float)(x + 0), (float)(y + 1), (float)(z + 0)) * scale;
-					grid_cell.p[5] = Vector3((float)(x + 1), (float)(y + 1), (float)(z + 0)) * scale;
-					grid_cell.p[6] = Vector3((float)(x + 1), (float)(y + 1), (float)(z + 1)) * scale;
-					grid_cell.p[7] = Vector3((float)(x + 0), (float)(y + 1), (float)(z + 1)) * scale;
+					MarchingCubes::GridCell grid_cell;
+					grid_cell.position[0] = Vector3((float)(x + 0), (float)(y + 0), (float)(z + 0));
+					grid_cell.position[1] = Vector3((float)(x + 1), (float)(y + 0), (float)(z + 0));
+					grid_cell.position[2] = Vector3((float)(x + 1), (float)(y + 0), (float)(z + 1));
+					grid_cell.position[3] = Vector3((float)(x + 0), (float)(y + 0), (float)(z + 1));
+					grid_cell.position[4] = Vector3((float)(x + 0), (float)(y + 1), (float)(z + 0));
+					grid_cell.position[5] = Vector3((float)(x + 1), (float)(y + 1), (float)(z + 0));
+					grid_cell.position[6] = Vector3((float)(x + 1), (float)(y + 1), (float)(z + 1));
+					grid_cell.position[7] = Vector3((float)(x + 0), (float)(y + 1), (float)(z + 1));
 					
 					for (int i = 0; i < 8; i++)
 					{
-						//TODO: it could be that 0.0f is meant to be given when we have 0x01...
-						grid_cell.val[i] = data_read[coord_to_index(grid_cell.p[i])];
+						grid_cell.value[i] = data_read[coord_to_index(grid_cell.position[i])];
 					}
 
-
-					TriMeshFace faces[8];
+					MarchingCubes::Face faces[8];
 					Vector3 vertices[16]; 
 					int vert_count = 0;
-					int face_count = Polygonise(grid_cell, &faces[0], vert_count, &vertices[0]);
+					int face_count = MarchingCubes::polygonise(grid_cell, &faces[0], vert_count, &vertices[0]);
 					
 					for (int face_idx = 0; face_idx < face_count; face_idx++)
 					{
-						Vector3 a = vertices[faces[face_idx].I[0]];
-						Vector3 b = vertices[faces[face_idx].I[2]];
-						Vector3 c = vertices[faces[face_idx].I[1]];
+						Vector3 a = vertices[faces[face_idx].indices[0]] * mesh_scale;
+						Vector3 b = vertices[faces[face_idx].indices[2]] * mesh_scale;
+						Vector3 c = vertices[faces[face_idx].indices[1]] * mesh_scale;
 
 						// Swap indices because GL is weird :)
 						st.add_vertex(a);
@@ -175,5 +168,6 @@ void MarchingCubesTerrain::set_debug_mesh() {
 	}
 	st.generate_normals();
 	st.generate_tangents();
+
 	set_mesh(st.commit());
 }
