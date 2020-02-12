@@ -26,12 +26,18 @@ public:
 private:
 	// Exports
 	DECLARE_PROPERTY(float, mesh_scale, 1.0f);
+	DECLARE_PROPERTY(bool, generate_collision, true);
+	DECLARE_PROPERTY(bool, regenerate_mesh, false);
+
 	DECLARE_PROPERTY(Ref<MarchingCubesData>, terrain_data, {});
 	
+	DECLARE_PROPERTY(Ref<Material>, tops_material, {});
+	DECLARE_PROPERTY(Ref<Material>, sides_material, {});
+
 	int coord_to_index(const Vector3& p_position) const;
 	Vector3 index_to_coord(int p_index) const;
 
 
 	void fill_with_noise();
-	void set_debug_mesh();
+	void generate_mesh();
 };

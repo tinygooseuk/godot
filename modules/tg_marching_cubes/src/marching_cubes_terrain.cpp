@@ -1,7 +1,9 @@
 #include "marching_cubes_terrain.h"
 #include "core/engine.h"
 #include "modules/opensimplex/open_simplex_noise.h"
+#include "scene/resources/concave_polygon_shape.h"
 #include "scene/resources/surface_tool.h"
+#include "scene/3d/collision_shape.h"
 
 #include "marching_cubes_algorithm.h"
 
@@ -9,8 +11,12 @@ void MarchingCubesTerrain::_bind_methods() {
 	//ClassDB::bind_method(D_METHOD("get_position_on_cable", "distance_along_cable"), &MarchingCubesTerrain::get_position_on_cable);
 	//IMPLEMENT_PROPERTY(MarchingCubesTerrain, BOOL, is_start_attached);
 	IMPLEMENT_PROPERTY_TYPEHINT(MarchingCubesTerrain, OBJECT, MarchingCubesData, terrain_data);
+	IMPLEMENT_PROPERTY_TYPEHINT(MarchingCubesTerrain, OBJECT, Material, tops_material);
+	IMPLEMENT_PROPERTY_TYPEHINT(MarchingCubesTerrain, OBJECT, Material, sides_material);
+	
 	IMPLEMENT_PROPERTY(MarchingCubesTerrain, REAL, mesh_scale);
-
+	IMPLEMENT_PROPERTY(MarchingCubesTerrain, BOOL, generate_collision);
+	IMPLEMENT_PROPERTY(MarchingCubesTerrain, BOOL, regenerate_mesh);
 }
 
 void MarchingCubesTerrain::_notification(int p_what) {
@@ -38,14 +44,20 @@ void MarchingCubesTerrain::_init() {
 void MarchingCubesTerrain::_ready() {
 	reallocate_memory();
 	fill_with_noise(); //TODO: no!
-	set_debug_mesh(); //TODO: no!
+	generate_mesh(); //TODO: no!
 	if (!Engine::get_singleton()->is_editor_hint()) {
 		
 	}
 }
 
 void MarchingCubesTerrain::_process(const float delta) {
-	
+	if (Engine::get_singleton()->is_editor_hint()) {
+		if (regenerate_mesh) {
+			regenerate_mesh = false;
+
+			generate_mesh();
+		}
+	}
 }
 
 String MarchingCubesTerrain::get_configuration_warning() const {
@@ -115,18 +127,18 @@ void MarchingCubesTerrain::fill_with_noise() {
 	}
 }
 
-void MarchingCubesTerrain::set_debug_mesh() {
+void MarchingCubesTerrain::generate_mesh() {
 	ERR_FAIL_COND(terrain_data.is_null() || terrain_data->data.empty());
 
 	auto data_read = terrain_data->data.read();
 	
-	/*Ref<ArrayMesh> new_mesh = memnew(ArrayMesh);
+	Ref<ArrayMesh> new_mesh = memnew(ArrayMesh);
 
 	SurfaceTool sides;
-	SurfaceTool tops;*/
+	SurfaceTool tops;
 
-	SurfaceTool st;
-	st.begin(Mesh::PrimitiveType::PRIMITIVE_TRIANGLES);
+	sides.begin(Mesh::PrimitiveType::PRIMITIVE_TRIANGLES);
+	tops.begin(Mesh::PrimitiveType::PRIMITIVE_TRIANGLES);
 	{
 		for (int x = 0; x < terrain_data->width; x++) {
 			for (int y = 0; y < terrain_data->height; y++) {
@@ -153,21 +165,57 @@ void MarchingCubesTerrain::set_debug_mesh() {
 					
 					for (int face_idx = 0; face_idx < face_count; face_idx++)
 					{
+						static const Vector3 VECTOR_UP = Vector3(0.0f, 1.0f, 0.0f);
+
 						Vector3 a = vertices[faces[face_idx].indices[0]] * mesh_scale;
 						Vector3 b = vertices[faces[face_idx].indices[2]] * mesh_scale;
 						Vector3 c = vertices[faces[face_idx].indices[1]] * mesh_scale;
 
+						Vector3 n = (b-a).cross(c-b).normalized();
+						SurfaceTool& append_to = (n.dot(VECTOR_UP) > 0.55f) ? tops : sides;
+
 						// Swap indices because GL is weird :)
-						st.add_vertex(a);
-						st.add_vertex(b);
-						st.add_vertex(c);
+						append_to.add_vertex(a);
+						append_to.add_vertex(b);
+						append_to.add_vertex(c);
 					}
 				}	
 			}	
 		}
 	}
-	st.generate_normals();
-	st.generate_tangents();
+	sides.generate_normals();
+	sides.generate_tangents();
+	tops.generate_normals();
+	tops.generate_tangents();
+	
+	// Commit surfaces to mesh (backwards!)
+	sides.commit(new_mesh);
+	tops.commit(new_mesh);
 
-	set_mesh(st.commit());
+	// Set materials (forwards!)
+	new_mesh->surface_set_material(0, tops_material);
+	new_mesh->surface_set_material(1, sides_material);
+	
+	// Set collision
+	if (generate_collision) {
+		Ref<Shape> shape = mesh->create_trimesh_shape();
+		
+		if (!shape.is_null()) {
+			CollisionShape* old_coll_shape = (CollisionShape*)find_node("../" + (String)get_name() + "_Collision");
+			if (old_coll_shape) {
+				// Tweak old collision
+				old_coll_shape->set_shape(shape);
+			} else {
+				// Add new collision
+				CollisionShape *cshape = memnew(CollisionShape);
+				cshape->set_shape(shape);
+				cshape->set_name((String)get_name() + "_Collision");
+				cshape->set_owner(get_owner());
+		
+				get_parent()->call_deferred("add_child", cshape);
+			}
+		}
+	}
+
+	set_mesh(new_mesh);
 }
