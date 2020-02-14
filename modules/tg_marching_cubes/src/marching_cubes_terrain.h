@@ -1,7 +1,6 @@
 #pragma once
 #include <scene/3d/mesh_instance.h>
 #include <core/tg_util.h>
-#include <vector>
 
 #include "marching_cubes_data.h"
 
@@ -22,6 +21,9 @@ public:
 
 	float get_value_at(const Vector3& p_position) const;
 	void set_value_at(const Vector3& p_position, float p_value);
+
+	Vector3 get_grid_coordinates_from_world_position(Vector3 p_world_pos) const;
+	Vector3 get_world_position_from_grid_coordinates(Vector3 p_coords) const;
 
 	void generate_mesh();
 

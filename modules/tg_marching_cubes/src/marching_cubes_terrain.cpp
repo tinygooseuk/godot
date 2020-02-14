@@ -18,8 +18,10 @@ void MarchingCubesTerrain::_bind_methods() {
 	IMPLEMENT_PROPERTY(MarchingCubesTerrain, BOOL, generate_collision);
 	IMPLEMENT_PROPERTY(MarchingCubesTerrain, BOOL, regenerate_mesh);
 
-	ClassDB::bind_method(D_METHOD("get_value_at", "p_position"), &MarchingCubesTerrain::get_value_at);
-	ClassDB::bind_method(D_METHOD("set_value_at", "p_position", "p_value"), &MarchingCubesTerrain::set_value_at);
+	ClassDB::bind_method(D_METHOD("get_value_at", "position"), &MarchingCubesTerrain::get_value_at);
+	ClassDB::bind_method(D_METHOD("set_value_at", "position", "value"), &MarchingCubesTerrain::set_value_at);
+	ClassDB::bind_method(D_METHOD("get_grid_coordinates_from_world_position", "world_position"), &MarchingCubesTerrain::get_grid_coordinates_from_world_position);
+	ClassDB::bind_method(D_METHOD("get_world_position_from_grid_coordinates", "grid_position"), &MarchingCubesTerrain::get_world_position_from_grid_coordinates);
 	ClassDB::bind_method(D_METHOD("generate_mesh"), &MarchingCubesTerrain::generate_mesh);
 }
 
@@ -110,6 +112,28 @@ void MarchingCubesTerrain::set_value_at(const Vector3& p_position, float p_value
 	const int index = coord_to_index(p_position);
 	terrain_data->data.write()[index] = p_value;
 }
+
+Vector3 MarchingCubesTerrain::get_grid_coordinates_from_world_position(Vector3 p_world_pos) const {
+	p_world_pos -= get_global_transform().get_origin();
+	p_world_pos /= mesh_scale;
+
+	ERR_FAIL_COND_V(p_world_pos.x < 0.0f || p_world_pos.x > terrain_data->width, p_world_pos);
+	ERR_FAIL_COND_V(p_world_pos.y < 0.0f || p_world_pos.y > terrain_data->height, p_world_pos);
+	ERR_FAIL_COND_V(p_world_pos.z < 0.0f || p_world_pos.z > terrain_data->depth, p_world_pos);
+
+	return p_world_pos.floor();
+}
+Vector3 MarchingCubesTerrain::get_world_position_from_grid_coordinates(Vector3 p_coords) const {
+	ERR_FAIL_COND_V(p_coords.x < 0.0f || p_coords.x > terrain_data->width, p_coords);
+	ERR_FAIL_COND_V(p_coords.y < 0.0f || p_coords.y > terrain_data->height, p_coords);
+	ERR_FAIL_COND_V(p_coords.z < 0.0f || p_coords.z > terrain_data->depth, p_coords);
+
+	p_coords *= mesh_scale;
+	p_coords += get_global_transform().get_origin();
+
+	return p_coords;
+}
+
 
 void MarchingCubesTerrain::reallocate_memory() {
 	ERR_FAIL_COND(terrain_data.is_null());
