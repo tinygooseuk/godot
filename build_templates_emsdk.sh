@@ -1,9 +1,9 @@
 #!/usr/bin/bash
 
-VERSION=3.2.rc.mono
+VERSION=3.2.1.rc.mono
 
 echo **************************************************
-echo Preparing to build export templates for Win64...
+echo Preparing to build export templates for Emscripten...
 echo **************************************************
 
 rm -rf ~/.godot/templates/$VERSION
