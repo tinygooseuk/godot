@@ -5,6 +5,8 @@
 
 #include "marching_cubes_data.h"
 
+class CollisionShape;
+
 class MarchingCubesTerrain : public MeshInstance {
 	GDCLASS(MarchingCubesTerrain, MeshInstance)
 
@@ -18,10 +20,10 @@ public:
 
 	virtual String get_configuration_warning() const override;
 
-	bool get_cube_at(const Vector3& p_position) const;
-	void set_cube_at(const Vector3& p_position, bool p_state);
+	float get_value_at(const Vector3& p_position) const;
+	void set_value_at(const Vector3& p_position, float p_value);
 
-	void reallocate_memory();
+	void generate_mesh();
 
 private:
 	// Exports
@@ -37,7 +39,8 @@ private:
 	int coord_to_index(const Vector3& p_position) const;
 	Vector3 index_to_coord(int p_index) const;
 
+	CollisionShape* find_collision_sibling() const;
 
+	void reallocate_memory();
 	void fill_with_noise();
-	void generate_mesh();
 };

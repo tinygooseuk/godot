@@ -17,6 +17,10 @@ void MarchingCubesTerrain::_bind_methods() {
 	IMPLEMENT_PROPERTY(MarchingCubesTerrain, REAL, mesh_scale);
 	IMPLEMENT_PROPERTY(MarchingCubesTerrain, BOOL, generate_collision);
 	IMPLEMENT_PROPERTY(MarchingCubesTerrain, BOOL, regenerate_mesh);
+
+	ClassDB::bind_method(D_METHOD("get_value_at", "p_position"), &MarchingCubesTerrain::get_value_at);
+	ClassDB::bind_method(D_METHOD("set_value_at", "p_position", "p_value"), &MarchingCubesTerrain::set_value_at);
+	ClassDB::bind_method(D_METHOD("generate_mesh"), &MarchingCubesTerrain::generate_mesh);
 }
 
 void MarchingCubesTerrain::_notification(int p_what) {
@@ -26,8 +30,7 @@ void MarchingCubesTerrain::_notification(int p_what) {
 			set_process(!Engine::get_singleton()->is_editor_hint()); 
 			break;
 		case NOTIFICATION_PROCESS:
-			if (!Engine::get_singleton()->is_editor_hint())
-				_process(get_process_delta_time());
+			_process(get_process_delta_time());
 			break;
 		default:
 			break;
@@ -55,6 +58,8 @@ void MarchingCubesTerrain::_process(const float delta) {
 		if (regenerate_mesh) {
 			regenerate_mesh = false;
 
+			reallocate_memory();
+			fill_with_noise(); //TODO: no!
 			generate_mesh();
 		}
 	}
@@ -85,12 +90,25 @@ Vector3 MarchingCubesTerrain::index_to_coord(int p_index) const {
 	return out;
 }
 
+CollisionShape* MarchingCubesTerrain::find_collision_sibling() const {
+	Node* parent_node = get_parent();
+	for (int i = 0; i < parent_node->get_child_count(); i++) {
+		Node* sibling_node = parent_node->get_child(i);
+		if (sibling_node->get_class() == "CollisionShape") {
+			return (CollisionShape*)sibling_node;
+		}
+	}
 
-bool MarchingCubesTerrain::get_cube_at(const Vector3& p_position) const {
-	return false;
+	return nullptr;
 }
-void MarchingCubesTerrain::set_cube_at(const Vector3& p_position, bool p_state) {
 
+float MarchingCubesTerrain::get_value_at(const Vector3& p_position) const {
+	const int index = coord_to_index(p_position);
+	return terrain_data->data.read()[index];
+}
+void MarchingCubesTerrain::set_value_at(const Vector3& p_position, float p_value) {
+	const int index = coord_to_index(p_position);
+	terrain_data->data.write()[index] = p_value;
 }
 
 void MarchingCubesTerrain::reallocate_memory() {
@@ -123,7 +141,7 @@ void MarchingCubesTerrain::fill_with_noise() {
 	for (int i = 0; i < size; i++) {
 		Vector3 coord = index_to_coord(i);
 
-		data_write[i] = noiser.get_noise_3dv(coord);
+		data_write[i] = noiser.get_noise_3dv(coord) + 0.1f; // bias the noise a little
 	}
 }
 
@@ -197,11 +215,11 @@ void MarchingCubesTerrain::generate_mesh() {
 	new_mesh->surface_set_material(1, sides_material);
 	
 	// Set collision
-	if (generate_collision) {
-		Ref<Shape> shape = mesh->create_trimesh_shape();
+	if (generate_collision && new_mesh.is_valid()) {
+		Ref<Shape> shape = new_mesh->create_trimesh_shape();
 		
 		if (!shape.is_null()) {
-			CollisionShape* old_coll_shape = (CollisionShape*)find_node("../" + (String)get_name() + "_Collision");
+			CollisionShape* old_coll_shape = find_collision_sibling();
 			if (old_coll_shape) {
 				// Tweak old collision
 				old_coll_shape->set_shape(shape);
