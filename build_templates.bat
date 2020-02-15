@@ -1,6 +1,6 @@
 @echo off
 
-set VERSION=3.2.rc.mono
+set VERSION=3.2.1.rc.mono
 
 echo **************************************************
 echo Preparing to build export templates for Win64...
