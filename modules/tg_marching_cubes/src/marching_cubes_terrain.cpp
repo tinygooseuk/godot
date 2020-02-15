@@ -121,7 +121,7 @@ Vector3 MarchingCubesTerrain::get_grid_coordinates_from_world_position(Vector3 p
 	ERR_FAIL_COND_V(p_world_pos.y < 0.0f || p_world_pos.y > terrain_data->height, p_world_pos);
 	ERR_FAIL_COND_V(p_world_pos.z < 0.0f || p_world_pos.z > terrain_data->depth, p_world_pos);
 
-	return p_world_pos.floor();
+	return p_world_pos.round();
 }
 Vector3 MarchingCubesTerrain::get_world_position_from_grid_coordinates(Vector3 p_coords) const {
 	ERR_FAIL_COND_V(p_coords.x < 0.0f || p_coords.x > terrain_data->width, p_coords);
