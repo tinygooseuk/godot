@@ -8,15 +8,17 @@
 #include "marching_cubes_algorithm.h"
 
 void MarchingCubesTerrain::_bind_methods() {
-	//ClassDB::bind_method(D_METHOD("get_position_on_cable", "distance_along_cable"), &MarchingCubesTerrain::get_position_on_cable);
-	//IMPLEMENT_PROPERTY(MarchingCubesTerrain, BOOL, is_start_attached);
-	IMPLEMENT_PROPERTY_TYPEHINT(MarchingCubesTerrain, OBJECT, MarchingCubesData, terrain_data);
-	IMPLEMENT_PROPERTY_TYPEHINT(MarchingCubesTerrain, OBJECT, Material, tops_material);
-	IMPLEMENT_PROPERTY_TYPEHINT(MarchingCubesTerrain, OBJECT, Material, sides_material);
+	IMPLEMENT_PROPERTY_RESOURCE(MarchingCubesTerrain, MarchingCubesData, terrain_data);
+	IMPLEMENT_PROPERTY_RESOURCE(MarchingCubesTerrain, Material, tops_material);
+	IMPLEMENT_PROPERTY_RESOURCE(MarchingCubesTerrain, Material, sides_material);
 	
 	IMPLEMENT_PROPERTY(MarchingCubesTerrain, REAL, mesh_scale);
 	IMPLEMENT_PROPERTY(MarchingCubesTerrain, BOOL, generate_collision);
+
+#if TOOLS_ENABLED
 	IMPLEMENT_PROPERTY(MarchingCubesTerrain, BOOL, regenerate_mesh);
+	IMPLEMENT_PROPERTY(MarchingCubesTerrain, BOOL, randomise_mesh);
+#endif
 
 	ClassDB::bind_method(D_METHOD("get_value_at", "position"), &MarchingCubesTerrain::get_value_at);
 	ClassDB::bind_method(D_METHOD("set_value_at", "position", "value"), &MarchingCubesTerrain::set_value_at);
@@ -47,19 +49,24 @@ void MarchingCubesTerrain::_init() {
 }
 
 void MarchingCubesTerrain::_ready() {
-	reallocate_memory();
-	generate_mesh(); //TODO: no!
+
 }
 
 void MarchingCubesTerrain::_process(const float delta) {
-	if (Engine::get_singleton()->is_editor_hint()) {
-		if (regenerate_mesh) {
-			regenerate_mesh = false;
+#if TOOLS_ENABLED
+	if (regenerate_mesh) {
+		regenerate_mesh = false;
 
-			reallocate_memory();
-			generate_mesh();
-		}
+		reallocate_memory();
+		generate_mesh();
 	}
+
+	if (randomise_mesh) {
+		randomise_mesh = false;
+		
+		fill_with_noise();
+	}
+#endif
 }
 
 String MarchingCubesTerrain::get_configuration_warning() const {
