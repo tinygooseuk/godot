@@ -44,7 +44,7 @@ void FloppyCable::_bind_methods() {
 	IMPLEMENT_PROPERTY(FloppyCable, INT, cable_num_sides);
 	IMPLEMENT_PROPERTY(FloppyCable, BOOL, reverse_winding_order);
 
-	IMPLEMENT_PROPERTY_TYPEHINT(FloppyCable, OBJECT, Material, cable_material);
+	IMPLEMENT_PROPERTY_RESOURCE(FloppyCable, Material, cable_material);
 }
 
 void FloppyCable::_notification(int p_what) {
@@ -54,8 +54,7 @@ void FloppyCable::_notification(int p_what) {
 			set_process(!Engine::get_singleton()->is_editor_hint()); 
 			break;
 		case NOTIFICATION_PROCESS:
-			if (!Engine::get_singleton()->is_editor_hint())
-			{
+			if (!Engine::get_singleton()->is_editor_hint()) {
 				_process(get_process_delta_time());
 			}
 			break;
