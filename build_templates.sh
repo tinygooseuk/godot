@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 
 VERSION=3.2.1.rc.mono
 
@@ -6,7 +6,8 @@ echo **************************************************
 echo Preparing to build export templates for X11 Linux...
 echo **************************************************
 
-rm -rf ~/.godot/templates/$VERSION
+rm -rf ~/.local/share/godot/templates/$VERSION
+mkdir ~/.local/share/godot/templates/$VERSION
 
 echo **************************************************
 echo Building DEBUG template for X11 Linux...
@@ -18,8 +19,9 @@ if [ $retVal -ne 0 ]; then
 	echo "Error building DEBUG"
 	exit $retVal	
 fi
-cp bin/godot.x11.opt.debug.64.llvm.mono "~/.local/shared/godot/templates/$VERSION/linux_x11_64_debug"
-cp -R bin/data.mono.x11.64.release_debug "~/.local/shared/godot/templates/$VERSION/data.mono.x11.64.release_debug"
+cp bin/godot.x11.opt.debug.64.llvm.mono "$HOME/.local/share/godot/templates/$VERSION"
+mv "$HOME/.local/share/godot/templates/$VERSION/godot.x11.opt.debug.64.llvm.mono" "$HOME/.local/share/godot/templates/$VERSION/linux_x11_64_debug"
+cp -R bin/data.mono.x11.64.release_debug "$HOME/.local/share/godot/templates/$VERSION/data.mono.x11.64.release_debug"
 
 
 
@@ -33,5 +35,6 @@ if [ $retVal -ne 0 ]; then
 	echo "Error building RELEASE"
 	exit $retVal	
 fi
-cp bin/godot.x11.opt.64.llvm.mono "~/.local/shared/godot/templates/$VERSION/linux_x11_64_release"
-cp -R bin/data.mono.x11.64.release "~/.local/shared/godot/templates/$VERSION/data.mono.x11.64.release"
+cp bin/godot.x11.opt.64.llvm.mono "$HOME/.local/share/godot/templates/$VERSION"
+mv "$HOME/.local/share/godot/templates/$VERSION/godot.x11.opt.64.llvm.mono" "$HOME/.local/share/godot/templates/$VERSION/linux_x11_64_release"
+cp -R bin/data.mono.x11.64.release "$HOME/.local/share/godot/templates/$VERSION"
