@@ -34,11 +34,6 @@ private:
 	DECLARE_PROPERTY(float, mesh_scale, 1.0f);
 	DECLARE_PROPERTY(bool, generate_collision, true);
 
-#if TOOLS_ENABLED
-	DECLARE_PROPERTY(bool, regenerate_mesh, false);
-	DECLARE_PROPERTY(bool, randomise_mesh, false);
-#endif
-
 	DECLARE_PROPERTY(Ref<MarchingCubesData>, terrain_data, {});
 	
 	DECLARE_PROPERTY(Ref<Material>, tops_material, {});
@@ -52,4 +47,9 @@ private:
 
 	void reallocate_memory();
 	void fill_with_noise();
+
+#if TOOLS_ENABLED
+	friend class MarchingCubesEditor;
+	friend class MarchingCubesEditorPlugin;
+#endif
 };

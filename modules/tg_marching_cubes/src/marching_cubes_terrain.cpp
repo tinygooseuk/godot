@@ -25,11 +25,6 @@ void MarchingCubesTerrain::_bind_methods() {
 	IMPLEMENT_PROPERTY(MarchingCubesTerrain, REAL, mesh_scale);
 	IMPLEMENT_PROPERTY(MarchingCubesTerrain, BOOL, generate_collision);
 
-#if TOOLS_ENABLED
-	IMPLEMENT_PROPERTY(MarchingCubesTerrain, BOOL, regenerate_mesh);
-	IMPLEMENT_PROPERTY(MarchingCubesTerrain, BOOL, randomise_mesh);
-#endif
-
 	ClassDB::bind_method(D_METHOD("get_value_at", "position"), &MarchingCubesTerrain::get_value_at);
 	ClassDB::bind_method(D_METHOD("set_value_at", "position", "value"), &MarchingCubesTerrain::set_value_at);
 	ClassDB::bind_method(D_METHOD("are_grid_coordinates_valid", "grid_position"), &MarchingCubesTerrain::are_grid_coordinates_valid);
@@ -43,10 +38,8 @@ void MarchingCubesTerrain::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_ENTER_TREE:
 			_ready();
-			set_process(!Engine::get_singleton()->is_editor_hint()); 
-			break;
-		case NOTIFICATION_PROCESS:
-			_process(get_process_delta_time());
+			//set_process(!Engine::get_singleton()->is_editor_hint()); 
+			set_process(false);
 			break;
 		default:
 			break;
@@ -65,20 +58,7 @@ void MarchingCubesTerrain::_ready() {
 }
 
 void MarchingCubesTerrain::_process(const float delta) {
-#if TOOLS_ENABLED
-	if (regenerate_mesh) {
-		regenerate_mesh = false;
 
-		reallocate_memory();
-		generate_mesh();
-	}
-
-	if (randomise_mesh) {
-		randomise_mesh = false;
-		
-		fill_with_noise();
-	}
-#endif
 }
 
 String MarchingCubesTerrain::get_configuration_warning() const {
@@ -226,8 +206,6 @@ void MarchingCubesTerrain::generate_mesh() {
 			}
 		}
 	}
-
-//	set_mesh(new_mesh);
 }
 
 int MarchingCubesTerrain::coord_to_index(const Vector3& p_position) const {
