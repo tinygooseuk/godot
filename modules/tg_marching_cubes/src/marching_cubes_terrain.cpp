@@ -138,7 +138,16 @@ void MarchingCubesTerrain::generate_mesh() {
 
 	auto data_read = terrain_data->data.read();
 	
-	Ref<ArrayMesh> new_mesh = memnew(ArrayMesh);
+	Ref<ArrayMesh> new_mesh = get_mesh();
+	
+	if (new_mesh.is_null()) {
+		new_mesh = Ref<ArrayMesh>(memnew(ArrayMesh));
+		set_mesh(new_mesh);
+	} else {
+		while (new_mesh->get_surface_count() > 0) {
+			new_mesh->surface_remove(0);
+		}
+	}
 
 	SurfaceTool sides;
 	SurfaceTool tops;
@@ -184,6 +193,7 @@ void MarchingCubesTerrain::generate_mesh() {
 						SurfaceTool& append_to = (n.dot(VECTOR_UP) > 0.55f) ? tops : sides;
 
 						// Swap indices because GL is weird :)
+						append_to.add_normal(-n);
 						append_to.add_vertex(a);
 						append_to.add_vertex(b);
 						append_to.add_vertex(c);
@@ -192,11 +202,7 @@ void MarchingCubesTerrain::generate_mesh() {
 			}	
 		}
 	}
-	sides.generate_normals();
-	//sides.generate_tangents();
-	tops.generate_normals();
-	//tops.generate_tangents();
-	
+
 	// Commit surfaces to mesh (backwards!)
 	sides.commit(new_mesh);
 	tops.commit(new_mesh);
@@ -207,7 +213,6 @@ void MarchingCubesTerrain::generate_mesh() {
 	
 	// Set collision
 	if (generate_collision && new_mesh.is_valid()) {
-		//TODO: do this deferred!!
 		Ref<Shape> shape = new_mesh->create_trimesh_shape();
 		
 		if (!shape.is_null()) {
@@ -222,7 +227,7 @@ void MarchingCubesTerrain::generate_mesh() {
 		}
 	}
 
-	set_mesh(new_mesh);
+//	set_mesh(new_mesh);
 }
 
 int MarchingCubesTerrain::coord_to_index(const Vector3& p_position) const {
