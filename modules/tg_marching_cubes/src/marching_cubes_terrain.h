@@ -22,6 +22,8 @@ public:
 	float get_value_at(const Vector3& p_position) const;
 	void set_value_at(const Vector3& p_position, float p_value);
 
+	bool are_grid_coordinates_valid(const Vector3& p_coords) const;
+
 	Vector3 get_grid_coordinates_from_world_position(Vector3 p_world_pos) const;
 	Vector3 get_world_position_from_grid_coordinates(Vector3 p_coords) const;
 
@@ -45,6 +47,7 @@ private:
 	int coord_to_index(const Vector3& p_position) const;
 	Vector3 index_to_coord(int p_index) const;
 
+	CollisionShape* generate_collision_shape(Ref<Shape> p_shape);
 	CollisionShape* find_collision_sibling() const;
 
 	void reallocate_memory();

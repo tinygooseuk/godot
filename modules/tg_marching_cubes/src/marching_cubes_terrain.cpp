@@ -7,6 +7,16 @@
 
 #include "marching_cubes_algorithm.h"
 
+#define MC_REPORT_ERRORS 0
+
+#if MC_REPORT_ERRORS
+#define MC_ERR_FAIL_COND(cond)			ERR_FAIL_COND(cond)
+#define MC_ERR_FAIL_COND_V(cond, val) 	ERR_FAIL_COND_V(cond, val)
+#else
+#define MC_ERR_FAIL_COND(cond)			do { if (cond) return; } while (false);
+#define MC_ERR_FAIL_COND_V(cond, val) 	do { if (cond) return val; } while (false);
+#endif
+
 void MarchingCubesTerrain::_bind_methods() {
 	IMPLEMENT_PROPERTY_RESOURCE(MarchingCubesTerrain, MarchingCubesData, terrain_data);
 	IMPLEMENT_PROPERTY_RESOURCE(MarchingCubesTerrain, Material, tops_material);
@@ -22,9 +32,11 @@ void MarchingCubesTerrain::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("get_value_at", "position"), &MarchingCubesTerrain::get_value_at);
 	ClassDB::bind_method(D_METHOD("set_value_at", "position", "value"), &MarchingCubesTerrain::set_value_at);
+	ClassDB::bind_method(D_METHOD("are_grid_coordinates_valid", "grid_position"), &MarchingCubesTerrain::are_grid_coordinates_valid);
 	ClassDB::bind_method(D_METHOD("get_grid_coordinates_from_world_position", "world_position"), &MarchingCubesTerrain::get_grid_coordinates_from_world_position);
 	ClassDB::bind_method(D_METHOD("get_world_position_from_grid_coordinates", "grid_position"), &MarchingCubesTerrain::get_world_position_from_grid_coordinates);
 	ClassDB::bind_method(D_METHOD("generate_mesh"), &MarchingCubesTerrain::generate_mesh);
+	ClassDB::bind_method(D_METHOD("generate_collision_shape"), &MarchingCubesTerrain::generate_collision_shape);
 }
 
 void MarchingCubesTerrain::_notification(int p_what) {
@@ -76,41 +88,6 @@ String MarchingCubesTerrain::get_configuration_warning() const {
 	return "";
 }
 
-int MarchingCubesTerrain::coord_to_index(const Vector3& p_position) const {
-	if (p_position.x >= terrain_data->width || p_position.y >= terrain_data->height || p_position.z >= terrain_data->depth ||
-		p_position.x < 0 || p_position.y < 0 || p_position.z < 0) {
-		return -1;
-	}
-
-	return p_position.z * (terrain_data->width * terrain_data->height) +
-			p_position.y * (terrain_data->width) +
-			p_position.x;
-}
-Vector3 MarchingCubesTerrain::index_to_coord(int p_index) const {
-	Vector3 out;
-
-	out.z = floorf((float)p_index / (terrain_data->width * terrain_data->height));
-	p_index -= out.z * (terrain_data->width * terrain_data->height);
-
-	out.y = floorf((float)p_index / terrain_data->width);
-	p_index -= out.y * terrain_data->width;
-
-	out.x = p_index;
-	return out;
-}
-
-CollisionShape* MarchingCubesTerrain::find_collision_sibling() const {
-	Node* parent_node = get_parent();
-	for (int i = 0; i < parent_node->get_child_count(); i++) {
-		Node* sibling_node = parent_node->get_child(i);
-		if (sibling_node->get_class() == "CollisionShape") {
-			return (CollisionShape*)sibling_node;
-		}
-	}
-
-	return nullptr;
-}
-
 float MarchingCubesTerrain::get_value_at(const Vector3& p_position) const {
 	const int index = coord_to_index(p_position);
 	if (index == -1) {
@@ -127,20 +104,28 @@ void MarchingCubesTerrain::set_value_at(const Vector3& p_position, float p_value
 	}
 }
 
+bool MarchingCubesTerrain::are_grid_coordinates_valid(const Vector3& p_coords) const {
+	MC_ERR_FAIL_COND_V(p_coords.x < 0.0f || p_coords.x > terrain_data->width, false);
+	MC_ERR_FAIL_COND_V(p_coords.y < 0.0f || p_coords.y > terrain_data->height, false);
+	MC_ERR_FAIL_COND_V(p_coords.z < 0.0f || p_coords.z > terrain_data->depth, false);
+
+	return true;
+}
+
 Vector3 MarchingCubesTerrain::get_grid_coordinates_from_world_position(Vector3 p_world_pos) const {
 	p_world_pos -= get_global_transform().get_origin();
 	p_world_pos /= mesh_scale;
 
-	ERR_FAIL_COND_V(p_world_pos.x < 0.0f || p_world_pos.x > terrain_data->width, p_world_pos);
-	ERR_FAIL_COND_V(p_world_pos.y < 0.0f || p_world_pos.y > terrain_data->height, p_world_pos);
-	ERR_FAIL_COND_V(p_world_pos.z < 0.0f || p_world_pos.z > terrain_data->depth, p_world_pos);
+	MC_ERR_FAIL_COND_V(p_world_pos.x < 0.0f || p_world_pos.x > terrain_data->width, p_world_pos);
+	MC_ERR_FAIL_COND_V(p_world_pos.y < 0.0f || p_world_pos.y > terrain_data->height, p_world_pos);
+	MC_ERR_FAIL_COND_V(p_world_pos.z < 0.0f || p_world_pos.z > terrain_data->depth, p_world_pos);
 
 	return p_world_pos.round();
 }
 Vector3 MarchingCubesTerrain::get_world_position_from_grid_coordinates(Vector3 p_coords) const {
-	ERR_FAIL_COND_V(p_coords.x < 0.0f || p_coords.x > terrain_data->width, p_coords);
-	ERR_FAIL_COND_V(p_coords.y < 0.0f || p_coords.y > terrain_data->height, p_coords);
-	ERR_FAIL_COND_V(p_coords.z < 0.0f || p_coords.z > terrain_data->depth, p_coords);
+	MC_ERR_FAIL_COND_V(p_coords.x < 0.0f || p_coords.x > terrain_data->width, p_coords);
+	MC_ERR_FAIL_COND_V(p_coords.y < 0.0f || p_coords.y > terrain_data->height, p_coords);
+	MC_ERR_FAIL_COND_V(p_coords.z < 0.0f || p_coords.z > terrain_data->depth, p_coords);
 
 	p_coords *= mesh_scale;
 	p_coords += get_global_transform().get_origin();
@@ -148,54 +133,8 @@ Vector3 MarchingCubesTerrain::get_world_position_from_grid_coordinates(Vector3 p
 	return p_coords;
 }
 
-
-void MarchingCubesTerrain::reallocate_memory() {
-	ERR_FAIL_COND(terrain_data.is_null());
-
-	int size = terrain_data->width * terrain_data->height * terrain_data->depth;
-
-	if (terrain_data->data.size() == size) {
-		return;
-	}
-	
-	bool justShrink = (size < terrain_data->data.size());
-	
-	terrain_data->data.resize(size);
-	
-	if (justShrink) {
-		return;
-	}
-
-	// Clear out
-	auto data_write = terrain_data->data.write(); 
-	for (int i = 0; i < size; i++) {
-		data_write[i] = 0.0f; 
-	}
-}
-
-void MarchingCubesTerrain::fill_with_noise() {
-	ERR_FAIL_COND(terrain_data.is_null());
-
-	int size = terrain_data->width * terrain_data->height * terrain_data->depth;
-	terrain_data->data.resize(size);
-	
-	auto data_write = terrain_data->data.write(); 
-
-	OpenSimplexNoise noiser;
-	noiser.set_seed(terrain_data->random_seed);
-	noiser.set_octaves(4);
-	noiser.set_period(20.0f);
-	noiser.set_persistence(0.8f);
-
-	for (int i = 0; i < size; i++) {
-		Vector3 coord = index_to_coord(i);
-
-		data_write[i] = noiser.get_noise_3dv(coord) + 0.2f; // bias the noise a little
-	}
-}
-
 void MarchingCubesTerrain::generate_mesh() {
-	ERR_FAIL_COND(terrain_data.is_null() || terrain_data->data.empty());
+	MC_ERR_FAIL_COND(terrain_data.is_null() || terrain_data->data.empty());
 
 	auto data_read = terrain_data->data.read();
 	
@@ -254,9 +193,9 @@ void MarchingCubesTerrain::generate_mesh() {
 		}
 	}
 	sides.generate_normals();
-	sides.generate_tangents();
+	//sides.generate_tangents();
 	tops.generate_normals();
-	tops.generate_tangents();
+	//tops.generate_tangents();
 	
 	// Commit surfaces to mesh (backwards!)
 	sides.commit(new_mesh);
@@ -268,6 +207,7 @@ void MarchingCubesTerrain::generate_mesh() {
 	
 	// Set collision
 	if (generate_collision && new_mesh.is_valid()) {
+		//TODO: do this deferred!!
 		Ref<Shape> shape = new_mesh->create_trimesh_shape();
 		
 		if (!shape.is_null()) {
@@ -276,16 +216,103 @@ void MarchingCubesTerrain::generate_mesh() {
 				// Tweak old collision
 				old_coll_shape->set_shape(shape);
 			} else {
-				// Add new collision
-				CollisionShape *cshape = memnew(CollisionShape);
-				cshape->set_shape(shape);
-				cshape->set_name((String)get_name() + "_Collision");
-				cshape->set_owner(get_owner());
-		
-				get_parent()->call_deferred("add_child", cshape);
+				// Generate new collision shape node AFTER setup
+				call_deferred("generate_collision_shape", shape);
 			}
 		}
 	}
 
 	set_mesh(new_mesh);
+}
+
+int MarchingCubesTerrain::coord_to_index(const Vector3& p_position) const {
+	if (p_position.x >= terrain_data->width || p_position.y >= terrain_data->height || p_position.z >= terrain_data->depth ||
+		p_position.x < 0 || p_position.y < 0 || p_position.z < 0) {
+		return -1;
+	}
+
+	return p_position.z * (terrain_data->width * terrain_data->height) +
+			p_position.y * (terrain_data->width) +
+			p_position.x;
+}
+
+Vector3 MarchingCubesTerrain::index_to_coord(int p_index) const {
+	Vector3 out;
+
+	out.z = floorf((float)p_index / (terrain_data->width * terrain_data->height));
+	p_index -= out.z * (terrain_data->width * terrain_data->height);
+
+	out.y = floorf((float)p_index / terrain_data->width);
+	p_index -= out.y * terrain_data->width;
+
+	out.x = p_index;
+	return out;
+}
+
+CollisionShape* MarchingCubesTerrain::generate_collision_shape(Ref<Shape> p_shape) {
+	CollisionShape *cshape = memnew(CollisionShape);
+	cshape->set_shape(p_shape);
+	cshape->set_name((String)get_name() + "_Collision");
+	cshape->set_owner(get_parent()->get_owner());
+
+	get_parent()->add_child(cshape);
+
+	return cshape;
+}
+
+CollisionShape* MarchingCubesTerrain::find_collision_sibling() const {
+	Node* parent_node = get_parent();
+	for (int i = 0; i < parent_node->get_child_count(); i++) {
+		Node* sibling_node = parent_node->get_child(i);
+		if (sibling_node->get_class() == "CollisionShape") {
+			return (CollisionShape*)sibling_node;
+		}
+	}
+
+	return nullptr;
+}
+
+void MarchingCubesTerrain::reallocate_memory() {
+	MC_ERR_FAIL_COND(terrain_data.is_null());
+
+	int size = terrain_data->width * terrain_data->height * terrain_data->depth;
+
+	if (terrain_data->data.size() == size) {
+		return;
+	}
+	
+	bool justShrink = (size < terrain_data->data.size());
+	
+	terrain_data->data.resize(size);
+	
+	if (justShrink) {
+		return;
+	}
+
+	// Clear out
+	auto data_write = terrain_data->data.write(); 
+	for (int i = 0; i < size; i++) {
+		data_write[i] = 0.0f; 
+	}
+}
+
+void MarchingCubesTerrain::fill_with_noise() {
+	MC_ERR_FAIL_COND(terrain_data.is_null());
+
+	int size = terrain_data->width * terrain_data->height * terrain_data->depth;
+	terrain_data->data.resize(size);
+	
+	auto data_write = terrain_data->data.write(); 
+
+	OpenSimplexNoise noiser;
+	noiser.set_seed(terrain_data->random_seed);
+	noiser.set_octaves(4);
+	noiser.set_period(20.0f);
+	noiser.set_persistence(0.8f);
+
+	for (int i = 0; i < size; i++) {
+		Vector3 coord = index_to_coord(i);
+
+		data_write[i] = noiser.get_noise_3dv(coord) + 0.2f; // bias the noise a little
+	}
 }
