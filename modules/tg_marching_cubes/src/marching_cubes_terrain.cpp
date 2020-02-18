@@ -253,9 +253,9 @@ CollisionShape* MarchingCubesTerrain::generate_collision_shape(Ref<Shape> p_shap
 	CollisionShape *cshape = memnew(CollisionShape);
 	cshape->set_shape(p_shape);
 	cshape->set_name((String)get_name() + "_Collision");
-	cshape->set_owner(get_parent()->get_owner());
 
 	get_parent()->add_child(cshape);
+	cshape->set_owner(get_parent()->get_owner());
 
 	return cshape;
 }
