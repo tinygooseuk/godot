@@ -255,6 +255,13 @@ CollisionShape* MarchingCubesTerrain::find_collision_sibling() const {
 	return nullptr;
 }
 
+void MarchingCubesTerrain::clear_mesh() {
+	auto data_write = terrain_data->data.write();
+	for (int i = 0; i < terrain_data->data.size(); i++)	{
+		data_write[i] = 0.0f;
+	}
+}
+
 void MarchingCubesTerrain::reallocate_memory() {
 	MC_ERR_FAIL_COND(terrain_data.is_null());
 
@@ -273,10 +280,7 @@ void MarchingCubesTerrain::reallocate_memory() {
 	}
 
 	// Clear out
-	auto data_write = terrain_data->data.write(); 
-	for (int i = 0; i < size; i++) {
-		data_write[i] = 0.0f; 
-	}
+	clear_mesh();
 }
 
 void MarchingCubesTerrain::fill_with_noise() {

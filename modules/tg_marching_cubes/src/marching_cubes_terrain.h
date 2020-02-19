@@ -45,6 +45,7 @@ private:
 	CollisionShape* generate_collision_shape(Ref<Shape> p_shape);
 	CollisionShape* find_collision_sibling() const;
 
+	void clear_mesh();
 	void reallocate_memory();
 	void fill_with_noise();
 

@@ -4,10 +4,12 @@
 class MarchingCubesTerrain;
 class EditorNode;
 class MenuButton;
+class ToolButton;
 
 class MarchingCubesEditor : public VBoxContainer {
 	GDCLASS(MarchingCubesEditor, VBoxContainer);
 
+	// Main refs.
     MarchingCubesTerrain* node = nullptr;
     EditorNode* editor = nullptr;
 	MenuButton* options = nullptr;
@@ -18,8 +20,23 @@ class MarchingCubesEditor : public VBoxContainer {
 		MENU_OPTION_CLEAR_MESH,
 	};
 
+	enum Tool {
+		TOOL_NONE,
+		TOOL_SPHERE,
+		TOOL_CUBE,
+		TOOL_RUFFLE
+	};
+	int tool = TOOL_NONE;
+
 	static void _bind_methods();
 	void _menu_option(int p_option);
+	void _tool_select(int p_tool);	
+
+	// Buttons
+	ToolButton* tool_none;
+	ToolButton* tool_sphere;
+	ToolButton* tool_cube;
+	ToolButton* tool_ruffle;
 
 public:
 	HBoxContainer *toolbar = nullptr;
