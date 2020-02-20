@@ -5,6 +5,9 @@ class MarchingCubesTerrain;
 class EditorNode;
 class MenuButton;
 class ToolButton;
+class CheckBox;
+class SpinBox;
+class HSlider;
 
 class MarchingCubesEditor : public VBoxContainer {
 	GDCLASS(MarchingCubesEditor, VBoxContainer);
@@ -28,15 +31,26 @@ class MarchingCubesEditor : public VBoxContainer {
 	};
 	int tool = TOOL_NONE;
 
+	// Lifecycle
 	static void _bind_methods();
+	void _notification(int p_what);
+	void _enter_tree();
 	void _menu_option(int p_option);
 	void _tool_select(int p_tool);	
 
-	// Buttons
+	// Toolbar Buttons
 	ToolButton* tool_none;
 	ToolButton* tool_sphere;
 	ToolButton* tool_cube;
 	ToolButton* tool_ruffle;
+
+	// Palette widgets
+	CheckBox* is_additive;
+	HSlider* power_slider;
+	HSlider* radius_slider;
+
+	// Tools
+	void brush_cube(const Vector3& centre, float radius, float power, bool additive = true);
 
 public:
 	HBoxContainer *toolbar = nullptr;
