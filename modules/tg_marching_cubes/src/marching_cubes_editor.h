@@ -34,11 +34,15 @@ class MarchingCubesEditor : public VBoxContainer {
 	// Lifecycle
 	static void _bind_methods();
 	void _notification(int p_what);
-	void _enter_tree();
-	void _menu_option(int p_option);
-	void _tool_select(int p_tool);	
+	void enter_tree();
+	void process(float delta);
 
-	// Toolbar Buttons
+	// Actions
+	void menu_option(int p_option);
+	void tool_select(int p_tool);	
+	void update_palette_labels(float new_value = 0.0f);
+
+	// Toolbar Button
 	ToolButton* tool_none;
 	ToolButton* tool_sphere;
 	ToolButton* tool_cube;
@@ -46,11 +50,24 @@ class MarchingCubesEditor : public VBoxContainer {
 
 	// Palette widgets
 	CheckBox* is_additive;
+	Label* power_label;
 	HSlider* power_slider;
+	Label* radius_label;
 	HSlider* radius_slider;
+
+	// State
+	Camera* editor_camera = nullptr;
+	int mouse_button_down = 0;
+
+	// Gizmo
+	void set_gizmo_position(const Vector3& centre, bool is_visible);
+	void recreate_gizmo();
+	void create_sphere_gizmo(float radius);
+	void create_cube_gizmo(const Vector3& extents);
 
 	// Tools
 	void brush_cube(const Vector3& centre, float radius, float power, bool additive = true);
+	void ruffle_cube(const Vector3& centre, float radius, float power);
 
 public:
 	HBoxContainer *toolbar = nullptr;
