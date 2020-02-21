@@ -147,5 +147,5 @@ if __name__ == "__main__":
         
     main(action)
 
-    if os.name == "posix":
+    if os.name == "nt":
         input()
