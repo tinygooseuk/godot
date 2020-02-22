@@ -7,6 +7,10 @@
 #include "scene/gui/menu_button.h"
 #include "scene/main/viewport.h"
 #include "scene/3d/camera.h"
+#include "scene/resources/box_shape.h"
+#include "scene/resources/sphere_shape.h"
+
+#if TOOLS_ENABLED
 
 void MarchingCubesEditor::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("menu_option", "option"), &MarchingCubesEditor::menu_option);
@@ -19,51 +23,31 @@ void MarchingCubesEditor::_notification(int p_what) {
 		case NOTIFICATION_ENTER_TREE: 	enter_tree(); break;
 		case NOTIFICATION_PROCESS:		process(get_process_delta_time()); break;
 	}
-
 }
 
 void MarchingCubesEditor::enter_tree() {
-	tool_none->set_icon(get_icon("Camera2D", "EditorIcons"));
-	tool_sphere->set_icon(get_icon("SphereShape", "EditorIcons"));
 	tool_cube->set_icon(get_icon("BoxShape", "EditorIcons"));
+	tool_sphere->set_icon(get_icon("SphereShape", "EditorIcons"));
 	tool_ruffle->set_icon(get_icon("SpriteSheet", "EditorIcons"));
 }
 
 void MarchingCubesEditor::process(float delta) {
-	if (tool > TOOL_NONE && mouse_button_down > 0) {
-		Viewport* editor_vp = editor_camera->get_viewport();
-		Vector2 mouse_pos = editor_vp->get_mouse_position();
+	if (mouse_button_down > 0) {
+		float radius = radius_slider->get_value();
+		float power = power_slider->get_value();
+		bool use_additive = is_additive->is_pressed();
 
-		Vector3 ray_origin = editor_camera->project_ray_origin(mouse_pos);
-		Vector3 ray_dir = editor_camera->project_ray_normal(mouse_pos);
-
-		auto* space = editor_camera->get_world()->get_direct_space_state();
-
-		PhysicsDirectSpaceState::RayResult ray;
-		bool is_hit = space->intersect_ray(ray_origin, ray_origin + ray_dir * 500.0f, ray);
-		if (is_hit) {
-			Vector3 grid_pos = node->get_world_position_from_grid_coordinates(node->get_grid_coordinates_from_world_position(ray.position));
-			set_gizmo_position(grid_pos, true);
-
-			float radius = radius_slider->get_value();
-			float power = power_slider->get_value();
-			bool use_additive = is_additive->is_pressed();
-
-			switch (tool) {
-				case TOOL_CUBE:
-					if (use_additive) {
-						brush_cube(ray.position, radius, mouse_button_down == BUTTON_LEFT ? -power : +power, true);
-					} else {
-						brush_cube(ray.position, radius, mouse_button_down == BUTTON_LEFT ? -1.0f : power, false);
-					}
-					break;
-				case TOOL_SPHERE: break; //TODO:
-				case TOOL_RUFFLE:
-					ruffle_cube(ray.position, radius, power);
-			}
-						
-		} else {
-			set_gizmo_position(Vector3(), false);
+		switch (tool) {
+			case TOOL_CUBE:
+				if (use_additive) {
+					brush_cube(tool_position, radius, shift ? +power : -power, true);
+				} else {
+					brush_cube(tool_position, radius, shift ? mouse_button_down : -1.0f, false);
+				}
+				break;
+			case TOOL_SPHERE: break; //TODO:
+			case TOOL_RUFFLE:
+				ruffle_cube(tool_position, radius, power);
 		}
 	}
 }
@@ -90,7 +74,7 @@ void MarchingCubesEditor::menu_option(int p_option) {
 void MarchingCubesEditor::tool_select(int p_tool) {
 	tool = p_tool;
 
-	ToolButton* buttons[] = { tool_none, tool_sphere, tool_cube, tool_ruffle };
+	ToolButton *buttons[] = { tool_cube, tool_sphere, tool_ruffle };
 	const int num_buttons = sizeof(buttons) / sizeof(*buttons);
 	
 	for (int i = 0; i < num_buttons; i++) {
@@ -98,6 +82,99 @@ void MarchingCubesEditor::tool_select(int p_tool) {
 	}
 
 	recreate_gizmo();
+	update_status();
+}
+
+void MarchingCubesEditor::update_status() {
+	String status_text;
+
+	switch (tool) {
+		case TOOL_SPHERE: status_text = "Sphere tool"; break;
+		case TOOL_CUBE: status_text = "Cube tool"; break;
+		case TOOL_RUFFLE: status_text = "Ruffle tool"; break;
+	}
+
+	switch (axis) {
+		case AXIS_NONE: status_text += " - Freeform Edit"; break;
+		case AXIS_X: status_text += " - X Axis @ " + String::num(axis_level); break;
+		case AXIS_Y: status_text += " - Y Axis @ " + String::num(axis_level); break;
+		case AXIS_Z: status_text += " - Z Axis @ " + String::num(axis_level); break;
+	}
+	status_text += "\n\nMiddle-Mouse or Space: Switch Axis";
+	status_text += "\nMouse wheel or -/+: Change Level";
+
+	status->set_text(status_text);
+}
+
+void MarchingCubesEditor::update_tool_position() {
+	Viewport *editor_vp = editor_camera->get_viewport();
+	Vector2 mouse_pos = editor_vp->get_mouse_position();
+
+	Vector3 ray_origin = editor_camera->project_ray_origin(mouse_pos);
+	Vector3 ray_dir = editor_camera->project_ray_normal(mouse_pos);
+
+	// Move tool position
+	switch (axis) {
+		case AXIS_NONE: {
+			auto *space = editor_camera->get_world()->get_direct_space_state();
+
+			PhysicsDirectSpaceState::RayResult ray;
+			bool is_hit = space->intersect_ray(ray_origin, ray_origin + ray_dir * 500.0f, ray);
+			if (is_hit) {
+				tool_position = node->get_world_position_from_grid_coordinates(node->get_grid_coordinates_from_world_position(ray.position));
+			}
+		} break;
+		case AXIS_X: {
+			Plane p = Plane(Vector3(axis_level * node->mesh_scale, 0.0f, 0.0f), Vector3(1.0, 0.0f, 0.0f));
+
+			Vector3 intersection;
+			if (p.intersects_ray(ray_origin, ray_dir, &intersection)) {
+				tool_position = node->get_world_position_from_grid_coordinates(node->get_grid_coordinates_from_world_position(intersection));
+			}
+		} break;
+
+		case AXIS_Y: {
+			Plane p = Plane(Vector3(0.0f, axis_level * node->mesh_scale, 0.0f), Vector3(0.0, 1.0f, 0.0f));
+
+			Vector3 intersection;
+			if (p.intersects_ray(ray_origin, ray_dir, &intersection)) {
+				tool_position = node->get_world_position_from_grid_coordinates(node->get_grid_coordinates_from_world_position(intersection));
+			}
+		} break;
+
+		case AXIS_Z: {
+			Plane p = Plane(Vector3(0.0f, 0.0f, axis_level * node->mesh_scale), Vector3(0.0, 0.0f, 1.0f));
+
+			Vector3 intersection;
+			if (p.intersects_ray(ray_origin, ray_dir, &intersection)) {
+				tool_position = node->get_world_position_from_grid_coordinates(node->get_grid_coordinates_from_world_position(intersection));
+			}
+		} break;
+	}
+
+	update_gizmo();
+}
+
+void MarchingCubesEditor::update_gizmo() {
+	VisualServer *vs = VisualServer::get_singleton();
+	if (debug_gizmo.is_valid()) {
+		Transform gizmo_transform;
+		gizmo_transform.set_origin(tool_position);
+
+		switch (tool) {
+			case TOOL_SPHERE:
+			case TOOL_RUFFLE: {
+				float radius = radius_slider->get_value();
+				gizmo_transform.set_basis(Basis().scaled(Vector3(radius, radius, radius) * 2.0f));
+			} break;
+
+			case TOOL_CUBE: {
+				float radius = radius_slider->get_value();
+				gizmo_transform.set_basis(Basis().scaled(Vector3(radius, radius, radius) * 2.0f));
+			} break;
+		}
+		vs->instance_set_transform(debug_gizmo, gizmo_transform);
+	}
 }
 
 void MarchingCubesEditor::update_palette_labels(float /*new_value*/) {
@@ -106,24 +183,37 @@ void MarchingCubesEditor::update_palette_labels(float /*new_value*/) {
 }
 
 //------------------------------ GIZMOS -------------------------
-void MarchingCubesEditor::set_gizmo_position(const Vector3& centre, bool is_visible) {
 
-}
-void MarchingCubesEditor::recreate_gizmo() {
-	switch (tool) {
-		case TOOL_NONE: break;
-		case TOOL_SPHERE:
-		case TOOL_RUFFLE:
-			 create_sphere_gizmo(radius_slider->get_value()); break;
-		case TOOL_CUBE:
-			break; //TODO:
-	}
-}
-void MarchingCubesEditor::create_sphere_gizmo(float radius) {
+void MarchingCubesEditor::create_sphere_gizmo() {
+	VisualServer *vs = VisualServer::get_singleton();
+	
+	// Remove existing
+	free_gizmo();
+	
+	// New gizmo
+	SphereShape *shape = memnew(SphereShape);
+	shape->set_radius(1.0f);
 
-}
-void MarchingCubesEditor::create_cube_gizmo(const Vector3& extents) {
+	RID scenario = node->get_world()->get_scenario();
+	RID cube_rid = shape->get_debug_mesh()->get_rid();
 
+	debug_gizmo = vs->instance_create2(cube_rid, scenario);
+}
+
+void MarchingCubesEditor::create_cube_gizmo() {
+	VisualServer *vs = VisualServer::get_singleton();
+
+	// Remove existing
+	free_gizmo();
+
+	// New gizmo
+	BoxShape* shape = memnew(BoxShape);
+	shape->set_extents(Vector3(1.0f, 1.0f, 1.0f));
+
+	RID scenario = node->get_world()->get_scenario();
+	RID cube_rid = shape->get_debug_mesh()->get_rid();	
+
+	debug_gizmo = vs->instance_create2(cube_rid, scenario);
 }
 
 
@@ -173,29 +263,117 @@ void MarchingCubesEditor::ruffle_cube(const Vector3& centre, float radius, float
 	node->generate_mesh();
 }
 
+//------------------------------ MISC -------------------------
+float MarchingCubesEditor::get_max_value(const Axis axis) const {
+	constexpr float DEFAULT_VALUE = 256.0f;
+
+	if (!node) {
+		return DEFAULT_VALUE;
+	}
+
+	switch (axis) {
+		case AXIS_X: return node->terrain_data->get_width();
+		case AXIS_Y: return node->terrain_data->get_height();
+		case AXIS_Z: return node->terrain_data->get_depth();
+
+		default: return DEFAULT_VALUE;
+	}
+}
+
+//------------------------------ PUBLIC -------------------------
+void MarchingCubesEditor::recreate_gizmo() {
+	if (!node) return; // Can't create with no node as can't get world 😢
+
+	switch (tool) {
+		case TOOL_SPHERE:
+		case TOOL_RUFFLE:
+			create_sphere_gizmo();
+			break;
+		case TOOL_CUBE:
+			create_cube_gizmo();
+
+			break; //TODO:
+	}
+}
+
+void MarchingCubesEditor::free_gizmo() {
+	if (debug_gizmo.is_valid()) {
+		VisualServer::get_singleton()->free(debug_gizmo);
+	}
+}
+
 bool MarchingCubesEditor::forward_spatial_input_event(Camera* p_camera, const Ref<InputEvent>& p_event) {
     if (!node) return false;
-	if (tool == TOOL_NONE) return false;
 
 	editor_camera = p_camera;
 
-	Ref<InputEventMouseButton> mouse_button_event = p_event;
-	if (mouse_button_event.is_valid()) {
-		UndoRedo* undo_redo = editor->get_undo_redo();
+	const float max_axislevel_value = get_max_value((Axis)axis);
 
+	Ref<InputEventMouseButton> mouse_button_event = p_event;
+	bool was_passthru = editor_passthru;
+
+	if (mouse_button_event.is_valid() && mouse_button_event->get_button_index() == BUTTON_RIGHT) {
+		editor_passthru = mouse_button_event->is_pressed();
+	}
+	
+	if (editor_passthru || was_passthru) {
+		return false;
+	}
+
+	if (mouse_button_event.is_valid()) {
 		if (mouse_button_event->is_pressed()) {
-			if (mouse_button_down == 0) {
-				// Begin transaction
-				undo_redo->create_action("Editing Marching Cubes");
-				//TODO: add undo and redo events here to support undo properly
+			switch (mouse_button_event->get_button_index()) {
+				case BUTTON_WHEEL_DOWN:
+					if (axis_level > 0.0f) axis_level -= 1.0f;
+					break;
+				case BUTTON_WHEEL_UP:
+					if (axis_level < max_axislevel_value) axis_level += 1.0f;
+					break;
+				case BUTTON_MIDDLE:
+					axis = (axis + 1) % AXIS_Count;
+					update_tool_position();
+					break;
+
+				default:
+					// Not a wheel event
+					if (mouse_button_down == BUTTON_LEFT) {
+						// Begin transaction
+						UndoRedo *undo_redo = editor->get_undo_redo();
+						undo_redo->create_action("Editing Marching Cubes");
+						//TODO: add undo and redo events here to support undo properly
+					}
+					mouse_button_down = mouse_button_event->get_button_index();
+					break;
 			}
-			mouse_button_down = mouse_button_event->get_button_index();
 		} else {
+			UndoRedo *undo_redo = editor->get_undo_redo();
+
 			if (mouse_button_down > 0 && undo_redo->is_committing_action()) {
 				undo_redo->commit_action();
 			}
 			mouse_button_down = 0;
 		}
+	}
+
+	Ref<InputEventKey> key_event = p_event;
+	if (key_event.is_valid() && key_event->is_pressed() && !key_event->is_echo()) {
+		if (key_event->get_scancode() == KEY_MINUS && axis_level > 0.0f) {
+			axis_level -= 1.0f;
+		} else if (key_event->get_scancode() == KEY_PLUS && axis_level < max_axislevel_value) {
+			axis_level += 1.0f;
+		} else if (key_event->get_scancode() == KEY_SPACE) {
+			axis = (axis + 1) % AXIS_Count;
+			update_tool_position();
+		}
+	}
+	if (key_event.is_valid() && key_event->get_scancode() == KEY_SHIFT) {
+		shift = key_event->is_pressed();
+	}
+
+	Ref<InputEventMouseMotion> mouse_move_event = p_event;
+	if (mouse_move_event.is_valid()) {
+		update_tool_position();
+		update_status();
 	}
 
 	return true;
@@ -226,23 +404,17 @@ MarchingCubesEditor::MarchingCubesEditor(EditorNode *p_editor) {
 	toolbar->add_child(memnew(VSeparator));
 
 	// Tools
-	tool_none = memnew(ToolButton);
-	tool_none->set_shortcut(ED_SHORTCUT("marching_cubes_editor/tool_none", TTR("Camera Tool"), KEY_Z));
-	tool_none->connect("pressed", this, "tool_select", make_binds(TOOL_NONE));
-	tool_none->set_toggle_mode(true);
-	toolbar->add_child(tool_none);
+	tool_cube = memnew(ToolButton);
+	tool_cube->set_shortcut(ED_SHORTCUT("marching_cubes_editor/tool_cube", TTR("Cube Tool"), KEY_C));
+	tool_cube->connect("pressed", this, "tool_select", make_binds(TOOL_CUBE));
+	tool_cube->set_toggle_mode(true);
+	toolbar->add_child(tool_cube);
 
 	tool_sphere = memnew(ToolButton);
 	tool_sphere->set_shortcut(ED_SHORTCUT("marching_cubes_editor/tool_sphere", TTR("Sphere Tool"), KEY_X));
 	tool_sphere->connect("pressed", this, "tool_select", make_binds(TOOL_SPHERE));
 	tool_sphere->set_toggle_mode(true);
 	toolbar->add_child(tool_sphere);
-
-	tool_cube = memnew(ToolButton);
-	tool_cube->set_shortcut(ED_SHORTCUT("marching_cubes_editor/tool_cube", TTR("Cube Tool"), KEY_C));
-	tool_cube->connect("pressed", this, "tool_select", make_binds(TOOL_CUBE));
-	tool_cube->set_toggle_mode(true);
-	toolbar->add_child(tool_cube);
 
 	tool_ruffle = memnew(ToolButton);
 	tool_ruffle->set_shortcut(ED_SHORTCUT("marching_cubes_editor/tool_ruffle", TTR("Ruffle Tool"), KEY_V));
@@ -253,6 +425,9 @@ MarchingCubesEditor::MarchingCubesEditor(EditorNode *p_editor) {
 	toolbar->hide();
 
 	// Set up palette (self)
+	status = memnew(Label);
+	add_child(status);
+
 	HBoxContainer* radius_box = memnew(HBoxContainer);
 	radius_box->set_alignment(AlignMode::ALIGN_BEGIN);
 	radius_box->set_h_size_flags(SIZE_EXPAND_FILL);
@@ -298,6 +473,8 @@ MarchingCubesEditor::MarchingCubesEditor(EditorNode *p_editor) {
 	add_child(is_additive);
 
 	// Final setup
-	tool_select(TOOL_NONE);
+	update_status();
+	tool_select(TOOL_CUBE);
 	update_palette_labels();
 }
+#endif // TOOLS_ENABLED

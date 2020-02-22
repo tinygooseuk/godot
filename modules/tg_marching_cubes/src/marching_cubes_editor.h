@@ -9,6 +9,7 @@ class CheckBox;
 class SpinBox;
 class HSlider;
 
+#if TOOLS_ENABLED
 class MarchingCubesEditor : public VBoxContainer {
 	GDCLASS(MarchingCubesEditor, VBoxContainer);
 
@@ -24,12 +25,22 @@ class MarchingCubesEditor : public VBoxContainer {
 	};
 
 	enum Tool {
-		TOOL_NONE,
-		TOOL_SPHERE,
 		TOOL_CUBE,
-		TOOL_RUFFLE
+		TOOL_SPHERE,
+		TOOL_RUFFLE,
 	};
-	int tool = TOOL_NONE;
+	int tool = TOOL_CUBE;
+
+	enum Axis {
+		AXIS_NONE,
+		AXIS_X,
+		AXIS_Y,
+		AXIS_Z,
+
+		AXIS_Count,
+	};
+	int axis = AXIS_NONE;
+	float axis_level = 0.0f;
 
 	// Lifecycle
 	static void _bind_methods();
@@ -40,15 +51,19 @@ class MarchingCubesEditor : public VBoxContainer {
 	// Actions
 	void menu_option(int p_option);
 	void tool_select(int p_tool);	
+	void update_status();
+	void update_tool_position();
+	void update_gizmo();
 	void update_palette_labels(float new_value = 0.0f);
 
 	// Toolbar Button
-	ToolButton* tool_none;
-	ToolButton* tool_sphere;
 	ToolButton* tool_cube;
+	ToolButton *tool_sphere;
 	ToolButton* tool_ruffle;
 
 	// Palette widgets
+	Label* status;
+
 	CheckBox* is_additive;
 	Label* power_label;
 	HSlider* power_slider;
@@ -57,23 +72,32 @@ class MarchingCubesEditor : public VBoxContainer {
 
 	// State
 	Camera* editor_camera = nullptr;
+	Vector3 tool_position;
 	int mouse_button_down = 0;
+	bool shift = false;
+	bool editor_passthru = false;
+	RID debug_gizmo;
 
 	// Gizmo
-	void set_gizmo_position(const Vector3& centre, bool is_visible);
-	void recreate_gizmo();
-	void create_sphere_gizmo(float radius);
-	void create_cube_gizmo(const Vector3& extents);
+	void create_sphere_gizmo();
+	void create_cube_gizmo();
 
 	// Tools
 	void brush_cube(const Vector3& centre, float radius, float power, bool additive = true);
 	void ruffle_cube(const Vector3& centre, float radius, float power);
 
+	// Misc
+	float get_max_value(Axis axis) const;
+
 public:
 	HBoxContainer *toolbar = nullptr;
+
+	void recreate_gizmo();
+	void free_gizmo();
 
 	bool forward_spatial_input_event(Camera* p_camera, const Ref<InputEvent>& p_event);
 	void edit(MarchingCubesTerrain* p_marching_cubes);
 
 	MarchingCubesEditor(EditorNode* p_editor);
 };
+#endif // TOOLS_ENABLED

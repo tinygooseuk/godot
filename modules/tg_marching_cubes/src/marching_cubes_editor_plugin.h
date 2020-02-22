@@ -6,6 +6,7 @@
 #include "marching_cubes_terrain.h"
 #include "marching_cubes_editor.h"
 
+#if TOOLS_ENABLED
 class MarchingCubesEditorPlugin : public EditorPlugin {
 
 	GDCLASS(MarchingCubesEditorPlugin, EditorPlugin);
@@ -27,3 +28,4 @@ public:
 	MarchingCubesEditorPlugin(EditorNode* p_node);
 	~MarchingCubesEditorPlugin();
 };
+#endif // TOOLS_ENABLED

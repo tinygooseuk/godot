@@ -8,6 +8,7 @@
 #include "core/math/geometry.h"
 #include "core/os/keyboard.h"
 
+#if TOOLS_ENABLED
 void MarchingCubesEditorPlugin::_notification(int p_what) {
 
 	if (p_what == EditorSettings::NOTIFICATION_EDITOR_SETTINGS_CHANGED) {
@@ -39,12 +40,14 @@ void MarchingCubesEditorPlugin::make_visible(bool p_visible) {
 		marching_cubes_editor->show();
 		marching_cubes_editor->toolbar->show();
 		marching_cubes_editor->set_process(true);
+		marching_cubes_editor->recreate_gizmo();
 	} else {
 
 		marching_cubes_editor->toolbar->hide();
 		marching_cubes_editor->hide();
 		marching_cubes_editor->edit(NULL);
 		marching_cubes_editor->set_process(false);
+		marching_cubes_editor->free_gizmo();
 	}
 }
 
@@ -69,3 +72,4 @@ MarchingCubesEditorPlugin::MarchingCubesEditorPlugin(EditorNode *p_node) {
 
 MarchingCubesEditorPlugin::~MarchingCubesEditorPlugin() {
 }
+#endif // TOOLS_ENABLED
