@@ -26,7 +26,7 @@ def show_upstream_diff():
     return run("git diff --name-only upstream/3.2")
 
 def merge_upstream_and_push():
-    if not run("git merge upstream 3.2"):
+    if not run("git pull upstream 3.2"):
         return False
 
     return run("git push origin 3.2")
