@@ -349,7 +349,7 @@ bool MarchingCubesEditor::forward_spatial_input_event(Camera* p_camera, const Re
 void MarchingCubesEditor::edit(MarchingCubesTerrain* p_marching_cubes) {
 	node = p_marching_cubes;
 	
-	if (node->terrain_data.is_null()) {
+	if (node && node->terrain_data.is_null()) {
 		node->set_terrain_data(memnew(MarchingCubesData));
 	}
 }
