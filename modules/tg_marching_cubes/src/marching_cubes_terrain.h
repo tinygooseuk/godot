@@ -37,6 +37,7 @@ private:
 	// Exports
 	DECLARE_PROPERTY(float, mesh_scale, 1.0f);
 	DECLARE_PROPERTY(bool, generate_collision, true);
+	DECLARE_PROPERTY(bool, is_destructible, true);
 
 	DECLARE_PROPERTY(Ref<MarchingCubesData>, terrain_data, {});
 	

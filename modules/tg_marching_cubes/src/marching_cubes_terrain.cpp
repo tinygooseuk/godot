@@ -23,7 +23,8 @@ void MarchingCubesTerrain::_bind_methods() {
 	IMPLEMENT_PROPERTY_RESOURCE(MarchingCubesTerrain, Material, sides_material);
 	
 	IMPLEMENT_PROPERTY(MarchingCubesTerrain, REAL, mesh_scale);
-	IMPLEMENT_PROPERTY(MarchingCubesTerrain, BOOL, generate_collision);
+	IMPLEMENT_PROPERTY(MarchingCubesTerrain, BOOL, generate_collision);	
+	IMPLEMENT_PROPERTY(MarchingCubesTerrain, BOOL, is_destructible);
 
 	ClassDB::bind_method(D_METHOD("get_value_at", "position"), &MarchingCubesTerrain::get_value_at);
 	ClassDB::bind_method(D_METHOD("set_value_at", "position", "value"), &MarchingCubesTerrain::set_value_at);

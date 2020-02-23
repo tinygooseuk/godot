@@ -59,7 +59,7 @@ class MarchingCubesEditor : public VBoxContainer {
 	// Toolbar Button
 	ToolButton* tool_cube;
 	ToolButton *tool_sphere;
-	ToolButton* tool_ruffle;
+	ToolButton* tool_ruffle;	
 
 	// Palette widgets
 	Label* status;
