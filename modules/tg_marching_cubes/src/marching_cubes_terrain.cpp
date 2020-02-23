@@ -27,9 +27,14 @@ void MarchingCubesTerrain::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("get_value_at", "position"), &MarchingCubesTerrain::get_value_at);
 	ClassDB::bind_method(D_METHOD("set_value_at", "position", "value"), &MarchingCubesTerrain::set_value_at);
+	
+	ClassDB::bind_method(D_METHOD("brush_cube", "centre", "radius", "power", "additive"), &MarchingCubesTerrain::brush_cube);
+	ClassDB::bind_method(D_METHOD("ruffle_cube", "centre", "radius", "power"), &MarchingCubesTerrain::ruffle_cube);
+
 	ClassDB::bind_method(D_METHOD("are_grid_coordinates_valid", "grid_position"), &MarchingCubesTerrain::are_grid_coordinates_valid);
 	ClassDB::bind_method(D_METHOD("get_grid_coordinates_from_world_position", "world_position"), &MarchingCubesTerrain::get_grid_coordinates_from_world_position);
 	ClassDB::bind_method(D_METHOD("get_world_position_from_grid_coordinates", "grid_position"), &MarchingCubesTerrain::get_world_position_from_grid_coordinates);
+	
 	ClassDB::bind_method(D_METHOD("generate_mesh"), &MarchingCubesTerrain::generate_mesh);
 	ClassDB::bind_method(D_METHOD("generate_collision_shape"), &MarchingCubesTerrain::generate_collision_shape);
 }
@@ -81,6 +86,42 @@ void MarchingCubesTerrain::set_value_at(const Vector3& p_position, float p_value
 
 	if (index != -1) {
 		terrain_data->data.write()[index] = p_value;
+	}
+}
+
+
+void MarchingCubesTerrain::brush_cube(const Vector3 &centre, float radius, float power, bool additive) {
+	int half_range = (int)Math::ceil(radius / mesh_scale);
+
+	for (int x = -half_range; x <= +half_range; x++) {
+		for (int y = -half_range; y <= +half_range; y++) {
+			for (int z = -half_range; z <= +half_range; z++) {
+				Vector3 offset = Vector3(x, y, z) * mesh_scale;
+				Vector3 coord = get_grid_coordinates_from_world_position(centre + offset);
+
+				if (are_grid_coordinates_valid(coord)) {
+					float currentValue = additive ? get_value_at(coord) : 0.0f;
+					set_value_at(coord, currentValue + power);
+				}
+			}
+		}
+	}
+}
+void MarchingCubesTerrain::ruffle_cube(const Vector3 &centre, float radius, float power) {
+	int half_range = (int)Math::ceil(radius / mesh_scale);
+
+	for (int x = -half_range; x <= +half_range; x++) {
+		for (int y = -half_range; y <= +half_range; y++) {
+			for (int z = -half_range; z <= +half_range; z++) {
+				Vector3 offset = Vector3(x, y, z) * mesh_scale;
+				Vector3 coord = get_grid_coordinates_from_world_position(centre + offset);
+
+				if (are_grid_coordinates_valid(coord)) {
+					float random_power = Math::random(-power, +power);
+					set_value_at(coord, get_value_at(coord) + random_power);
+				}
+			}
+		}
 	}
 }
 

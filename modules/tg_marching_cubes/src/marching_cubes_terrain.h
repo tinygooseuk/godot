@@ -22,6 +22,10 @@ public:
 	float get_value_at(const Vector3& p_position) const;
 	void set_value_at(const Vector3& p_position, float p_value);
 
+	// Tools
+	void brush_cube(const Vector3 &centre, float radius, float power, bool additive = true);
+	void ruffle_cube(const Vector3 &centre, float radius, float power);
+
 	bool are_grid_coordinates_valid(const Vector3& p_coords) const;
 
 	Vector3 get_grid_coordinates_from_world_position(Vector3 p_world_pos) const;

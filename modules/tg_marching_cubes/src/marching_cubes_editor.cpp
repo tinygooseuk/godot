@@ -221,45 +221,13 @@ void MarchingCubesEditor::create_cube_gizmo() {
 void MarchingCubesEditor::brush_cube(const Vector3& centre, float radius, float power, bool additive) {
 	ERR_FAIL_COND(!node);
 
-	int half_range = (int)Math::ceil(radius / node->get_mesh_scale());
-
-	for (int x = -half_range; x <= +half_range; x++) {
-		for (int y = -half_range; y <= +half_range; y++) {
-			for (int z = -half_range; z <= +half_range; z++) {
-				Vector3 offset = Vector3(x, y, z) * node->get_mesh_scale();
-				Vector3 coord = node->get_grid_coordinates_from_world_position(centre + offset);	
-				
-				if (node->are_grid_coordinates_valid(coord))
-				{
-					float currentValue = additive ? node->get_value_at(coord) : 0.0f;
-					node->set_value_at(coord, currentValue + power);
-				}
-			}	
-		}	
-	}
-	
+	node->brush_cube(centre, radius, power, additive);
 	node->generate_mesh();
 }
 void MarchingCubesEditor::ruffle_cube(const Vector3& centre, float radius, float power) {
 	ERR_FAIL_COND(!node);
 
-	int half_range = (int)Math::ceil(radius / node->get_mesh_scale());
-
-	for (int x = -half_range; x <= +half_range; x++) {
-		for (int y = -half_range; y <= +half_range; y++) {
-			for (int z = -half_range; z <= +half_range; z++) {
-				Vector3 offset = Vector3(x, y, z) * node->get_mesh_scale();
-				Vector3 coord = node->get_grid_coordinates_from_world_position(centre + offset);	
-				
-				if (node->are_grid_coordinates_valid(coord))
-				{
-					float random_power = Math::random(-power, +power);
-					node->set_value_at(coord, node->get_value_at(coord) + random_power);
-				}
-			}	
-		}	
-	}
-	
+	node->ruffle_cube(centre, radius, power);	
 	node->generate_mesh();
 }
 
@@ -380,6 +348,10 @@ bool MarchingCubesEditor::forward_spatial_input_event(Camera* p_camera, const Re
 }
 void MarchingCubesEditor::edit(MarchingCubesTerrain* p_marching_cubes) {
 	node = p_marching_cubes;
+	
+	if (node->terrain_data.is_null()) {
+		node->set_terrain_data(memnew(MarchingCubesData));
+	}
 }
 
 MarchingCubesEditor::MarchingCubesEditor(EditorNode *p_editor) {
