@@ -101,13 +101,43 @@ void MarchingCubesTerrain::brush_cube(const Vector3 &centre, float radius, float
 				Vector3 coord = get_grid_coordinates_from_world_position(centre + offset);
 
 				if (are_grid_coordinates_valid(coord)) {
-					float currentValue = additive ? get_value_at(coord) : 0.0f;
-					set_value_at(coord, currentValue + power);
+					float currentValue = get_value_at(coord);
+					float targetValue = power;
+					if (additive) {
+						targetValue += currentValue;
+					}
+
+					set_value_at(coord, targetValue);
 				}
 			}
 		}
 	}
 }
+
+void MarchingCubesTerrain::brush_sphere(const Vector3 &centre, float radius, float power, bool additive) {
+	int half_range = (int)Math::ceil(radius / mesh_scale);
+
+	for (int x = -half_range; x <= +half_range; x++) {
+		for (int y = -half_range; y <= +half_range; y++) {
+			for (int z = -half_range; z <= +half_range; z++) {
+				Vector3 offset = Vector3(x, y, z) * mesh_scale;
+				Vector3 coord = get_grid_coordinates_from_world_position(centre + offset);
+
+				if (are_grid_coordinates_valid(coord)) {
+					float currentValue = get_value_at(coord);
+					float targetValue = power;
+					if (additive) {
+						targetValue += currentValue;
+					}
+					
+					float alpha = offset.length() / radius;
+					set_value_at(coord, Math::lerp(currentValue, targetValue, alpha));
+				}
+			}
+		}
+	}
+}
+
 void MarchingCubesTerrain::ruffle_cube(const Vector3 &centre, float radius, float power) {
 	int half_range = (int)Math::ceil(radius / mesh_scale);
 

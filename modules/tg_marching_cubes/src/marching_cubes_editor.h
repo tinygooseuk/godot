@@ -84,6 +84,7 @@ class MarchingCubesEditor : public VBoxContainer {
 
 	// Tools
 	void brush_cube(const Vector3& centre, float radius, float power, bool additive = true);
+	void brush_sphere(const Vector3& centre, float radius, float power, bool additive = true);
 	void ruffle_cube(const Vector3& centre, float radius, float power);
 
 	// Misc

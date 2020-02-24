@@ -224,6 +224,12 @@ void MarchingCubesEditor::brush_cube(const Vector3& centre, float radius, float 
 	node->brush_cube(centre, radius, power, additive);
 	node->generate_mesh();
 }
+void MarchingCubesEditor::brush_sphere(const Vector3& centre, float radius, float power, bool additive) {
+	ERR_FAIL_COND(!node);
+
+	node->brush_sphere(centre, radius, power, additive);
+	node->generate_mesh();
+}
 void MarchingCubesEditor::ruffle_cube(const Vector3& centre, float radius, float power) {
 	ERR_FAIL_COND(!node);
 
