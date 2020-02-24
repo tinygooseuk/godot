@@ -267,6 +267,7 @@ void MarchingCubesEditor::recreate_gizmo() {
 void MarchingCubesEditor::free_gizmo() {
 	if (debug_gizmo.is_valid()) {
 		VisualServer::get_singleton()->free(debug_gizmo);
+		debug_gizmo = {};
 	}
 }
 
