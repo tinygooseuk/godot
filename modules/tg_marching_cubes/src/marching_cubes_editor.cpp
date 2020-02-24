@@ -45,7 +45,13 @@ void MarchingCubesEditor::process(float delta) {
 					brush_cube(tool_position, radius, shift ? mouse_button_down : -1.0f, false);
 				}
 				break;
-			case TOOL_SPHERE: break; //TODO:
+			case TOOL_SPHERE:
+				if (use_additive) {
+					brush_sphere(tool_position, radius, shift ? +power : -power, true);
+				} else {
+					brush_sphere(tool_position, radius, shift ? mouse_button_down : -1.0f, false);
+				}
+				break;
 			case TOOL_RUFFLE:
 				ruffle_cube(tool_position, radius, power);
 		}
