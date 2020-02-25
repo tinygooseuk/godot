@@ -24,7 +24,9 @@ void MarchingCubesTerrain::_bind_methods() {
 	
 	IMPLEMENT_PROPERTY(MarchingCubesTerrain, REAL, mesh_scale);
 	IMPLEMENT_PROPERTY(MarchingCubesTerrain, BOOL, generate_collision);	
+#if TOOLS_ENABLED
 	IMPLEMENT_PROPERTY(MarchingCubesTerrain, BOOL, debug_mode);	
+#endif
 	IMPLEMENT_PROPERTY(MarchingCubesTerrain, BOOL, is_destructible);
 
 	ClassDB::bind_method(D_METHOD("get_value_at", "position"), &MarchingCubesTerrain::get_value_at);
@@ -46,8 +48,7 @@ void MarchingCubesTerrain::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_ENTER_TREE:
 			_ready();
-			//set_process(!Engine::get_singleton()->is_editor_hint()); 
-			set_process(false);
+			set_process(Engine::get_singleton()->is_editor_hint()); 
 			break;
 		default:
 			break;
@@ -66,7 +67,10 @@ void MarchingCubesTerrain::_ready() {
 }
 
 void MarchingCubesTerrain::_process(const float delta) {
-
+	if (old_debug_mode != debug_mode) {
+		old_debug_mode = debug_mode;
+		generate_mesh();
+	}
 }
 
 String MarchingCubesTerrain::get_configuration_warning() const {
@@ -311,34 +315,48 @@ void MarchingCubesTerrain::generate_debug_mesh() {
 		for (int x = 0; x < terrain_data->width; x++) {
 			for (int y = 0; y < terrain_data->height; y++) {
 				for (int z = 0; z < terrain_data->depth; z++) {
-					Vector3 coord = Vector3((float)x, (float)y, (float)z);
-					int index = coord_to_index(coord);
-					float value = data_read[index];
+					const Vector3 coord = Vector3((float)x, (float)y, (float)z);
+					const int index = coord_to_index(coord);
+					const float value = data_read[index];
 				
 					auto add_cube = [&debug, &data_read](const Vector3 &centre, float half_extents, const Color &color){
-						Vector3 FBL = centre + Vector3(-half_extents, -half_extents, +half_extents);
-						Vector3 FBR = centre + Vector3(+half_extents, -half_extents, +half_extents);
-						Vector3 FTL = centre + Vector3(-half_extents, +half_extents, +half_extents);
-						Vector3 FTR = centre + Vector3(+half_extents, +half_extents, +half_extents);
-						Vector3 RBL = centre + Vector3(-half_extents, -half_extents, -half_extents);
-						Vector3 RBR = centre + Vector3(+half_extents, -half_extents, -half_extents);
-						Vector3 RTL = centre + Vector3(-half_extents, +half_extents, -half_extents);
-						Vector3 RTR = centre + Vector3(+half_extents, +half_extents, -half_extents);
+						const Vector3 FBL = centre + Vector3(-half_extents, -half_extents, +half_extents);
+						const Vector3 FBR = centre + Vector3(+half_extents, -half_extents, +half_extents);
+						const Vector3 FTL = centre + Vector3(-half_extents, +half_extents, +half_extents);
+						const Vector3 FTR = centre + Vector3(+half_extents, +half_extents, +half_extents);
+						const Vector3 RBL = centre + Vector3(-half_extents, -half_extents, -half_extents);
+						const Vector3 RBR = centre + Vector3(+half_extents, -half_extents, -half_extents);
+						const Vector3 RTL = centre + Vector3(-half_extents, +half_extents, -half_extents);
+						const Vector3 RTR = centre + Vector3(+half_extents, +half_extents, -half_extents);
 
 						debug.add_color(color);
 
-						// FRONT
-						debug.add_vertex(FBL); debug.add_vertex(FBR); debug.add_vertex(FTR); 
-						debug.add_vertex(FBL); debug.add_vertex(FTR); debug.add_vertex(FTL); 
-
 						// BACK
-						debug.add_vertex(RBR); debug.add_vertex(RBL); debug.add_vertex(RTL);
-						debug.add_vertex(RBL); debug.add_vertex(RTL); debug.add_vertex(RTR);
+						debug.add_vertex(RBL); debug.add_vertex(RBR); debug.add_vertex(RTR); 
+						debug.add_vertex(RBL); debug.add_vertex(RTR); debug.add_vertex(RTL); 
 
-						//TODO: other faces
+						// FRONT
+						debug.add_vertex(FBR); debug.add_vertex(FBL); debug.add_vertex(FTL);
+						debug.add_vertex(FBR); debug.add_vertex(FTL); debug.add_vertex(FTR);
+
+						// LEFT
+						debug.add_vertex(FBL); debug.add_vertex(RBL); debug.add_vertex(RTL);
+						debug.add_vertex(FBL); debug.add_vertex(RTL); debug.add_vertex(FTL);
+
+						// RIGHT
+						debug.add_vertex(RBR); debug.add_vertex(FBR); debug.add_vertex(FTR);
+						debug.add_vertex(RBR); debug.add_vertex(FTR); debug.add_vertex(RTR);
+
+						// BOTTOM
+						debug.add_vertex(FBL); debug.add_vertex(FBR); debug.add_vertex(RBR);
+						debug.add_vertex(FBL); debug.add_vertex(RBR); debug.add_vertex(RBL);
+
+						// TOP
+						debug.add_vertex(RTL); debug.add_vertex(RTR); debug.add_vertex(FTR);
+						debug.add_vertex(RTL); debug.add_vertex(FTR); debug.add_vertex(FTL);
 					};
 
-					add_cube(get_world_position_from_grid_coordinates(coord), Math::absf(value) * 0.5f, value > 0.0f ? Colors::green : Colors::red);
+					add_cube(coord * mesh_scale, Math::absf(value) * 0.5f, value > 0.0f ? Color(0.0f, 1.0f, 0.0f) : Color(1.0f, 0.0f, 0.0f));
 				}	
 			}	
 		}
@@ -348,7 +366,9 @@ void MarchingCubesTerrain::generate_debug_mesh() {
 	debug.commit(new_mesh);
 
 	// Set materials (forwards!)
-	new_mesh->surface_set_material(0, tops_material);
+	SpatialMaterial *spat_mat = memnew(SpatialMaterial);
+	spat_mat->set_flag(SpatialMaterial::FLAG_ALBEDO_FROM_VERTEX_COLOR, true);
+	new_mesh->surface_set_material(0, spat_mat);
 }
 
 int MarchingCubesTerrain::coord_to_index(const Vector3& p_position) const {
