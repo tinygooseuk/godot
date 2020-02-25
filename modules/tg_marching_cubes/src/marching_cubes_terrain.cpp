@@ -24,12 +24,14 @@ void MarchingCubesTerrain::_bind_methods() {
 	
 	IMPLEMENT_PROPERTY(MarchingCubesTerrain, REAL, mesh_scale);
 	IMPLEMENT_PROPERTY(MarchingCubesTerrain, BOOL, generate_collision);	
+	IMPLEMENT_PROPERTY(MarchingCubesTerrain, BOOL, debug_mode);	
 	IMPLEMENT_PROPERTY(MarchingCubesTerrain, BOOL, is_destructible);
 
 	ClassDB::bind_method(D_METHOD("get_value_at", "position"), &MarchingCubesTerrain::get_value_at);
 	ClassDB::bind_method(D_METHOD("set_value_at", "position", "value"), &MarchingCubesTerrain::set_value_at);
 	
 	ClassDB::bind_method(D_METHOD("brush_cube", "centre", "radius", "power", "additive"), &MarchingCubesTerrain::brush_cube);
+	ClassDB::bind_method(D_METHOD("brush_sphere", "centre", "radius", "power", "additive"), &MarchingCubesTerrain::brush_sphere);
 	ClassDB::bind_method(D_METHOD("ruffle_cube", "centre", "radius", "power"), &MarchingCubesTerrain::ruffle_cube);
 
 	ClassDB::bind_method(D_METHOD("are_grid_coordinates_valid", "grid_position"), &MarchingCubesTerrain::are_grid_coordinates_valid);
@@ -124,14 +126,14 @@ void MarchingCubesTerrain::brush_sphere(const Vector3 &centre, float radius, flo
 				Vector3 coord = get_grid_coordinates_from_world_position(centre + offset);
 
 				if (are_grid_coordinates_valid(coord)) {
-					float currentValue = get_value_at(coord);
-					float targetValue = power;
+					float current_value = get_value_at(coord);
+					float target_value = power;
 					if (additive) {
-						targetValue += currentValue;
+						target_value += current_value;
 					}
 					
 					float alpha = offset.length() / radius;
-					set_value_at(coord, Math::lerp(currentValue, targetValue, alpha));
+					set_value_at(coord, Math::lerp(current_value, target_value, alpha));
 				}
 			}
 		}
@@ -148,8 +150,11 @@ void MarchingCubesTerrain::ruffle_cube(const Vector3 &centre, float radius, floa
 				Vector3 coord = get_grid_coordinates_from_world_position(centre + offset);
 
 				if (are_grid_coordinates_valid(coord)) {
-					float random_power = Math::random(-power, +power);
-					set_value_at(coord, get_value_at(coord) + random_power);
+					float current_value = get_value_at(coord);
+					float target_value = current_value + Math::random(-power, +power);
+
+					float alpha = offset.length() / radius;
+					set_value_at(coord, Math::lerp(current_value, target_value, alpha));
 				}
 			}
 		}
@@ -187,6 +192,10 @@ Vector3 MarchingCubesTerrain::get_world_position_from_grid_coordinates(Vector3 p
 
 void MarchingCubesTerrain::generate_mesh() {
 	MC_ERR_FAIL_COND(terrain_data.is_null() || terrain_data->data.empty());
+
+	if (debug_mode) {
+		return generate_debug_mesh();
+	}
 
 	auto data_read = terrain_data->data.read();
 	
@@ -278,6 +287,68 @@ void MarchingCubesTerrain::generate_mesh() {
 			}
 		}
 	}
+}
+
+void MarchingCubesTerrain::generate_debug_mesh() {
+	MC_ERR_FAIL_COND(terrain_data.is_null() || terrain_data->data.empty());
+
+	auto data_read = terrain_data->data.read();
+	
+	Ref<ArrayMesh> new_mesh = get_mesh();
+	
+	if (new_mesh.is_null()) {
+		new_mesh = Ref<ArrayMesh>(memnew(ArrayMesh));
+		set_mesh(new_mesh);
+	} else {
+		while (new_mesh->get_surface_count() > 0) {
+			new_mesh->surface_remove(0);
+		}
+	}
+
+	SurfaceTool debug;
+	debug.begin(Mesh::PrimitiveType::PRIMITIVE_TRIANGLES);
+	{
+		for (int x = 0; x < terrain_data->width; x++) {
+			for (int y = 0; y < terrain_data->height; y++) {
+				for (int z = 0; z < terrain_data->depth; z++) {
+					Vector3 coord = Vector3((float)x, (float)y, (float)z);
+					int index = coord_to_index(coord);
+					float value = data_read[index];
+				
+					auto add_cube = [&debug, &data_read](const Vector3 &centre, float half_extents, const Color &color){
+						Vector3 FBL = centre + Vector3(-half_extents, -half_extents, +half_extents);
+						Vector3 FBR = centre + Vector3(+half_extents, -half_extents, +half_extents);
+						Vector3 FTL = centre + Vector3(-half_extents, +half_extents, +half_extents);
+						Vector3 FTR = centre + Vector3(+half_extents, +half_extents, +half_extents);
+						Vector3 RBL = centre + Vector3(-half_extents, -half_extents, -half_extents);
+						Vector3 RBR = centre + Vector3(+half_extents, -half_extents, -half_extents);
+						Vector3 RTL = centre + Vector3(-half_extents, +half_extents, -half_extents);
+						Vector3 RTR = centre + Vector3(+half_extents, +half_extents, -half_extents);
+
+						debug.add_color(color);
+
+						// FRONT
+						debug.add_vertex(FBL); debug.add_vertex(FBR); debug.add_vertex(FTR); 
+						debug.add_vertex(FBL); debug.add_vertex(FTR); debug.add_vertex(FTL); 
+
+						// BACK
+						debug.add_vertex(RBR); debug.add_vertex(RBL); debug.add_vertex(RTL);
+						debug.add_vertex(RBL); debug.add_vertex(RTL); debug.add_vertex(RTR);
+
+						//TODO: other faces
+					};
+
+					add_cube(get_world_position_from_grid_coordinates(coord), Math::absf(value) * 0.5f, value > 0.0f ? Colors::green : Colors::red);
+				}	
+			}	
+		}
+	}
+
+	// Commit surfaces to mesh (backwards!)
+	debug.commit(new_mesh);
+
+	// Set materials (forwards!)
+	new_mesh->surface_set_material(0, tops_material);
 }
 
 int MarchingCubesTerrain::coord_to_index(const Vector3& p_position) const {

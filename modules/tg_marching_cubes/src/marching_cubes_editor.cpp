@@ -9,6 +9,7 @@
 #include "scene/3d/camera.h"
 #include "scene/resources/box_shape.h"
 #include "scene/resources/sphere_shape.h"
+#include "scene/resources/primitive_meshes.h"
 
 #if TOOLS_ENABLED
 

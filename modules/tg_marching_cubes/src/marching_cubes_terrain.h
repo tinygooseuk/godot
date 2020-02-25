@@ -33,12 +33,14 @@ public:
 	Vector3 get_world_position_from_grid_coordinates(Vector3 p_coords) const;
 
 	void generate_mesh();
+	void generate_debug_mesh();
 
 private:
 	// Exports
 	DECLARE_PROPERTY(float, mesh_scale, 1.0f);
 	DECLARE_PROPERTY(bool, generate_collision, true);
-	DECLARE_PROPERTY(bool, is_destructible, true);
+	DECLARE_PROPERTY(bool, debug_mode, false);
+	DECLARE_PROPERTY(bool, is_destructible, false);
 
 	DECLARE_PROPERTY(Ref<MarchingCubesData>, terrain_data, {});
 	
