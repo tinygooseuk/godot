@@ -25,6 +25,7 @@ public:
 	// Tools
 	void brush_cube(const Vector3 &centre, float radius, float power, bool additive = true);
 	void brush_sphere(const Vector3 &centre, float radius, float power, bool additive = true);
+	void flatten_cube(const Vector3 &centre, float radius, float power);
 	void ruffle_cube(const Vector3 &centre, float radius, float power);
 
 	bool are_grid_coordinates_valid(const Vector3& p_coords) const;
