@@ -21,6 +21,7 @@ class MarchingCubesEditor : public VBoxContainer {
 	enum Menu {
 		MENU_OPTION_REGENERATE_MESH,
 		MENU_OPTION_RANDOMISE_MESH,
+		MENU_OPTION_INVERT_DATA,
 		MENU_OPTION_CLEAR_MESH,
 	};
 

@@ -47,9 +47,12 @@ void MarchingCubesTerrain::_bind_methods() {
 void MarchingCubesTerrain::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_ENTER_TREE:
-			_ready();
+			ready();
 			set_process(Engine::get_singleton()->is_editor_hint()); 
 			break;
+
+		case NOTIFICATION_PROCESS:
+			process(get_process_delta_time());
 		default:
 			break;
 	}
@@ -62,11 +65,11 @@ void MarchingCubesTerrain::_init() {
 	}
 }
 
-void MarchingCubesTerrain::_ready() {
-
+void MarchingCubesTerrain::ready() {
+	
 }
 
-void MarchingCubesTerrain::_process(const float delta) {
+void MarchingCubesTerrain::process(const float delta) {
 	if (old_debug_mode != debug_mode) {
 		old_debug_mode = debug_mode;
 		generate_mesh();
@@ -92,7 +95,7 @@ void MarchingCubesTerrain::set_value_at(const Vector3& p_position, float p_value
 	const int index = coord_to_index(p_position);
 
 	if (index != -1) {
-		terrain_data->data.write()[index] = p_value;
+		terrain_data->data.write()[index] = clamp(p_value, -1.0f, +1.0f);
 	}
 }
 
@@ -449,7 +452,7 @@ void MarchingCubesTerrain::reallocate_memory() {
 void MarchingCubesTerrain::fill_with_noise() {
 	MC_ERR_FAIL_COND(terrain_data.is_null());
 
-	int size = terrain_data->width * terrain_data->height * terrain_data->depth;
+	const int size = terrain_data->width * terrain_data->height * terrain_data->depth;
 	terrain_data->data.resize(size);
 	
 	auto data_write = terrain_data->data.write(); 
@@ -464,5 +467,16 @@ void MarchingCubesTerrain::fill_with_noise() {
 		Vector3 coord = index_to_coord(i);
 
 		data_write[i] = noiser.get_noise_3dv(coord) + 0.2f; // bias the noise a little
+	}
+}
+
+void MarchingCubesTerrain::invert_data_sign() {
+	MC_ERR_FAIL_COND(terrain_data.is_null());
+
+	const int size = terrain_data->width * terrain_data->height * terrain_data->depth;
+	auto data_write = terrain_data->data.write(); 
+
+	for (int i = 0; i < size; i++) {
+		data_write[i] = -data_write[i];
 	}
 }

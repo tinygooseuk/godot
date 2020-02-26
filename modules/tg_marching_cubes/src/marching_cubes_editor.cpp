@@ -60,6 +60,8 @@ void MarchingCubesEditor::process(float delta) {
 }
 
 void MarchingCubesEditor::menu_option(int p_option) {
+	ERR_FAIL_COND(!node);
+
 	switch (p_option) {
 		case MENU_OPTION_REGENERATE_MESH:
 			node->reallocate_memory();
@@ -68,13 +70,19 @@ void MarchingCubesEditor::menu_option(int p_option) {
 
 		case MENU_OPTION_RANDOMISE_MESH:
 			node->fill_with_noise();
-			menu_option(MENU_OPTION_REGENERATE_MESH); // Now trigger re-gen
+			break;
+
+		case MENU_OPTION_INVERT_DATA:
+			node->invert_data_sign();
 			break;
 
 		case MENU_OPTION_CLEAR_MESH:
 			node->clear_mesh();
-			menu_option(MENU_OPTION_REGENERATE_MESH); // Now trigger re-gen
 			break;
+	}
+
+	if (p_option != MENU_OPTION_REGENERATE_MESH) {
+		menu_option(MENU_OPTION_REGENERATE_MESH); // Now trigger re-gen
 	}
 }
 
@@ -383,6 +391,7 @@ MarchingCubesEditor::MarchingCubesEditor(EditorNode *p_editor) {
 	options->set_text(TTR("Marching Cubes"));
 	options->get_popup()->add_item(TTR("Regenerate Mesh"), MENU_OPTION_REGENERATE_MESH);
 	options->get_popup()->add_item(TTR("Randomise Mesh"), MENU_OPTION_RANDOMISE_MESH);
+	options->get_popup()->add_item(TTR("Invert Data"), MENU_OPTION_INVERT_DATA);
 	options->get_popup()->add_item(TTR("Clear Mesh"), MENU_OPTION_CLEAR_MESH);
 
 	options->get_popup()->connect("id_pressed", this, "menu_option");

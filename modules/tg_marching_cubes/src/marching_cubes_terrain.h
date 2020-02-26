@@ -14,8 +14,8 @@ public:
 	void _notification(int p_what);
 
 	void _init();
-	void _ready();
-	void _process(float delta);
+	void ready();
+	void process(float delta);
 
 	virtual String get_configuration_warning() const override;
 
@@ -59,6 +59,7 @@ private:
 	void clear_mesh();
 	void reallocate_memory();
 	void fill_with_noise();
+	void invert_data_sign();
 
 #if TOOLS_ENABLED
 	friend class MarchingCubesEditor;
