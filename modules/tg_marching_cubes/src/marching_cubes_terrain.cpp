@@ -145,22 +145,9 @@ void MarchingCubesTerrain::brush_sphere(const Vector3 &centre, float radius, flo
  
 void MarchingCubesTerrain::flatten_cube(const Vector3 &centre, float radius, float power) {
 	const int half_range = (int)Math::ceil(radius / mesh_scale);
-	float mean_value = 0.0f;
-
-	for (int x = -half_range; x <= +half_range; x++) {
-		for (int y = -half_range; y <= +half_range; y++) {
-			for (int z = -half_range; z <= +half_range; z++) {
-				const Vector3 offset = Vector3(x, y, z) * mesh_scale;
-				const Vector3 coord = get_grid_coordinates_from_world_position(centre + offset);
-
-				if (are_grid_coordinates_valid(coord)) {
-					mean_value += get_value_at(coord);
-				}				
-			}
-		}
-	}
-
-	mean_value /= (half_range * 3.0f * 2.0f); // full range, one 3 axes
+	
+	const Vector3 coord = get_grid_coordinates_from_world_position(centre);
+	const float target_value = get_value_at(coord);
 
 	for (int x = -half_range; x <= +half_range; x++) {
 		for (int y = -half_range; y <= +half_range; y++) {
@@ -170,7 +157,7 @@ void MarchingCubesTerrain::flatten_cube(const Vector3 &centre, float radius, flo
 
 				if (are_grid_coordinates_valid(coord)) {
 					const float current_value = get_value_at(coord);					
-					set_value_at(coord, Math::lerp(current_value, mean_value, power));
+					set_value_at(coord, Math::lerp(current_value, target_value, power));
 				}
 			}
 		}

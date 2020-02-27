@@ -129,10 +129,14 @@ void MarchingCubesEditor::update_status() {
 
 void MarchingCubesEditor::update_tool_position() {
 	Viewport *editor_vp = editor_camera->get_viewport();
-	Vector2 mouse_pos = editor_vp->get_mouse_position();
+	const Vector2 mouse_pos = editor_vp->get_mouse_position();
 
-	Vector3 ray_origin = editor_camera->project_ray_origin(mouse_pos);
-	Vector3 ray_dir = editor_camera->project_ray_normal(mouse_pos);
+	const Vector3 ray_origin = editor_camera->project_ray_origin(mouse_pos);
+	const Vector3 ray_dir = editor_camera->project_ray_normal(mouse_pos);
+
+	const Vector3 centre_position = node->get_global_transform().origin + Vector3(node->terrain_data->width * node->mesh_scale, node->terrain_data->height * node->mesh_scale, node->terrain_data->depth * node->mesh_scale) / 2.0f;
+
+	if (!node) return;
 
 	// Move tool position
 	switch (axis) {
@@ -144,6 +148,8 @@ void MarchingCubesEditor::update_tool_position() {
 			if (is_hit) {
 				tool_position = node->get_world_position_from_grid_coordinates(node->get_grid_coordinates_from_world_position(ray.position));
 			}
+
+			VS::get_singleton()->instance_set_visible(editor_grid, false);
 		} break;
 		case AXIS_X: {
 			Plane p = Plane(Vector3(axis_level * node->mesh_scale, 0.0f, 0.0f), Vector3(1.0, 0.0f, 0.0f));
@@ -151,6 +157,17 @@ void MarchingCubesEditor::update_tool_position() {
 			Vector3 intersection;
 			if (p.intersects_ray(ray_origin, ray_dir, &intersection)) {
 				tool_position = node->get_world_position_from_grid_coordinates(node->get_grid_coordinates_from_world_position(intersection));
+			}
+
+			if (editor_grid.is_valid()) {
+				Vector3 position = centre_position;
+				position.x = axis_level * node->mesh_scale;
+
+				Transform xform;
+				xform.set_look_at(position, position + Vector3(1.0f, 0.0f, 0.0f), Vector3(0.0f, 1.0f, 0.0f));
+
+				VS::get_singleton()->instance_set_transform(editor_grid, xform);
+				VS::get_singleton()->instance_set_visible(editor_grid, true);
 			}
 		} break;
 
@@ -161,6 +178,17 @@ void MarchingCubesEditor::update_tool_position() {
 			if (p.intersects_ray(ray_origin, ray_dir, &intersection)) {
 				tool_position = node->get_world_position_from_grid_coordinates(node->get_grid_coordinates_from_world_position(intersection));
 			}
+
+			if (editor_grid.is_valid()) {
+				Vector3 position = centre_position;
+				position.y = axis_level * node->mesh_scale;
+
+				Transform xform;
+				xform.set_look_at(position, position + Vector3(0.0f, 1.0f, 0.0f), Vector3(0.0f, 1.0f, 0.0f));
+
+				VS::get_singleton()->instance_set_transform(editor_grid, xform);
+				VS::get_singleton()->instance_set_visible(editor_grid, true);
+			}
 		} break;
 
 		case AXIS_Z: {
@@ -169,6 +197,17 @@ void MarchingCubesEditor::update_tool_position() {
 			Vector3 intersection;
 			if (p.intersects_ray(ray_origin, ray_dir, &intersection)) {
 				tool_position = node->get_world_position_from_grid_coordinates(node->get_grid_coordinates_from_world_position(intersection));
+			}
+
+			if (editor_grid.is_valid()) {
+				Vector3 position = centre_position;
+				position.z = axis_level * node->mesh_scale;
+
+				Transform xform;
+				xform.set_look_at(position, position + Vector3(0.0f, 0.0f, 1.0f), Vector3(0.0f, 1.0f, 0.0f));
+
+				VS::get_singleton()->instance_set_transform(editor_grid, xform);
+				VS::get_singleton()->instance_set_visible(editor_grid, true);
 			}
 		} break;
 	}
@@ -231,7 +270,7 @@ void MarchingCubesEditor::create_sphere_gizmo() {
 	shape->set_radius(1.0f);
 
 	RID scenario = node->get_world()->get_scenario();
-	RID cube_rid = shape->get_debug_mesh()->get_rid();
+	RID cube_rid = shape->get_debug_mesh()->get_rid(); //TODO: free this too?
 
 	debug_gizmo = vs->instance_create2(cube_rid, scenario);
 }
@@ -247,7 +286,7 @@ void MarchingCubesEditor::create_cube_gizmo() {
 	shape->set_extents(Vector3(1.0f, 1.0f, 1.0f));
 
 	RID scenario = node->get_world()->get_scenario();
-	RID cube_rid = shape->get_debug_mesh()->get_rid();	
+	RID cube_rid = shape->get_debug_mesh()->get_rid();	//TODO: free this too?
 
 	debug_gizmo = vs->instance_create2(cube_rid, scenario);
 }
@@ -258,27 +297,42 @@ void MarchingCubesEditor::create_editor_grid() {
 	}
 
 	PoolVector3Array verts;
-	verts.resize(10 * 2 * 2); // 10 lines of 2 verts in 2 axes
-
+	verts.resize((10 + 1) * 2 * 2); // 10 lines of 2 verts in 2 axes
 	auto vert_write = verts.write();
-	int w = 0;
+	int v_ptr = 0;
+
+	PoolColorArray vert_colours;
+	vert_colours.resize((10 + 1) * 2 * 2); // 10 lines of 2 verts in 2 axes
+	auto vc_write = vert_colours.write();
+	int vc_ptr = 0;
+
+	// Create grid	
 	float grid_offset = node->mesh_scale * 5.0f;
 
-	for (int i = 0; i < 10; i++) {
-		vert_write[w++] = Vector3(-50.0f, 0.0f, float(i * node->mesh_scale) - grid_offset);
-		vert_write[w++] = Vector3(+50.0f, 0.0f, float(i * node->mesh_scale) - grid_offset);
+	static constexpr int GRID_EXTENTS = 50;
+	static constexpr int HALF_GRID_EXTENTS = GRID_EXTENTS / 2;
+	for (int i = 0; i <= GRID_EXTENTS; i++) {
+		// Add vertexs
+		vert_write[v_ptr++] = Vector3(-float(HALF_GRID_EXTENTS) * node->mesh_scale, 0.0f, float(i * node->mesh_scale) - grid_offset);
+		vert_write[v_ptr++] = Vector3(+float(HALF_GRID_EXTENTS) * node->mesh_scale, 0.0f, float(i * node->mesh_scale) - grid_offset);
 
-		vert_write[w++] = Vector3(float(i * node->mesh_scale) - grid_offset, 0.0f, -50.0f);
-		vert_write[w++] = Vector3(float(i * node->mesh_scale) - grid_offset, 0.0f, +50.0f);
+		vert_write[v_ptr++] = Vector3(float(i * node->mesh_scale) - grid_offset, 0.0f, -float(HALF_GRID_EXTENTS) * node->mesh_scale);
+		vert_write[v_ptr++] = Vector3(float(i * node->mesh_scale) - grid_offset, 0.0f, +float(HALF_GRID_EXTENTS) * node->mesh_scale);
+
+		float distance_to_centre = Math::absf(i - HALF_GRID_EXTENTS) / (float)HALF_GRID_EXTENTS;
+		vc_write[vc_ptr++] = Color(1.0f, 1.0f, 1.0f, Math::lerp(1.0f, 0.5f, distance_to_centre));
+		vc_write[vc_ptr++] = Color(1.0f, 1.0f, 1.0f, Math::lerp(1.0f, 0.5f, distance_to_centre));
+		vc_write[vc_ptr++] = Color(1.0f, 1.0f, 1.0f, Math::lerp(1.0f, 0.5f, distance_to_centre));
+		vc_write[vc_ptr++] = Color(1.0f, 1.0f, 1.0f, Math::lerp(1.0f, 0.5f, distance_to_centre));
 	}
 
 	RID scenario = node->get_world()->get_scenario();
-	RID grid_rid = VS::get_singleton()->mesh_create();
+	RID grid_rid = VS::get_singleton()->mesh_create(); //TODO: free this one!!
 
 	Array mesh_info;
 	mesh_info.resize(ArrayMesh::ARRAY_MAX);
 	mesh_info[ArrayMesh::ARRAY_VERTEX] = verts;
-	//TODO: feather edges!
+	mesh_info[ArrayMesh::ARRAY_COLOR] = vert_colours;
 
 	VS::get_singleton()->mesh_add_surface_from_arrays(grid_rid, VS::PRIMITIVE_LINES, mesh_info);
 
@@ -367,9 +421,11 @@ bool MarchingCubesEditor::forward_spatial_input_event(Camera* p_camera, const Re
 			switch (mouse_button_event->get_button_index()) {
 				case BUTTON_WHEEL_DOWN:
 					if (axis_level > 0.0f) axis_level -= 1.0f;
+					update_tool_position();
 					break;
 				case BUTTON_WHEEL_UP:
 					if (axis_level < max_axislevel_value) axis_level += 1.0f;
+					update_tool_position();
 					break;
 				case BUTTON_MIDDLE:
 					axis = (axis + 1) % AXIS_Count;
@@ -401,8 +457,10 @@ bool MarchingCubesEditor::forward_spatial_input_event(Camera* p_camera, const Re
 	if (key_event.is_valid() && key_event->is_pressed() && !key_event->is_echo()) {
 		if (key_event->get_scancode() == KEY_MINUS && axis_level > 0.0f) {
 			axis_level -= 1.0f;
+			update_tool_position();
 		} else if (key_event->get_scancode() == KEY_PLUS && axis_level < max_axislevel_value) {
 			axis_level += 1.0f;
+			update_tool_position();
 		} else if (key_event->get_scancode() == KEY_SPACE) {
 			axis = (axis + 1) % AXIS_Count;
 			update_tool_position();
