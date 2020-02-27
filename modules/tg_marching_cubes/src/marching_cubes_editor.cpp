@@ -198,6 +198,20 @@ void MarchingCubesEditor::update_palette_labels(float /*new_value*/) {
 }
 
 //------------------------------ GIZMOS -------------------------
+void MarchingCubesEditor::recreate_gizmo() {
+	if (!node) return; // Can't create with no node as can't get world 😢
+
+	switch (tool) {
+		case TOOL_SPHERE:
+		case TOOL_RUFFLE:
+			create_sphere_gizmo();
+			break;
+		case TOOL_CUBE:
+			create_cube_gizmo();
+
+			break; //TODO:
+	}
+}
 
 void MarchingCubesEditor::create_sphere_gizmo() {
 	VisualServer *vs = VisualServer::get_singleton();
@@ -229,6 +243,53 @@ void MarchingCubesEditor::create_cube_gizmo() {
 	RID cube_rid = shape->get_debug_mesh()->get_rid();	
 
 	debug_gizmo = vs->instance_create2(cube_rid, scenario);
+}
+
+void MarchingCubesEditor::create_editor_grid() {
+	if (editor_grid.is_valid()) {
+		VS::get_singleton()->free(editor_grid);
+	}
+
+	PoolVector3Array verts;
+	verts.resize(10 * 2 * 2); // 10 lines of 2 verts in 2 axes
+
+	auto vert_write = verts.write();
+	int w = 0;
+	float grid_offset = node->mesh_scale * 5.0f;
+
+	for (int i = 0; i < 10; i++) {
+		vert_write[w++] = Vector3(-50.0f, 0.0f, float(i * node->mesh_scale) - grid_offset);
+		vert_write[w++] = Vector3(+50.0f, 0.0f, float(i * node->mesh_scale) - grid_offset);
+
+		vert_write[w++] = Vector3(float(i * node->mesh_scale) - grid_offset, 0.0f, -50.0f);
+		vert_write[w++] = Vector3(float(i * node->mesh_scale) - grid_offset, 0.0f, +50.0f);
+	}
+
+	RID scenario = node->get_world()->get_scenario();
+	RID grid_rid = VS::get_singleton()->mesh_create();
+
+	Array mesh_info;
+	mesh_info.resize(ArrayMesh::ARRAY_MAX);
+	mesh_info[ArrayMesh::ARRAY_VERTEX] = verts;
+	//TODO: feather edges!
+
+	VS::get_singleton()->mesh_add_surface_from_arrays(grid_rid, VS::PRIMITIVE_LINES, mesh_info);
+
+	editor_grid = VS::get_singleton()->instance_create2(grid_rid, scenario);
+}
+
+void MarchingCubesEditor::free_gizmo() {
+	if (debug_gizmo.is_valid()) {
+		VisualServer::get_singleton()->free(debug_gizmo);
+		debug_gizmo = {};
+	}
+}
+
+void MarchingCubesEditor::free_editor_grid() {
+	if (editor_grid.is_valid()) {
+		VisualServer::get_singleton()->free(editor_grid);
+		editor_grid = {};
+	}
 }
 
 
@@ -270,28 +331,6 @@ float MarchingCubesEditor::get_max_value(const Axis axis) const {
 }
 
 //------------------------------ PUBLIC -------------------------
-void MarchingCubesEditor::recreate_gizmo() {
-	if (!node) return; // Can't create with no node as can't get world 😢
-
-	switch (tool) {
-		case TOOL_SPHERE:
-		case TOOL_RUFFLE:
-			create_sphere_gizmo();
-			break;
-		case TOOL_CUBE:
-			create_cube_gizmo();
-
-			break; //TODO:
-	}
-}
-
-void MarchingCubesEditor::free_gizmo() {
-	if (debug_gizmo.is_valid()) {
-		VisualServer::get_singleton()->free(debug_gizmo);
-		debug_gizmo = {};
-	}
-}
-
 bool MarchingCubesEditor::forward_spatial_input_event(Camera* p_camera, const Ref<InputEvent>& p_event) {
     if (!node) return false;
 
