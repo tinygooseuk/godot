@@ -454,11 +454,11 @@ void MarchingCubesTerrain::reallocate_memory() {
 		return;
 	}
 	
-	bool justShrink = (size < terrain_data->data.size());
+	bool just_shrink = (size < terrain_data->data.size());
 	
 	terrain_data->data.resize(size);
 	
-	if (justShrink) {
+	if (just_shrink) {
 		return;
 	}
 

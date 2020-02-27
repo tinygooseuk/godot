@@ -159,7 +159,7 @@ void MarchingCubesEditor::update_tool_position() {
 				tool_position = node->get_world_position_from_grid_coordinates(node->get_grid_coordinates_from_world_position(intersection));
 			}
 
-			if (editor_grid.is_valid()) {
+			if (false && editor_grid.is_valid()) {
 				Vector3 position = centre_position;
 				position.x = axis_level * node->mesh_scale;
 
@@ -179,7 +179,7 @@ void MarchingCubesEditor::update_tool_position() {
 				tool_position = node->get_world_position_from_grid_coordinates(node->get_grid_coordinates_from_world_position(intersection));
 			}
 
-			if (editor_grid.is_valid()) {
+			if (false && editor_grid.is_valid()) {
 				Vector3 position = centre_position;
 				position.y = axis_level * node->mesh_scale;
 
@@ -199,7 +199,7 @@ void MarchingCubesEditor::update_tool_position() {
 				tool_position = node->get_world_position_from_grid_coordinates(node->get_grid_coordinates_from_world_position(intersection));
 			}
 
-			if (editor_grid.is_valid()) {
+			if (false && editor_grid.is_valid()) {
 				Vector3 position = centre_position;
 				position.z = axis_level * node->mesh_scale;
 
