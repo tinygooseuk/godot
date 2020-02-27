@@ -41,13 +41,14 @@ void MarchingCubesEditorPlugin::make_visible(bool p_visible) {
 		marching_cubes_editor->toolbar->show();
 		marching_cubes_editor->set_process(true);
 		marching_cubes_editor->recreate_gizmo();
+		marching_cubes_editor->create_editor_grid();
 	} else {
-
 		marching_cubes_editor->toolbar->hide();
 		marching_cubes_editor->hide();
 		marching_cubes_editor->edit(NULL);
 		marching_cubes_editor->set_process(false);
 		marching_cubes_editor->free_gizmo();
+		marching_cubes_editor->free_editor_grid();
 	}
 }
 

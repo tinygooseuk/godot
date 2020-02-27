@@ -102,13 +102,10 @@ void MarchingCubesTerrain::set_value_at(const Vector3& p_position, float p_value
 
 
 void MarchingCubesTerrain::brush_cube(const Vector3 &centre, float radius, float power, bool additive) {
-	const int half_range = (int)Math::ceil(radius / mesh_scale);
-
-	for (int x = -half_range; x <= +half_range; x++) {
-		for (int y = -half_range; y <= +half_range; y++) {
-			for (int z = -half_range; z <= +half_range; z++) {
-				const Vector3 offset = Vector3(x, y, z) * mesh_scale;
-				const Vector3 coord = get_grid_coordinates_from_world_position(centre + offset);
+	for (float x = -radius; x <= +radius; x += 1.0f) {
+		for (float y = -radius; y <= +radius; y += 1.0f) {
+			for (float z = -radius; z <= +radius; z += 1.0f) {
+				const Vector3 coord = get_grid_coordinates_from_world_position(centre + Vector3(x, y, z));
 
 				if (are_grid_coordinates_valid(coord)) {
 					const float currentValue = get_value_at(coord);
@@ -125,13 +122,11 @@ void MarchingCubesTerrain::brush_cube(const Vector3 &centre, float radius, float
 }
 
 void MarchingCubesTerrain::brush_sphere(const Vector3 &centre, float radius, float power, bool additive) {
-	const int half_range = (int)Math::ceil(radius / mesh_scale);
-
-	for (int x = -half_range; x <= +half_range; x++) {
-		for (int y = -half_range; y <= +half_range; y++) {
-			for (int z = -half_range; z <= +half_range; z++) {
-				const Vector3 offset = Vector3(x, y, z) * mesh_scale;
-				const Vector3 coord = get_grid_coordinates_from_world_position(centre + offset);
+	for (float x = -radius; x <= +radius; x += 1.0f) {
+		for (float y = -radius; y <= +radius; y += 1.0f) {
+			for (float z = -radius; z <= +radius; z += 1.0f) {
+				const Vector3 offset = Vector3(x, y, z);
+				Vector3 coord = get_grid_coordinates_from_world_position(centre + offset);
 
 				if (are_grid_coordinates_valid(coord)) {
 					const float current_value = get_value_at(coord);
@@ -140,7 +135,7 @@ void MarchingCubesTerrain::brush_sphere(const Vector3 &centre, float radius, flo
 						target_value += current_value;
 					}
 					
-					const float alpha = offset.length() / radius;
+					const float alpha = clamp(offset.length() / radius, 0.0f, 1.0f);
 					set_value_at(coord, Math::lerp(current_value, target_value, alpha));
 				}
 			}

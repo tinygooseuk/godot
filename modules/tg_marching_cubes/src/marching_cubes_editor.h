@@ -80,10 +80,17 @@ class MarchingCubesEditor : public VBoxContainer {
 	bool shift = false;
 	bool editor_passthru = false;
 	RID debug_gizmo;
+	RID editor_grid;
 
-	// Gizmo
+	// Gizmos
+	void recreate_gizmo();
 	void create_sphere_gizmo();
 	void create_cube_gizmo();
+	void create_editor_grid();
+
+	void free_gizmo();
+	void free_editor_grid();
+
 
 	// Tools
 	void brush_cube(const Vector3& centre, float radius, float power, bool additive = true);
@@ -97,12 +104,12 @@ class MarchingCubesEditor : public VBoxContainer {
 public:
 	HBoxContainer *toolbar = nullptr;
 
-	void recreate_gizmo();
-	void free_gizmo();
-
+	
 	bool forward_spatial_input_event(Camera* p_camera, const Ref<InputEvent>& p_event);
 	void edit(MarchingCubesTerrain* p_marching_cubes);
 
 	MarchingCubesEditor(EditorNode* p_editor);
+
+	friend class MarchingCubesEditorPlugin;
 };
 #endif // TOOLS_ENABLED
