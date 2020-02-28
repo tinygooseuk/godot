@@ -17,6 +17,7 @@ void MarchingCubesEditor::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("menu_option", "option"), &MarchingCubesEditor::menu_option);
 	ClassDB::bind_method(D_METHOD("tool_select", "tool"), &MarchingCubesEditor::tool_select);
 	ClassDB::bind_method(D_METHOD("update_palette_labels", "new_value"), &MarchingCubesEditor::update_palette_labels);
+	ClassDB::bind_method(D_METHOD("bump_data", "direction"), &MarchingCubesEditor::bump_data);
 }
 
 void MarchingCubesEditor::_notification(int p_what) {
@@ -390,6 +391,46 @@ void MarchingCubesEditor::ruffle_cube(const Vector3& centre, float radius, float
 	node->ruffle_cube(centre, radius, power);	
 	node->generate_mesh();
 }
+void MarchingCubesEditor::bump_data(BumpDirection direction) {
+	//TODO:
+	Ref<MarchingCubesData> data = memnew(MarchingCubesData);
+	data->width = node->terrain_data->width; 
+	data->height = node->terrain_data->height;
+	data->depth = node->terrain_data->depth;
+	data->data.resize(data->width * data->height * data->depth);
+
+	//TODO: memdelete?
+	Ref<MarchingCubesData> old_data = node->terrain_data.ptr();
+
+	Vector3 bump_dir = { 0.0f, 0.0f, 0.0f };
+	switch (direction) {
+		case BUMP_LEFT: 		bump_dir.x = -1; break;
+		case BUMP_UP: 			bump_dir.y = +1; break;
+		case BUMP_DOWN: 		bump_dir.y = -1; break;
+		case BUMP_RIGHT: 		bump_dir.x = +1; break;
+		case BUMP_FORWARD: 		bump_dir.z = -1; break;
+		case BUMP_BACKWARD: 	bump_dir.z = +1; break;
+	}
+
+	auto write = data->data.write();
+	for (float x = 0; x < data->width; x++) {
+		for (float y = 0; y < data->height; y++) {
+			for (float z = 0; z < data->depth; z++) {
+				const Vector3 coord = Vector3(x, y, z);
+				const int index = node->coord_to_index(coord);
+
+				const Vector3 old_coord = coord + bump_dir;
+				const int old_index = node->coord_to_index(old_coord);
+
+				//TODO: check valid!!
+				data[index] = old_data[old_index];
+			}
+		}
+	}
+
+	node->generate_mesh();
+}
+
 
 //------------------------------ MISC -------------------------
 float MarchingCubesEditor::get_max_value(const Axis axis) const {
@@ -433,14 +474,17 @@ bool MarchingCubesEditor::forward_spatial_input_event(Camera* p_camera, const Re
 				case BUTTON_WHEEL_DOWN:
 					if (axis_level > 0.0f) axis_level -= 1.0f;
 					update_tool_position();
+					update_status();
 					break;
 				case BUTTON_WHEEL_UP:
 					if (axis_level < max_axislevel_value) axis_level += 1.0f;
 					update_tool_position();
+					update_status();
 					break;
 				case BUTTON_MIDDLE:
 					axis = (axis + 1) % AXIS_Count;
 					update_tool_position();
+					update_status();
 					break;
 
 				default:
@@ -469,12 +513,15 @@ bool MarchingCubesEditor::forward_spatial_input_event(Camera* p_camera, const Re
 		if (key_event->get_scancode() == KEY_MINUS && axis_level > 0.0f) {
 			axis_level -= 1.0f;
 			update_tool_position();
+			update_status();
 		} else if (key_event->get_scancode() == KEY_PLUS && axis_level < max_axislevel_value) {
 			axis_level += 1.0f;
 			update_tool_position();
+			update_status();
 		} else if (key_event->get_scancode() == KEY_SPACE) {
 			axis = (axis + 1) % AXIS_Count;
 			update_tool_position();
+			update_status();
 		}
 	}
 	if (key_event.is_valid() && key_event->get_scancode() == KEY_SHIFT) {
@@ -593,6 +640,47 @@ MarchingCubesEditor::MarchingCubesEditor(EditorNode *p_editor) {
 	is_additive = memnew(CheckBox);
 	is_additive->set_text(TTR("Is Additive?"));
 	add_child(is_additive);
+
+	add_child(memnew(HSeparator));
+
+	Label* bump_label = memnew(Label);
+	bump_label->set_text("Bump:");
+
+	HBoxContainer* bump_box = memnew(HBoxContainer);
+	bump_box->set_alignment(AlignMode::ALIGN_BEGIN);
+	bump_box->set_h_size_flags(SIZE_EXPAND_FILL);
+	{ 
+		Button* left_bump = memnew(Button);
+		left_bump->set_text("Left");
+		left_bump->connect("pressed", this, "bump_data", make_binds(BUMP_LEFT));
+		bump_box->add_child(left_bump);
+
+		Button* up_bump = memnew(Button);
+		up_bump->set_text("Up");
+		up_bump->connect("pressed", this, "bump_data", make_binds(BUMP_UP));
+		bump_box->add_child(up_bump);
+
+		Button* down_bump = memnew(Button);
+		down_bump->set_text("Down");
+		down_bump->connect("pressed", this, "bump_data", make_binds(BUMP_DOWN));
+		bump_box->add_child(down_bump);
+	
+		Button* right_bump = memnew(Button);
+		right_bump->set_text("Right");
+		right_bump->connect("pressed", this, "bump_data", make_binds(BUMP_RIGHT));
+		bump_box->add_child(right_bump);
+	
+		Button* forward_bump = memnew(Button);
+		forward_bump->set_text("Forward");
+		forward_bump->connect("pressed", this, "bump_data", make_binds(BUMP_FORWARD));
+		bump_box->add_child(forward_bump);
+	
+		Button* back_bump = memnew(Button);
+		back_bump->set_text("Back");
+		back_bump->connect("pressed", this, "bump_data", make_binds(BUMP_BACKWARD));
+		bump_box->add_child(back_bump);
+	}
+	add_child(bump_box);
 
 	// Final setup
 	update_status();

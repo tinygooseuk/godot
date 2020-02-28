@@ -25,6 +25,15 @@ class MarchingCubesEditor : public VBoxContainer {
 		MENU_OPTION_CLEAR_MESH,
 	};
 
+	enum BumpDirection {
+		BUMP_UP,
+		BUMP_DOWN,
+		BUMP_LEFT,
+		BUMP_RIGHT,
+		BUMP_FORWARD,
+		BUMP_BACKWARD
+	};
+
 	enum Tool {
 		TOOL_CUBE,
 		TOOL_SPHERE,
@@ -97,6 +106,7 @@ class MarchingCubesEditor : public VBoxContainer {
 	void brush_sphere(const Vector3& centre, float radius, float power, bool additive = true);
 	void flatten_cube(const Vector3& centre, float radius, float power);
 	void ruffle_cube(const Vector3& centre, float radius, float power);
+	void bump_data(BumpDirection direction);
 
 	// Misc
 	float get_max_value(Axis axis) const;
@@ -104,7 +114,6 @@ class MarchingCubesEditor : public VBoxContainer {
 public:
 	HBoxContainer *toolbar = nullptr;
 
-	
 	bool forward_spatial_input_event(Camera* p_camera, const Ref<InputEvent>& p_event);
 	void edit(MarchingCubesTerrain* p_marching_cubes);
 
