@@ -149,7 +149,9 @@ void MarchingCubesEditor::update_tool_position() {
 				tool_position = node->get_world_position_from_grid_coordinates(node->get_grid_coordinates_from_world_position(ray.position));
 			}
 
-			VS::get_singleton()->instance_set_visible(editor_grid, false);
+			if (editor_grid.is_valid()) {
+				VS::get_singleton()->instance_set_visible(editor_grid, false);
+			}
 		} break;
 		case AXIS_X: {
 			Plane p = Plane(Vector3(axis_level * node->mesh_scale, 0.0f, 0.0f), Vector3(1.0, 0.0f, 0.0f));
@@ -159,12 +161,13 @@ void MarchingCubesEditor::update_tool_position() {
 				tool_position = node->get_world_position_from_grid_coordinates(node->get_grid_coordinates_from_world_position(intersection));
 			}
 
-			if (false && editor_grid.is_valid()) {
+			if (editor_grid.is_valid()) {
 				Vector3 position = centre_position;
 				position.x = axis_level * node->mesh_scale;
 
 				Transform xform;
-				xform.set_look_at(position, position + Vector3(1.0f, 0.0f, 0.0f), Vector3(0.0f, 1.0f, 0.0f));
+				xform.set_basis(Basis(Vector3(0.0f, 0.0f, M_PI_2)));
+				xform.set_origin(position);
 
 				VS::get_singleton()->instance_set_transform(editor_grid, xform);
 				VS::get_singleton()->instance_set_visible(editor_grid, true);
@@ -179,12 +182,13 @@ void MarchingCubesEditor::update_tool_position() {
 				tool_position = node->get_world_position_from_grid_coordinates(node->get_grid_coordinates_from_world_position(intersection));
 			}
 
-			if (false && editor_grid.is_valid()) {
+			if (editor_grid.is_valid()) {
 				Vector3 position = centre_position;
 				position.y = axis_level * node->mesh_scale;
 
 				Transform xform;
-				xform.set_look_at(position, position + Vector3(0.0f, 1.0f, 0.0f), Vector3(0.0f, 1.0f, 0.0f));
+				xform.set_basis(Basis(Vector3(0.0f, 0.0f, 0.0f)));
+				xform.set_origin(position);
 
 				VS::get_singleton()->instance_set_transform(editor_grid, xform);
 				VS::get_singleton()->instance_set_visible(editor_grid, true);
@@ -199,12 +203,13 @@ void MarchingCubesEditor::update_tool_position() {
 				tool_position = node->get_world_position_from_grid_coordinates(node->get_grid_coordinates_from_world_position(intersection));
 			}
 
-			if (false && editor_grid.is_valid()) {
+			if (editor_grid.is_valid()) {
 				Vector3 position = centre_position;
 				position.z = axis_level * node->mesh_scale;
 
 				Transform xform;
-				xform.set_look_at(position, position + Vector3(0.0f, 0.0f, 1.0f), Vector3(0.0f, 1.0f, 0.0f));
+				xform.set_basis(Basis(Vector3(M_PI_2, 0.0f, 0.0f)));
+				xform.set_origin(position);
 
 				VS::get_singleton()->instance_set_transform(editor_grid, xform);
 				VS::get_singleton()->instance_set_visible(editor_grid, true);
@@ -296,21 +301,22 @@ void MarchingCubesEditor::create_editor_grid() {
 		VS::get_singleton()->free(editor_grid);
 	}
 
+	static constexpr int GRID_EXTENTS = 50;
+	static constexpr int HALF_GRID_EXTENTS = GRID_EXTENTS / 2;
+
 	PoolVector3Array verts;
-	verts.resize((10 + 1) * 2 * 2); // 10 lines of 2 verts in 2 axes
+	verts.resize((GRID_EXTENTS + 1) * 2 * 2); // 10 lines of 2 verts in 2 axes
 	auto vert_write = verts.write();
 	int v_ptr = 0;
 
 	PoolColorArray vert_colours;
-	vert_colours.resize((10 + 1) * 2 * 2); // 10 lines of 2 verts in 2 axes
+	vert_colours.resize((GRID_EXTENTS + 1) * 2 * 2); // 10 lines of 2 verts in 2 axes
 	auto vc_write = vert_colours.write();
 	int vc_ptr = 0;
 
 	// Create grid	
-	float grid_offset = node->mesh_scale * 5.0f;
+	float grid_offset = node->mesh_scale * float(HALF_GRID_EXTENTS);
 
-	static constexpr int GRID_EXTENTS = 50;
-	static constexpr int HALF_GRID_EXTENTS = GRID_EXTENTS / 2;
 	for (int i = 0; i <= GRID_EXTENTS; i++) {
 		// Add vertexs
 		vert_write[v_ptr++] = Vector3(-float(HALF_GRID_EXTENTS) * node->mesh_scale, 0.0f, float(i * node->mesh_scale) - grid_offset);
@@ -335,6 +341,11 @@ void MarchingCubesEditor::create_editor_grid() {
 	mesh_info[ArrayMesh::ARRAY_COLOR] = vert_colours;
 
 	VS::get_singleton()->mesh_add_surface_from_arrays(grid_rid, VS::PRIMITIVE_LINES, mesh_info);
+
+
+	SpatialMaterial *spat_mat = memnew(SpatialMaterial);
+	spat_mat->set_flag(SpatialMaterial::FLAG_ALBEDO_FROM_VERTEX_COLOR, true);
+	VS::get_singleton()->mesh_surface_set_material(grid_rid, 0, spat_mat->get_rid());
 
 	editor_grid = VS::get_singleton()->instance_create2(grid_rid, scenario);
 }
