@@ -13,6 +13,9 @@
 
 #if TOOLS_ENABLED
 
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 void MarchingCubesEditor::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("menu_option", "option"), &MarchingCubesEditor::menu_option);
 	ClassDB::bind_method(D_METHOD("tool_select", "tool"), &MarchingCubesEditor::tool_select);
