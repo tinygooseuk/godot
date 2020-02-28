@@ -138,7 +138,10 @@ void MarchingCubesEditor::update_tool_position() {
 	const Vector3 ray_origin = editor_camera->project_ray_origin(mouse_pos);
 	const Vector3 ray_dir = editor_camera->project_ray_normal(mouse_pos);
 
-	const Vector3 centre_position = node->get_global_transform().origin + Vector3(node->terrain_data->width * node->mesh_scale, node->terrain_data->height * node->mesh_scale, node->terrain_data->depth * node->mesh_scale) / 2.0f;
+	// Centre position = node origin + half size + half tile offset on XZ
+	const Vector3 centre_position = node->get_global_transform().origin +
+		Vector3(node->terrain_data->width * node->mesh_scale, node->terrain_data->height * node->mesh_scale, node->terrain_data->depth * node->mesh_scale) * 0.5f +
+		Vector3(node->mesh_scale, 0.0f, node->mesh_scale) * 0.5f;
 
 	if (!node) return;
 
@@ -309,12 +312,12 @@ void MarchingCubesEditor::create_editor_grid() {
 	static constexpr int HALF_GRID_EXTENTS = GRID_EXTENTS / 2;
 
 	PoolVector3Array verts;
-	verts.resize((GRID_EXTENTS + 1) * 2 * 2); // 10 lines of 2 verts in 2 axes
+	verts.resize((GRID_EXTENTS + 1) * 2 * 2 * 2); // 10 lines of 2 verts on 2 layers in 2 axes
 	auto vert_write = verts.write();
 	int v_ptr = 0;
 
 	PoolColorArray vert_colours;
-	vert_colours.resize((GRID_EXTENTS + 1) * 2 * 2); // 10 lines of 2 verts in 2 axes
+	vert_colours.resize((GRID_EXTENTS + 1) * 2 * 2 * 2); // 10 lines of 2 verts on 2 layers in 2 axes
 	auto vc_write = vert_colours.write();
 	int vc_ptr = 0;
 
@@ -322,18 +325,24 @@ void MarchingCubesEditor::create_editor_grid() {
 	float grid_offset = node->mesh_scale * float(HALF_GRID_EXTENTS);
 
 	for (int i = 0; i <= GRID_EXTENTS; i++) {
-		// Add vertexs
-		vert_write[v_ptr++] = Vector3(-float(HALF_GRID_EXTENTS) * node->mesh_scale, 0.0f, float(i * node->mesh_scale) - grid_offset);
-		vert_write[v_ptr++] = Vector3(+float(HALF_GRID_EXTENTS) * node->mesh_scale, 0.0f, float(i * node->mesh_scale) - grid_offset);
+		// Add vertices
+		vert_write[v_ptr++] = Vector3(-float(HALF_GRID_EXTENTS) * node->mesh_scale, -node->mesh_scale * 0.5f, float(i * node->mesh_scale) - grid_offset);
+		vert_write[v_ptr++] = Vector3(+float(HALF_GRID_EXTENTS) * node->mesh_scale, -node->mesh_scale * 0.5f, float(i * node->mesh_scale) - grid_offset);
 
-		vert_write[v_ptr++] = Vector3(float(i * node->mesh_scale) - grid_offset, 0.0f, -float(HALF_GRID_EXTENTS) * node->mesh_scale);
-		vert_write[v_ptr++] = Vector3(float(i * node->mesh_scale) - grid_offset, 0.0f, +float(HALF_GRID_EXTENTS) * node->mesh_scale);
+		vert_write[v_ptr++] = Vector3(float(i * node->mesh_scale) - grid_offset, -node->mesh_scale * 0.5f, -float(HALF_GRID_EXTENTS) * node->mesh_scale);
+		vert_write[v_ptr++] = Vector3(float(i * node->mesh_scale) - grid_offset, -node->mesh_scale * 0.5f, +float(HALF_GRID_EXTENTS) * node->mesh_scale);
 
+		vert_write[v_ptr++] = Vector3(-float(HALF_GRID_EXTENTS) * node->mesh_scale, +node->mesh_scale * 0.5f, float(i * node->mesh_scale) - grid_offset);
+		vert_write[v_ptr++] = Vector3(+float(HALF_GRID_EXTENTS) * node->mesh_scale, +node->mesh_scale * 0.5f, float(i * node->mesh_scale) - grid_offset);
+
+		vert_write[v_ptr++] = Vector3(float(i * node->mesh_scale) - grid_offset, +node->mesh_scale * 0.5f, -float(HALF_GRID_EXTENTS) * node->mesh_scale);
+		vert_write[v_ptr++] = Vector3(float(i * node->mesh_scale) - grid_offset, +node->mesh_scale * 0.5f, +float(HALF_GRID_EXTENTS) * node->mesh_scale);
+
+		// Add colours
 		float distance_to_centre = Math::absf(i - HALF_GRID_EXTENTS) / (float)HALF_GRID_EXTENTS;
-		vc_write[vc_ptr++] = Color(1.0f, 1.0f, 1.0f, Math::lerp(1.0f, 0.5f, distance_to_centre));
-		vc_write[vc_ptr++] = Color(1.0f, 1.0f, 1.0f, Math::lerp(1.0f, 0.5f, distance_to_centre));
-		vc_write[vc_ptr++] = Color(1.0f, 1.0f, 1.0f, Math::lerp(1.0f, 0.5f, distance_to_centre));
-		vc_write[vc_ptr++] = Color(1.0f, 1.0f, 1.0f, Math::lerp(1.0f, 0.5f, distance_to_centre));
+		for (int i = 0; i < 8; i++) {
+			vc_write[vc_ptr++] = Color(1.0f, 1.0f, 1.0f, Math::lerp(1.0f, 0.2f, distance_to_centre));
+		}
 	}
 
 	RID scenario = node->get_world()->get_scenario();
@@ -394,7 +403,7 @@ void MarchingCubesEditor::ruffle_cube(const Vector3& centre, float radius, float
 	node->ruffle_cube(centre, radius, power);	
 	node->generate_mesh();
 }
-void MarchingCubesEditor::bump_data(BumpDirection direction) {
+void MarchingCubesEditor::bump_data(int direction) {
 	//TODO:
 	Ref<MarchingCubesData> data = memnew(MarchingCubesData);
 	data->width = node->terrain_data->width; 
@@ -407,14 +416,15 @@ void MarchingCubesEditor::bump_data(BumpDirection direction) {
 
 	Vector3 bump_dir = { 0.0f, 0.0f, 0.0f };
 	switch (direction) {
-		case BUMP_LEFT: 		bump_dir.x = -1; break;
-		case BUMP_UP: 			bump_dir.y = +1; break;
-		case BUMP_DOWN: 		bump_dir.y = -1; break;
-		case BUMP_RIGHT: 		bump_dir.x = +1; break;
+		case BUMP_LEFT: 		bump_dir.x = +1; break;
+		case BUMP_UP: 			bump_dir.y = -1; break;
+		case BUMP_DOWN: 		bump_dir.y = +1; break;
+		case BUMP_RIGHT: 		bump_dir.x = -1; break;
 		case BUMP_FORWARD: 		bump_dir.z = -1; break;
 		case BUMP_BACKWARD: 	bump_dir.z = +1; break;
 	}
 
+	auto read = old_data->data.read();
 	auto write = data->data.write();
 	for (float x = 0; x < data->width; x++) {
 		for (float y = 0; y < data->height; y++) {
@@ -425,12 +435,12 @@ void MarchingCubesEditor::bump_data(BumpDirection direction) {
 				const Vector3 old_coord = coord + bump_dir;
 				const int old_index = node->coord_to_index(old_coord);
 
-				//TODO: check valid!!
-				data[index] = old_data[old_index];
+				write[index] = read[old_index];
 			}
 		}
 	}
 
+	node->terrain_data = data;
 	node->generate_mesh();
 }
 
@@ -648,6 +658,7 @@ MarchingCubesEditor::MarchingCubesEditor(EditorNode *p_editor) {
 
 	Label* bump_label = memnew(Label);
 	bump_label->set_text("Bump:");
+	add_child(bump_label);
 
 	HBoxContainer* bump_box = memnew(HBoxContainer);
 	bump_box->set_alignment(AlignMode::ALIGN_BEGIN);

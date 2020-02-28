@@ -376,6 +376,10 @@ void MarchingCubesTerrain::generate_debug_mesh() {
 						debug.add_vertex(RTL); debug.add_vertex(FTR); debug.add_vertex(FTL);
 					};
 
+					if (Math::absf(value) < 0.05f) {
+						continue;
+					}
+
 					add_cube(coord * mesh_scale, Math::absf(value) * 0.5f, value > 0.0f ? Color(0.0f, 1.0f, 0.0f) : Color(1.0f, 0.0f, 0.0f));
 				}	
 			}	

@@ -106,7 +106,7 @@ class MarchingCubesEditor : public VBoxContainer {
 	void brush_sphere(const Vector3& centre, float radius, float power, bool additive = true);
 	void flatten_cube(const Vector3& centre, float radius, float power);
 	void ruffle_cube(const Vector3& centre, float radius, float power);
-	void bump_data(BumpDirection direction);
+	void bump_data(int direction);
 
 	// Misc
 	float get_max_value(Axis axis) const;
