@@ -10,6 +10,7 @@
 #include "scene/resources/box_shape.h"
 #include "scene/resources/sphere_shape.h"
 #include "scene/resources/primitive_meshes.h"
+#include "scene/resources/mesh_data_tool.h"
 
 #if TOOLS_ENABLED
 
@@ -84,6 +85,60 @@ void MarchingCubesEditor::menu_option(int p_option) {
 		case MENU_OPTION_INVERT_DATA:
 			node->invert_data_sign();
 			break;
+
+		case MENU_OPTION_BAKE_TO_MESHINSTANCE: {
+			node->generate_mesh();
+			
+			Ref<Mesh> old_mesh = node->get_mesh();
+			
+			// Calculate the midpoint of all surfaces of the mesh
+			Vector3 avg_vertex_all_surf;
+			for (int surf_idx = 0; surf_idx < old_mesh->get_surface_count(); surf_idx++) {
+				Vector3 avg_vertex;
+
+				MeshDataTool mdt;
+				mdt.create_from_surface(old_mesh, surf_idx);
+
+				for (int v = 0; v < mdt.get_vertex_count(); v++) {
+					avg_vertex += mdt.get_vertex(v);
+				}
+				avg_vertex /= mdt.get_vertex_count();
+
+				avg_vertex_all_surf += avg_vertex;
+			}
+			avg_vertex_all_surf /= old_mesh->get_surface_count();
+
+			// Create a new mesh
+			Ref<ArrayMesh> new_mesh = memnew(ArrayMesh);
+
+			for (int surf_idx = 0; surf_idx < old_mesh->get_surface_count(); surf_idx++) {
+				MeshDataTool mdt;
+				mdt.create_from_surface(old_mesh, surf_idx);
+
+				for (int v = 0; v < mdt.get_vertex_count(); v++) {
+					mdt.set_vertex(v, mdt.get_vertex(v) - avg_vertex_all_surf);
+				}
+				
+				mdt.commit_to_surface(new_mesh);
+			}
+
+			// Finally save the mesh
+			MeshInstance* mesh_instance = memnew(MeshInstance);
+			mesh_instance->set_name((String)get_name() + " (Baked)");
+			mesh_instance->set_mesh(new_mesh);
+
+			UndoRedo *ur = EditorNode::get_singleton()->get_undo_redo();
+			ur->create_action(TTR("Bake to MeshInstance"));
+
+			ur->add_do_method(node->get_parent(), "add_child", mesh_instance);
+			ur->add_do_method(node->get_parent(), "move_child", mesh_instance, node->get_index() + 1);
+
+			ur->add_do_method(mesh_instance, "set_owner", node->get_parent()->get_owner());
+			ur->add_do_reference(mesh_instance);
+			ur->add_undo_method(node, "remove_child", mesh_instance);
+			ur->commit_action();
+		}
+		break;
 
 		case MENU_OPTION_CLEAR_MESH:
 			node->clear_mesh();
@@ -573,6 +628,7 @@ MarchingCubesEditor::MarchingCubesEditor(EditorNode *p_editor) {
 	options->get_popup()->add_item(TTR("Regenerate Mesh"), MENU_OPTION_REGENERATE_MESH);
 	options->get_popup()->add_item(TTR("Randomise Mesh"), MENU_OPTION_RANDOMISE_MESH);
 	options->get_popup()->add_item(TTR("Invert Data"), MENU_OPTION_INVERT_DATA);
+	options->get_popup()->add_item(TTR("Bake to MeshInstance"), MENU_OPTION_BAKE_TO_MESHINSTANCE);
 	options->get_popup()->add_item(TTR("Clear Mesh"), MENU_OPTION_CLEAR_MESH);
 
 	options->get_popup()->connect("id_pressed", this, "menu_option");
