@@ -707,6 +707,7 @@ MarchingCubesEditor::MarchingCubesEditor(EditorNode *p_editor) {
 	add_child(power_box);
 
 	is_additive = memnew(CheckBox);
+	is_additive->set_pressed(true);
 	is_additive->set_text(TTR("Is Additive?"));
 	add_child(is_additive);
 
