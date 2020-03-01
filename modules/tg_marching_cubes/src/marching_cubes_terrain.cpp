@@ -71,10 +71,12 @@ void MarchingCubesTerrain::ready() {
 }
 
 void MarchingCubesTerrain::process(const float delta) {
+#if TOOLS_ENABLED
 	if (old_debug_mode != debug_mode) {
 		old_debug_mode = debug_mode;
 		generate_mesh();
 	}
+#endif
 }
 
 String MarchingCubesTerrain::get_configuration_warning() const {
@@ -217,9 +219,11 @@ Vector3 MarchingCubesTerrain::get_world_position_from_grid_coordinates(Vector3 p
 void MarchingCubesTerrain::generate_mesh() {
 	MC_ERR_FAIL_COND(terrain_data.is_null() || terrain_data->data.empty());
 
+#if TOOLS_ENABLED
 	if (debug_mode) {
 		return generate_debug_mesh();
 	}
+#endif 
 
 	auto data_read = terrain_data->data.read();
 	
