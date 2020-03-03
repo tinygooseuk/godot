@@ -14,9 +14,9 @@ class MarchingCubesEditor : public VBoxContainer {
 	GDCLASS(MarchingCubesEditor, VBoxContainer);
 
 	// Main refs.
-    MarchingCubesTerrain* node = nullptr;
-    EditorNode* editor = nullptr;
-	MenuButton* options = nullptr;
+	MarchingCubesTerrain *node = nullptr;
+	EditorNode *editor = nullptr;
+	MenuButton *options = nullptr;
 
 	enum Menu {
 		MENU_OPTION_REGENERATE_MESH,
@@ -62,29 +62,29 @@ class MarchingCubesEditor : public VBoxContainer {
 
 	// Actions
 	void menu_option(int p_option);
-	void tool_select(int p_tool);	
+	void tool_select(int p_tool);
 	void update_status();
 	void update_tool_position();
 	void update_gizmo();
 	void update_palette_labels(float new_value = 0.0f);
 
 	// Toolbar Buttons
-	ToolButton* tool_cube;
+	ToolButton *tool_cube;
 	ToolButton *tool_sphere;
-	ToolButton* tool_flatten;	
-	ToolButton* tool_ruffle;	
+	ToolButton *tool_flatten;
+	ToolButton *tool_ruffle;
 
 	// Palette widgets
-	Label* status;
+	Label *status;
 
-	CheckBox* is_additive;
-	Label* power_label;
-	HSlider* power_slider;
-	Label* radius_label;
-	HSlider* radius_slider;
+	CheckBox *is_additive;
+	Label *power_label;
+	HSlider *power_slider;
+	Label *radius_label;
+	HSlider *radius_slider;
 
 	// State
-	Camera* editor_camera = nullptr;
+	Camera *editor_camera = nullptr;
 	Vector3 tool_position;
 	int mouse_button_down = 0;
 	bool shift = false;
@@ -101,24 +101,33 @@ class MarchingCubesEditor : public VBoxContainer {
 	void free_gizmo();
 	void free_editor_grid();
 
-
 	// Tools
-	void brush_cube(const Vector3& centre, float radius, float power, bool additive = true);
-	void brush_sphere(const Vector3& centre, float radius, float power, bool additive = true);
-	void flatten_cube(const Vector3& centre, float radius, float power);
-	void ruffle_cube(const Vector3& centre, float radius, float power);
+	void brush_cube(const Vector3 &centre, float radius, float power, bool additive = true);
+	void brush_sphere(const Vector3 &centre, float radius, float power, bool additive = true);
+	void flatten_cube(const Vector3 &centre, float radius, float power);
+	void ruffle_cube(const Vector3 &centre, float radius, float power);
 	void bump_data(int direction);
 
 	// Misc
 	float get_max_value(Axis axis) const;
 
+	// Begin/end editing (for Undo/Redo)
+	bool is_editing = false;
+
+	void begin_editing();
+	void end_editing();
+	void apply_data(const PoolRealArray &p_data);
+	void copy_data(const PoolRealArray &p_from, PoolRealArray &p_to);
+
 public:
 	HBoxContainer *toolbar = nullptr;
 
-	bool forward_spatial_input_event(Camera* p_camera, const Ref<InputEvent>& p_event);
-	void edit(MarchingCubesTerrain* p_marching_cubes);
+	PoolRealArray stashed_data;
 
-	MarchingCubesEditor(EditorNode* p_editor);
+	bool forward_spatial_input_event(Camera *p_camera, const Ref<InputEvent> &p_event);
+	void edit(MarchingCubesTerrain *p_marching_cubes);
+
+	MarchingCubesEditor(EditorNode *p_editor);
 
 	friend class MarchingCubesEditorPlugin;
 };

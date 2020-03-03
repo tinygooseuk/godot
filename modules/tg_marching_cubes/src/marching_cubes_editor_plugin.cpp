@@ -1,8 +1,8 @@
+#include "marching_cubes_editor_plugin.h"
 #include "core/os/input.h"
 #include "editor/editor_scale.h"
 #include "editor/editor_settings.h"
 #include "editor/plugins/spatial_editor_plugin.h"
-#include "marching_cubes_editor_plugin.h"
 #include "scene/3d/camera.h"
 
 #include "core/math/geometry.h"
@@ -10,7 +10,6 @@
 
 #if TOOLS_ENABLED
 void MarchingCubesEditorPlugin::_notification(int p_what) {
-
 	if (p_what == EditorSettings::NOTIFICATION_EDITOR_SETTINGS_CHANGED) {
 
 		switch ((int)EditorSettings::get_singleton()->get("editors/marching_cubes/editor_side")) {
@@ -25,17 +24,14 @@ void MarchingCubesEditorPlugin::_notification(int p_what) {
 }
 
 void MarchingCubesEditorPlugin::edit(Object *p_object) {
-
 	marching_cubes_editor->edit(Object::cast_to<MarchingCubesTerrain>(p_object));
 }
 
 bool MarchingCubesEditorPlugin::handles(Object *p_object) const {
-
 	return p_object->is_class("MarchingCubesTerrain");
 }
 
 void MarchingCubesEditorPlugin::make_visible(bool p_visible) {
-
 	if (p_visible) {
 		marching_cubes_editor->show();
 		marching_cubes_editor->toolbar->show();
@@ -53,7 +49,6 @@ void MarchingCubesEditorPlugin::make_visible(bool p_visible) {
 }
 
 MarchingCubesEditorPlugin::MarchingCubesEditorPlugin(EditorNode *p_node) {
-
 	editor = p_node;
 
 	EDITOR_DEF("editors/marching_cubes/editor_side", 1);

@@ -4,13 +4,13 @@
 #include "core/os/keyboard.h"
 #include "editor/editor_node.h"
 #include "editor/plugins/spatial_editor_plugin.h"
+#include "scene/3d/camera.h"
 #include "scene/gui/menu_button.h"
 #include "scene/main/viewport.h"
-#include "scene/3d/camera.h"
 #include "scene/resources/box_shape.h"
-#include "scene/resources/sphere_shape.h"
-#include "scene/resources/primitive_meshes.h"
 #include "scene/resources/mesh_data_tool.h"
+#include "scene/resources/primitive_meshes.h"
+#include "scene/resources/sphere_shape.h"
 
 #if TOOLS_ENABLED
 
@@ -22,6 +22,7 @@ void MarchingCubesEditor::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("tool_select", "tool"), &MarchingCubesEditor::tool_select);
 	ClassDB::bind_method(D_METHOD("update_palette_labels", "new_value"), &MarchingCubesEditor::update_palette_labels);
 	ClassDB::bind_method(D_METHOD("bump_data", "direction"), &MarchingCubesEditor::bump_data);
+	ClassDB::bind_method(D_METHOD("apply_data", "data"), &MarchingCubesEditor::apply_data);
 }
 
 void MarchingCubesEditor::_notification(int p_what) {
@@ -123,7 +124,7 @@ void MarchingCubesEditor::menu_option(int p_option) {
 			}
 
 			// Finally save the mesh
-			MeshInstance* mesh_instance = memnew(MeshInstance);
+			MeshInstance *mesh_instance = memnew(MeshInstance);
 			mesh_instance->set_name((String)get_name() + " (Baked)");
 			mesh_instance->set_mesh(new_mesh);
 
@@ -137,8 +138,7 @@ void MarchingCubesEditor::menu_option(int p_option) {
 			ur->add_do_reference(mesh_instance);
 			ur->add_undo_method(node, "remove_child", mesh_instance);
 			ur->commit_action();
-		}
-		break;
+		} break;
 
 		case MENU_OPTION_CLEAR_MESH:
 			node->clear_mesh();
@@ -306,8 +306,8 @@ void MarchingCubesEditor::update_gizmo() {
 }
 
 void MarchingCubesEditor::update_palette_labels(float /*new_value*/) {
-	power_label->set_text(TTR("Power") + " (" + String::num(power_slider->get_value(), 2) + ")");
 	radius_label->set_text(TTR("Radius") + " (" + String::num(radius_slider->get_value(), 2) + ")");
+	power_label->set_text(TTR("Power") + " (" + String::num(power_slider->get_value(), 4) + ")");
 }
 
 //------------------------------ GIZMOS -------------------------
@@ -349,11 +349,11 @@ void MarchingCubesEditor::create_cube_gizmo() {
 	free_gizmo();
 
 	// New gizmo
-	BoxShape* shape = memnew(BoxShape);
+	BoxShape *shape = memnew(BoxShape);
 	shape->set_extents(Vector3(1.0f, 1.0f, 1.0f));
 
 	RID scenario = node->get_world()->get_scenario();
-	RID cube_rid = shape->get_debug_mesh()->get_rid();	//TODO: free this too?
+	RID cube_rid = shape->get_debug_mesh()->get_rid(); //TODO: free this too?
 
 	debug_gizmo = vs->instance_create2(cube_rid, scenario);
 }
@@ -378,20 +378,21 @@ void MarchingCubesEditor::create_editor_grid() {
 
 	// Create grid	
 	float grid_offset = node->mesh_scale * float(HALF_GRID_EXTENTS);
+	float radius = radius_slider->get_value();
 
 	for (int i = 0; i <= GRID_EXTENTS; i++) {
 		// Add vertices
-		vert_write[v_ptr++] = Vector3(-float(HALF_GRID_EXTENTS) * node->mesh_scale, -node->mesh_scale * 0.5f, float(i * node->mesh_scale) - grid_offset);
-		vert_write[v_ptr++] = Vector3(+float(HALF_GRID_EXTENTS) * node->mesh_scale, -node->mesh_scale * 0.5f, float(i * node->mesh_scale) - grid_offset);
+		vert_write[v_ptr++] = Vector3(-float(HALF_GRID_EXTENTS) * node->mesh_scale, -node->mesh_scale * radius * 0.5f, float(i * node->mesh_scale) - grid_offset);
+		vert_write[v_ptr++] = Vector3(+float(HALF_GRID_EXTENTS) * node->mesh_scale, -node->mesh_scale * radius * 0.5f, float(i * node->mesh_scale) - grid_offset);
 
-		vert_write[v_ptr++] = Vector3(float(i * node->mesh_scale) - grid_offset, -node->mesh_scale * 0.5f, -float(HALF_GRID_EXTENTS) * node->mesh_scale);
-		vert_write[v_ptr++] = Vector3(float(i * node->mesh_scale) - grid_offset, -node->mesh_scale * 0.5f, +float(HALF_GRID_EXTENTS) * node->mesh_scale);
+		vert_write[v_ptr++] = Vector3(float(i * node->mesh_scale) - grid_offset, -node->mesh_scale * radius * 0.5f, -float(HALF_GRID_EXTENTS) * node->mesh_scale);
+		vert_write[v_ptr++] = Vector3(float(i * node->mesh_scale) - grid_offset, -node->mesh_scale * radius * 0.5f, +float(HALF_GRID_EXTENTS) * node->mesh_scale);
 
-		vert_write[v_ptr++] = Vector3(-float(HALF_GRID_EXTENTS) * node->mesh_scale, +node->mesh_scale * 0.5f, float(i * node->mesh_scale) - grid_offset);
-		vert_write[v_ptr++] = Vector3(+float(HALF_GRID_EXTENTS) * node->mesh_scale, +node->mesh_scale * 0.5f, float(i * node->mesh_scale) - grid_offset);
+		vert_write[v_ptr++] = Vector3(-float(HALF_GRID_EXTENTS) * node->mesh_scale, +node->mesh_scale * radius * 0.5f, float(i * node->mesh_scale) - grid_offset);
+		vert_write[v_ptr++] = Vector3(+float(HALF_GRID_EXTENTS) * node->mesh_scale, +node->mesh_scale * radius * 0.5f, float(i * node->mesh_scale) - grid_offset);
 
-		vert_write[v_ptr++] = Vector3(float(i * node->mesh_scale) - grid_offset, +node->mesh_scale * 0.5f, -float(HALF_GRID_EXTENTS) * node->mesh_scale);
-		vert_write[v_ptr++] = Vector3(float(i * node->mesh_scale) - grid_offset, +node->mesh_scale * 0.5f, +float(HALF_GRID_EXTENTS) * node->mesh_scale);
+		vert_write[v_ptr++] = Vector3(float(i * node->mesh_scale) - grid_offset, +node->mesh_scale * radius * 0.5f, -float(HALF_GRID_EXTENTS) * node->mesh_scale);
+		vert_write[v_ptr++] = Vector3(float(i * node->mesh_scale) - grid_offset, +node->mesh_scale * radius * 0.5f, +float(HALF_GRID_EXTENTS) * node->mesh_scale);
 
 		// Add colours
 		float distance_to_centre = Math::absf(i - HALF_GRID_EXTENTS) / (float)HALF_GRID_EXTENTS;
@@ -409,7 +410,6 @@ void MarchingCubesEditor::create_editor_grid() {
 	mesh_info[ArrayMesh::ARRAY_COLOR] = vert_colours;
 
 	VS::get_singleton()->mesh_add_surface_from_arrays(grid_rid, VS::PRIMITIVE_LINES, mesh_info);
-
 
 	SpatialMaterial *spat_mat = memnew(SpatialMaterial);
 	spat_mat->set_flag(SpatialMaterial::FLAG_ALBEDO_FROM_VERTEX_COLOR, true);
@@ -432,27 +432,26 @@ void MarchingCubesEditor::free_editor_grid() {
 	}
 }
 
-
 //------------------------------ TOOLS -------------------------
-void MarchingCubesEditor::brush_cube(const Vector3& centre, float radius, float power, bool additive) {
+void MarchingCubesEditor::brush_cube(const Vector3 &centre, float radius, float power, bool additive) {
 	ERR_FAIL_COND(!node);
 
 	node->brush_cube(centre, radius, power, additive);
 	node->generate_mesh();
 }
-void MarchingCubesEditor::brush_sphere(const Vector3& centre, float radius, float power, bool additive) {
+void MarchingCubesEditor::brush_sphere(const Vector3 &centre, float radius, float power, bool additive) {
 	ERR_FAIL_COND(!node);
 
 	node->brush_sphere(centre, radius, power, additive);
 	node->generate_mesh();
 }
-void MarchingCubesEditor::flatten_cube(const Vector3& centre, float radius, float power) {
+void MarchingCubesEditor::flatten_cube(const Vector3 &centre, float radius, float power) {
 	ERR_FAIL_COND(!node);
 
 	node->flatten_cube(centre, radius, power);	
 	node->generate_mesh();
 }
-void MarchingCubesEditor::ruffle_cube(const Vector3& centre, float radius, float power) {
+void MarchingCubesEditor::ruffle_cube(const Vector3 &centre, float radius, float power) {
 	ERR_FAIL_COND(!node);
 
 	node->ruffle_cube(centre, radius, power);	
@@ -499,7 +498,6 @@ void MarchingCubesEditor::bump_data(int direction) {
 	node->generate_mesh();
 }
 
-
 //------------------------------ MISC -------------------------
 float MarchingCubesEditor::get_max_value(const Axis axis) const {
 	constexpr float DEFAULT_VALUE = 256.0f;
@@ -517,8 +515,43 @@ float MarchingCubesEditor::get_max_value(const Axis axis) const {
 	}
 }
 
+void MarchingCubesEditor::begin_editing() {
+	copy_data(node->get_terrain_data()->data, stashed_data);
+
+	is_editing = true;
+}
+void MarchingCubesEditor::end_editing() {
+	ERR_FAIL_COND(!is_editing);
+
+	UndoRedo *ur = editor->get_undo_redo();
+	ur->create_action("Marching Cubes drawing");
+	ur->add_do_method(this, "apply_data", node->get_terrain_data()->data);
+	ur->add_undo_method(this, "apply_data", stashed_data);
+	ur->commit_action();
+
+	is_editing = false;
+}
+
+void MarchingCubesEditor::apply_data(const PoolRealArray &p_data) {
+	ERR_FAIL_COND(!node);
+
+	copy_data(p_data, node->get_terrain_data()->data);
+	node->generate_mesh();
+}
+void MarchingCubesEditor::copy_data(const PoolRealArray &p_from, PoolRealArray &p_to) {
+	// Store current data into a stashed variable
+	p_to.resize(p_from.size());
+
+	auto r = p_from.read();
+	auto w = p_to.write();
+
+	for (int i = 0; i < p_from.size(); i++) {
+		w[i] = r[i];
+	}
+}
+
 //------------------------------ PUBLIC -------------------------
-bool MarchingCubesEditor::forward_spatial_input_event(Camera* p_camera, const Ref<InputEvent>& p_event) {
+bool MarchingCubesEditor::forward_spatial_input_event(Camera *p_camera, const Ref<InputEvent> &p_event) {
     if (!node) return false;
 
 	editor_camera = p_camera;
@@ -557,21 +590,14 @@ bool MarchingCubesEditor::forward_spatial_input_event(Camera* p_camera, const Re
 
 				default:
 					// Not a wheel event
-					if (mouse_button_down == BUTTON_LEFT) {
-						// Begin transaction
-						UndoRedo *undo_redo = editor->get_undo_redo();
-						undo_redo->create_action("Editing Marching Cubes");
-						//TODO: add undo and redo events here to support undo properly
-					}
 					mouse_button_down = mouse_button_event->get_button_index();
+					if (mouse_button_down == BUTTON_LEFT) {
+						begin_editing(); // for undo/redo
+					}
 					break;
 			}
 		} else {
-			UndoRedo *undo_redo = editor->get_undo_redo();
-
-			if (mouse_button_down > 0 && undo_redo->is_committing_action()) {
-				undo_redo->commit_action();
-			}
+			end_editing();
 			mouse_button_down = 0;
 		}
 	}
@@ -604,7 +630,7 @@ bool MarchingCubesEditor::forward_spatial_input_event(Camera* p_camera, const Re
 
 	return true;
 }
-void MarchingCubesEditor::edit(MarchingCubesTerrain* p_marching_cubes) {
+void MarchingCubesEditor::edit(MarchingCubesTerrain *p_marching_cubes) {
 	node = p_marching_cubes;
 	
 	if (node && node->terrain_data.is_null()) {
@@ -666,7 +692,7 @@ MarchingCubesEditor::MarchingCubesEditor(EditorNode *p_editor) {
 	status = memnew(Label);
 	add_child(status);
 
-	HBoxContainer* radius_box = memnew(HBoxContainer);
+	HBoxContainer *radius_box = memnew(HBoxContainer);
 	radius_box->set_alignment(AlignMode::ALIGN_BEGIN);
 	radius_box->set_h_size_flags(SIZE_EXPAND_FILL);
 	{
@@ -686,7 +712,7 @@ MarchingCubesEditor::MarchingCubesEditor(EditorNode *p_editor) {
 	}
 	add_child(radius_box);
 
-	HBoxContainer* power_box = memnew(HBoxContainer);
+	HBoxContainer *power_box = memnew(HBoxContainer);
 	power_box->set_alignment(AlignMode::ALIGN_BEGIN);
 	power_box->set_h_size_flags(SIZE_EXPAND_FILL);
 	{
@@ -697,6 +723,7 @@ MarchingCubesEditor::MarchingCubesEditor(EditorNode *p_editor) {
 		
 		power_slider = memnew(HSlider);
 		power_slider->set_custom_minimum_size(Size2(200.0f, 0.0f));
+		power_slider->set_exp_ratio(true);
 		power_slider->set_min(0.001f);
 		power_slider->set_max(1.000f);
 		power_slider->set_step(0.001f);
@@ -713,40 +740,40 @@ MarchingCubesEditor::MarchingCubesEditor(EditorNode *p_editor) {
 
 	add_child(memnew(HSeparator));
 
-	Label* bump_label = memnew(Label);
+	Label *bump_label = memnew(Label);
 	bump_label->set_text("Bump:");
 	add_child(bump_label);
 
-	HBoxContainer* bump_box = memnew(HBoxContainer);
+	HBoxContainer *bump_box = memnew(HBoxContainer);
 	bump_box->set_alignment(AlignMode::ALIGN_BEGIN);
 	bump_box->set_h_size_flags(SIZE_EXPAND_FILL);
 	{ 
-		Button* left_bump = memnew(Button);
+		Button *left_bump = memnew(Button);
 		left_bump->set_text("Left");
 		left_bump->connect("pressed", this, "bump_data", make_binds(BUMP_LEFT));
 		bump_box->add_child(left_bump);
 
-		Button* up_bump = memnew(Button);
+		Button *up_bump = memnew(Button);
 		up_bump->set_text("Up");
 		up_bump->connect("pressed", this, "bump_data", make_binds(BUMP_UP));
 		bump_box->add_child(up_bump);
 
-		Button* down_bump = memnew(Button);
+		Button *down_bump = memnew(Button);
 		down_bump->set_text("Down");
 		down_bump->connect("pressed", this, "bump_data", make_binds(BUMP_DOWN));
 		bump_box->add_child(down_bump);
 	
-		Button* right_bump = memnew(Button);
+		Button *right_bump = memnew(Button);
 		right_bump->set_text("Right");
 		right_bump->connect("pressed", this, "bump_data", make_binds(BUMP_RIGHT));
 		bump_box->add_child(right_bump);
 	
-		Button* forward_bump = memnew(Button);
+		Button *forward_bump = memnew(Button);
 		forward_bump->set_text("Forward");
 		forward_bump->connect("pressed", this, "bump_data", make_binds(BUMP_FORWARD));
 		bump_box->add_child(forward_bump);
 	
-		Button* back_bump = memnew(Button);
+		Button *back_bump = memnew(Button);
 		back_bump->set_text("Back");
 		back_bump->connect("pressed", this, "bump_data", make_binds(BUMP_BACKWARD));
 		bump_box->add_child(back_bump);
