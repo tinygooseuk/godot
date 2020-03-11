@@ -38,10 +38,12 @@ class MarchingCubesEditor : public VBoxContainer {
 	enum Tool {
 		TOOL_CUBE,
 		TOOL_SPHERE,
+		TOOL_PAINT,
 		TOOL_FLATTEN,
 		TOOL_RUFFLE,
 	};
 	int tool = TOOL_CUBE;
+	int colour = 1;
 
 	enum Axis {
 		AXIS_NONE,
@@ -71,6 +73,7 @@ class MarchingCubesEditor : public VBoxContainer {
 	// Toolbar Buttons
 	ToolButton *tool_cube;
 	ToolButton *tool_sphere;
+	ToolButton *tool_paint;
 	ToolButton *tool_flatten;
 	ToolButton *tool_ruffle;
 
@@ -104,6 +107,7 @@ class MarchingCubesEditor : public VBoxContainer {
 	// Tools
 	void brush_cube(const Vector3 &centre, float radius, float power, bool additive = true);
 	void brush_sphere(const Vector3 &centre, float radius, float power, bool additive = true);
+	void paint_sphere(const Vector3 &centre, float radius, int colour);
 	void flatten_cube(const Vector3 &centre, float radius, float power);
 	void ruffle_cube(const Vector3 &centre, float radius, float power);
 	void bump_data(int direction);

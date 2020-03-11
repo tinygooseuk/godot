@@ -1,5 +1,6 @@
 #pragma once
 #include "core/math/vector3.h"
+#include "core/color.h"
 // Adapted from https://graphics.stanford.edu/~mdfisher/MarchingCubes.html
 
 namespace MarchingCubes {
@@ -18,6 +19,7 @@ struct Face {
 struct GridCell {
 	Vector3 position[8]; //position of each corner of the grid in world space
 	float value[8]; //value of the function at this grid corner
+	Color colour[8];
 };
 
 //given a grid cell, returns the set of triangles that approximates the region where val == 0.

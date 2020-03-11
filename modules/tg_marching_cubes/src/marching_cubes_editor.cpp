@@ -35,6 +35,7 @@ void MarchingCubesEditor::_notification(int p_what) {
 void MarchingCubesEditor::enter_tree() {
 	tool_cube->set_icon(get_icon("BoxShape", "EditorIcons"));
 	tool_sphere->set_icon(get_icon("SphereShape", "EditorIcons"));
+	tool_paint->set_icon(get_icon("CanvasItem", "EditorIcons"));
 	tool_flatten->set_icon(get_icon("PlaneShape", "EditorIcons"));
 	tool_ruffle->set_icon(get_icon("SpriteSheet", "EditorIcons"));
 }
@@ -59,6 +60,9 @@ void MarchingCubesEditor::process(float delta) {
 				} else {
 					brush_sphere(tool_position, radius, shift ? mouse_button_down : -1.0f, false);
 				}
+				break;
+			case TOOL_PAINT:
+				paint_sphere(tool_position, radius, colour); //TODO: colour!
 				break;
 			case TOOL_FLATTEN:
 				flatten_cube(tool_position, radius, power);
@@ -153,7 +157,7 @@ void MarchingCubesEditor::menu_option(int p_option) {
 void MarchingCubesEditor::tool_select(int p_tool) {
 	tool = p_tool;
 
-	ToolButton *buttons[] = { tool_cube, tool_sphere, tool_flatten, tool_ruffle };
+	ToolButton *buttons[] = { tool_cube, tool_sphere, tool_paint, tool_flatten, tool_ruffle };
 	const int num_buttons = sizeof(buttons) / sizeof(*buttons);
 	
 	for (int i = 0; i < num_buttons; i++) {
@@ -170,6 +174,7 @@ void MarchingCubesEditor::update_status() {
 	switch (tool) {
 		case TOOL_SPHERE: status_text = "Sphere tool"; break;
 		case TOOL_CUBE: status_text = "Cube tool"; break;
+		case TOOL_PAINT: status_text = "Paint tool"; break;
 		case TOOL_FLATTEN: status_text = "Flatten tool"; break;
 		case TOOL_RUFFLE: status_text = "Ruffle tool"; break;
 	}
@@ -289,13 +294,14 @@ void MarchingCubesEditor::update_gizmo() {
 		gizmo_transform.set_origin(tool_position);
 
 		switch (tool) {
-			case TOOL_SPHERE: {
+			case TOOL_SPHERE: 
+			case TOOL_PAINT: 
+			case TOOL_RUFFLE: {
 				float radius = radius_slider->get_value();
 				gizmo_transform.set_basis(Basis().scaled(Vector3(radius, radius, radius) * 2.0f));
 			} break;
 
 			case TOOL_CUBE:
-			case TOOL_RUFFLE:
 			case TOOL_FLATTEN: {
 				float radius = radius_slider->get_value();
 				gizmo_transform.set_basis(Basis().scaled(Vector3(radius, radius, radius) * 2.0f));
@@ -316,6 +322,7 @@ void MarchingCubesEditor::recreate_gizmo() {
 
 	switch (tool) {
 		case TOOL_SPHERE:
+		case TOOL_PAINT:
 		case TOOL_RUFFLE:
 			create_sphere_gizmo();
 			break;
@@ -443,6 +450,12 @@ void MarchingCubesEditor::brush_sphere(const Vector3 &centre, float radius, floa
 	ERR_FAIL_COND(!node);
 
 	node->brush_sphere(centre, radius, power, additive);
+	node->generate_mesh();
+}
+void MarchingCubesEditor::paint_sphere(const Vector3 &centre, float radius, int colour) {
+	ERR_FAIL_COND(!node);
+
+	node->paint_sphere(centre, radius, colour);
 	node->generate_mesh();
 }
 void MarchingCubesEditor::flatten_cube(const Vector3 &centre, float radius, float power) {
@@ -663,7 +676,7 @@ MarchingCubesEditor::MarchingCubesEditor(EditorNode *p_editor) {
 
 	// Tools
 	tool_cube = memnew(ToolButton);
-	tool_cube->set_shortcut(ED_SHORTCUT("marching_cubes_editor/tool_cube", TTR("Cube Tool"), KEY_C));
+	tool_cube->set_shortcut(ED_SHORTCUT("marching_cubes_editor/tool_cube", TTR("Cube Tool"), KEY_Z));
 	tool_cube->connect("pressed", this, "tool_select", make_binds(TOOL_CUBE));
 	tool_cube->set_toggle_mode(true);
 	toolbar->add_child(tool_cube);
@@ -674,14 +687,20 @@ MarchingCubesEditor::MarchingCubesEditor(EditorNode *p_editor) {
 	tool_sphere->set_toggle_mode(true);
 	toolbar->add_child(tool_sphere);
 
+	tool_paint = memnew(ToolButton);
+	tool_paint->set_shortcut(ED_SHORTCUT("marching_cubes_editor/tool_paint", TTR("Paint Tool"), KEY_C));
+	tool_paint->connect("pressed", this, "tool_select", make_binds(TOOL_PAINT));
+	tool_paint->set_toggle_mode(true);
+	toolbar->add_child(tool_paint);
+
 	tool_flatten = memnew(ToolButton);
-	tool_flatten->set_shortcut(ED_SHORTCUT("marching_cubes_editor/tool_flatten", TTR("Flatten Tool"), KEY_C));
+	tool_flatten->set_shortcut(ED_SHORTCUT("marching_cubes_editor/tool_flatten", TTR("Flatten Tool"), KEY_V));
 	tool_flatten->connect("pressed", this, "tool_select", make_binds(TOOL_FLATTEN));
 	tool_flatten->set_toggle_mode(true);
 	toolbar->add_child(tool_flatten);
 
 	tool_ruffle = memnew(ToolButton);
-	tool_ruffle->set_shortcut(ED_SHORTCUT("marching_cubes_editor/tool_ruffle", TTR("Ruffle Tool"), KEY_V));
+	tool_ruffle->set_shortcut(ED_SHORTCUT("marching_cubes_editor/tool_ruffle", TTR("Ruffle Tool"), KEY_B));
 	tool_ruffle->connect("pressed", this, "tool_select", make_binds(TOOL_RUFFLE));
 	tool_ruffle->set_toggle_mode(true);
 	toolbar->add_child(tool_ruffle);

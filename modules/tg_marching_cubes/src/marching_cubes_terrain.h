@@ -22,9 +22,13 @@ public:
 	float get_value_at(const Vector3 &p_position) const;
 	void set_value_at(const Vector3 &p_position, float p_value);
 
+	int get_colour_at(const Vector3 &p_position) const;
+	void set_colour_at(const Vector3 &p_position, int p_colour);
+
 	// Tools
 	void brush_cube(const Vector3 &centre, float radius, float power, bool additive = true);
 	void brush_sphere(const Vector3 &centre, float radius, float power, bool additive = true);
+	void paint_sphere(const Vector3 &centre, float radius, int colour);
 	void flatten_cube(const Vector3 &centre, float radius, float power);
 	void ruffle_cube(const Vector3 &centre, float radius, float power);
 

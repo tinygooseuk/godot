@@ -107,6 +107,22 @@ void MarchingCubesTerrain::set_value_at(const Vector3 &p_position, float p_value
 	}
 }
 
+int MarchingCubesTerrain::get_colour_at(const Vector3 &p_position) const {
+	const int index = coord_to_index(p_position);
+	if (index == -1) {
+		return 0;
+	}
+
+	return terrain_data->colour_data.read()[index];
+}
+void MarchingCubesTerrain::set_colour_at(const Vector3 &p_position, int p_colour) {
+	const int index = coord_to_index(p_position);
+
+	if (index != -1) {
+		terrain_data->colour_data.write()[index] = p_colour;
+	}
+}
+
 void MarchingCubesTerrain::brush_cube(const Vector3 &centre, float radius, float power, bool additive) {
 	for (float x = -radius; x <= +radius; x += 1.0f) {
 		for (float y = -radius; y <= +radius; y += 1.0f) {
@@ -143,6 +159,21 @@ void MarchingCubesTerrain::brush_sphere(const Vector3 &centre, float radius, flo
 
 					const float alpha = clamp(offset.length() / radius, 0.0f, 1.0f);
 					set_value_at(coord, Math::lerp(current_value, target_value, alpha));
+				}
+			}
+		}
+	}
+}
+
+void MarchingCubesTerrain::paint_sphere(const Vector3 &centre, float radius, int colour) {
+	for (float x = -radius; x <= +radius; x += 1.0f) {
+		for (float y = -radius; y <= +radius; y += 1.0f) {
+			for (float z = -radius; z <= +radius; z += 1.0f) {
+				const Vector3 offset = Vector3(x, y, z);
+				Vector3 coord = get_grid_coordinates_from_world_position(centre + offset);
+
+				if (are_grid_coordinates_valid(coord)) {
+					set_colour_at(coord, colour);
 				}
 			}
 		}
@@ -230,6 +261,8 @@ void MarchingCubesTerrain::generate_mesh() {
 #endif
 
 	auto data_read = terrain_data->data.read();
+	auto colour_read = terrain_data->colour_data.read();
+	auto colour_palette_read = terrain_data->colour_palette.read();
 
 	Ref<ArrayMesh> new_mesh = get_mesh();
 
@@ -262,11 +295,19 @@ void MarchingCubesTerrain::generate_mesh() {
 					grid_cell.position[7] = Vector3((float)(x + 0), (float)(y + 1), (float)(z + 1));
 
 					for (int i = 0; i < 8; i++) {
-						int index = coord_to_index(grid_cell.position[i]);
+						const int index = coord_to_index(grid_cell.position[i]);
 						if (index == -1) {
 							grid_cell.value[i] = 0.0f;
+							grid_cell.colour[i] = Color(1.0f, 1.0f, 1.0f);
 						} else {
 							grid_cell.value[i] = data_read[index];
+
+							const int colour_index = colour_read[index];
+							if (terrain_data->use_colour && colour_index < terrain_data->colour_palette.size()) {
+								grid_cell.colour[i] = colour_palette_read[colour_index];
+							} else {
+								grid_cell.colour[i] = Color(1.0f, 1.0f, 1.0f);
+							}
 						}
 					}
 
@@ -284,6 +325,16 @@ void MarchingCubesTerrain::generate_mesh() {
 
 						Vector3 n = (b - a).cross(c - b).normalized();
 						SurfaceTool &append_to = (n.dot(VECTOR_UP) > 0.55f) ? tops : sides;
+
+						if (terrain_data->use_colour) {
+							Color average_colour;
+							for (int i = 0; i < 8; i++) {
+								average_colour += grid_cell.colour[i];
+							}
+							average_colour /= 8.0f;
+							
+							append_to.add_color(average_colour);
+						}
 
 						// Swap indices because GL is weird :)
 						append_to.add_normal(-n);
@@ -486,20 +537,23 @@ void MarchingCubesTerrain::reallocate_memory() {
 
 	int size = terrain_data->width * terrain_data->height * terrain_data->depth;
 
-	if (terrain_data->data.size() == size) {
-		return;
+	// Data resize
+	if (terrain_data->data.size() != size) {
+		terrain_data->data.resize(size);
 	}
 
-	bool just_shrink = (size < terrain_data->data.size());
+	// Colours resize
+	if (terrain_data->use_colour) {
+		if (terrain_data->colour_data.size() != size) {
+			terrain_data->colour_data.resize(size);
+		}
 
-	terrain_data->data.resize(size);
-
-	if (just_shrink) {
-		return;
+		if (terrain_data->colour_palette.empty()) {
+			terrain_data->colour_palette.append(Color(1.0f, 1.0f, 1.0f));
+		}
+	} else {
+		terrain_data->colour_data.resize(0);
 	}
-
-	// Clear out
-	clear_mesh();
 }
 
 void MarchingCubesTerrain::fill_with_noise() {
