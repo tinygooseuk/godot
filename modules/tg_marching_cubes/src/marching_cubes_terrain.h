@@ -17,7 +17,7 @@ public:
 	void ready();
 	void process(float delta);
 
-	virtual String get_configuration_warning() const override;
+	virtual String get_configuration_warning() const /*override*/;
 
 	float get_value_at(const Vector3 &p_position) const;
 	void set_value_at(const Vector3 &p_position, float p_value);

@@ -6,6 +6,7 @@
 #include "editor/plugins/spatial_editor_plugin.h"
 #include "scene/3d/camera.h"
 #include "scene/gui/menu_button.h"
+#include "scene/gui/color_rect.h"
 #include "scene/main/viewport.h"
 #include "scene/resources/box_shape.h"
 #include "scene/resources/mesh_data_tool.h"
@@ -23,6 +24,7 @@ void MarchingCubesEditor::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("update_palette_labels", "new_value"), &MarchingCubesEditor::update_palette_labels);
 	ClassDB::bind_method(D_METHOD("bump_data", "direction"), &MarchingCubesEditor::bump_data);
 	ClassDB::bind_method(D_METHOD("apply_data", "data"), &MarchingCubesEditor::apply_data);
+	ClassDB::bind_method(D_METHOD("change_colour", "delta"), &MarchingCubesEditor::change_colour);
 }
 
 void MarchingCubesEditor::_notification(int p_what) {
@@ -62,7 +64,7 @@ void MarchingCubesEditor::process(float delta) {
 				}
 				break;
 			case TOOL_PAINT:
-				paint_sphere(tool_position, radius, colour); //TODO: colour!
+				paint_sphere(tool_position, radius, colour);
 				break;
 			case TOOL_FLATTEN:
 				flatten_cube(tool_position, radius, power);
@@ -328,8 +330,7 @@ void MarchingCubesEditor::recreate_gizmo() {
 			break;
 		case TOOL_CUBE:
 			create_cube_gizmo();
-
-			break; //TODO:
+			break;
 	}
 }
 
@@ -471,7 +472,6 @@ void MarchingCubesEditor::ruffle_cube(const Vector3 &centre, float radius, float
 	node->generate_mesh();
 }
 void MarchingCubesEditor::bump_data(int direction) {
-	//TODO:
 	Ref<MarchingCubesData> data = memnew(MarchingCubesData);
 	data->width = node->terrain_data->width; 
 	data->height = node->terrain_data->height;
@@ -512,6 +512,21 @@ void MarchingCubesEditor::bump_data(int direction) {
 }
 
 //------------------------------ MISC -------------------------
+void MarchingCubesEditor::set_colour(int p_colour_index) {
+	if (!node || node->terrain_data->colour_palette.empty()) {
+		colour_label->set_text("0");
+		colour_rect->set_frame_color(Color(1.0f, 1.0f, 1.0f));
+		return;
+	}
+
+	colour = clamp(p_colour_index, 0, node->terrain_data->colour_palette.size()-1);
+
+	colour_label->set_text(String::num(colour));
+	colour_rect->set_frame_color(node->terrain_data->colour_palette[colour]);
+}
+void MarchingCubesEditor::change_colour(int p_colour_index_delta) {
+	set_colour(colour + p_colour_index_delta);
+}
 float MarchingCubesEditor::get_max_value(const Axis axis) const {
 	constexpr float DEFAULT_VALUE = 256.0f;
 
@@ -530,6 +545,7 @@ float MarchingCubesEditor::get_max_value(const Axis axis) const {
 
 void MarchingCubesEditor::begin_editing() {
 	copy_data(node->get_terrain_data()->data, stashed_data);
+	copy_data(node->get_terrain_data()->colour_data, stashed_colour_data);
 
 	is_editing = true;
 }
@@ -537,31 +553,22 @@ void MarchingCubesEditor::end_editing() {
 	ERR_FAIL_COND(!is_editing);
 
 	UndoRedo *ur = editor->get_undo_redo();
-	ur->create_action("Marching Cubes drawing");
-	ur->add_do_method(this, "apply_data", node->get_terrain_data()->data);
-	ur->add_undo_method(this, "apply_data", stashed_data);
+	ur->create_action("Marching Cubes editing");
+	ur->add_do_method(this, "apply_data", node->get_terrain_data()->data, node->get_terrain_data()->colour_data);
+	ur->add_undo_method(this, "apply_data", stashed_data, stashed_colour_data);
 	ur->commit_action();
 
 	is_editing = false;
 }
 
-void MarchingCubesEditor::apply_data(const PoolRealArray &p_data) {
+void MarchingCubesEditor::apply_data(const PoolRealArray &p_data, const PoolByteArray &p_colour_data) {
 	ERR_FAIL_COND(!node);
 
 	copy_data(p_data, node->get_terrain_data()->data);
+	copy_data(p_colour_data, node->get_terrain_data()->colour_data);
 	node->generate_mesh();
 }
-void MarchingCubesEditor::copy_data(const PoolRealArray &p_from, PoolRealArray &p_to) {
-	// Store current data into a stashed variable
-	p_to.resize(p_from.size());
 
-	auto r = p_from.read();
-	auto w = p_to.write();
-
-	for (int i = 0; i < p_from.size(); i++) {
-		w[i] = r[i];
-	}
-}
 
 //------------------------------ PUBLIC -------------------------
 bool MarchingCubesEditor::forward_spatial_input_event(Camera *p_camera, const Ref<InputEvent> &p_event) {
@@ -801,25 +808,46 @@ MarchingCubesEditor::MarchingCubesEditor(EditorNode *p_editor) {
 
 	add_child(memnew(HSeparator));
 
+	Label *colour_header_label = memnew(Label);
+	colour_header_label->set_text("Colour:");
+	add_child(colour_header_label);
+
 	HBoxContainer *colour_box = memnew(HBoxContainer);
 	colour_box->set_alignment(AlignMode::ALIGN_BEGIN);
 	colour_box->set_h_size_flags(SIZE_EXPAND_FILL);
 	{ 
 		Button *previous_colour = memnew(Button);
 		previous_colour->set_text("<-");
-		previous_colour->connect("pressed", this, "bump_data", make_binds(BUMP_LEFT));
+		previous_colour->connect("pressed", this, "change_colour", make_binds(-1));
+		previous_colour->set_custom_minimum_size(Size2(40.0f, 40.0f));
 		colour_box->add_child(previous_colour);
 
+		Container *overlay = memnew(Container);
+		overlay->set_custom_minimum_size(Size2(40.0f, 40.0f));
+		{
+			colour_rect = memnew(ColorRect);
+			colour_rect->set_custom_minimum_size(Size2(40.0f, 40.0f));
+			overlay->add_child(colour_rect);
+
+			colour_label = memnew(Label);
+			colour_label->set_custom_minimum_size(Size2(40.0f, 40.0f));
+			colour_label->set_align(Label::Align::ALIGN_CENTER);
+			colour_label->set_valign(Label::VAlign::VALIGN_CENTER);
+			overlay->add_child(colour_label);
+		}
+		colour_box->add_child(overlay);	
 	
 	
 		Button *next_colour = memnew(Button);
 		next_colour->set_text("->");
-		next_colour->connect("pressed", this, "bump_data", make_binds(BUMP_BACKWARD));
+		next_colour->connect("pressed", this, "change_colour", make_binds(+1));
+		next_colour->set_custom_minimum_size(Size2(40.0f, 40.0f));
 		colour_box->add_child(next_colour);
 	}
 	add_child(colour_box);
 
 	// Final setup
+	set_colour(0);
 	update_status();
 	tool_select(TOOL_CUBE);
 	update_palette_labels();

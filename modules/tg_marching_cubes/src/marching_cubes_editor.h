@@ -8,6 +8,7 @@ class ToolButton;
 class CheckBox;
 class SpinBox;
 class HSlider;
+class ColorRect;
 
 #if TOOLS_ENABLED
 class MarchingCubesEditor : public VBoxContainer {
@@ -86,6 +87,9 @@ class MarchingCubesEditor : public VBoxContainer {
 	Label *radius_label;
 	HSlider *radius_slider;
 
+	Label *colour_label;
+	ColorRect *colour_rect;
+
 	// State
 	Camera *editor_camera = nullptr;
 	Vector3 tool_position;
@@ -113,6 +117,8 @@ class MarchingCubesEditor : public VBoxContainer {
 	void bump_data(int direction);
 
 	// Misc
+	void set_colour(int p_colour_index);
+	void change_colour(int p_colour_index_delta);
 	float get_max_value(Axis axis) const;
 
 	// Begin/end editing (for Undo/Redo)
@@ -120,13 +126,26 @@ class MarchingCubesEditor : public VBoxContainer {
 
 	void begin_editing();
 	void end_editing();
-	void apply_data(const PoolRealArray &p_data);
-	void copy_data(const PoolRealArray &p_from, PoolRealArray &p_to);
+	void apply_data(const PoolRealArray &p_data, const PoolByteArray &p_colour_data);
+
+	template <typename PoolType>
+	inline void copy_data(const PoolType &p_from, PoolType &p_to) {
+		// Store current data into a stashed variable
+		p_to.resize(p_from.size());
+
+		auto r = p_from.read();
+		auto w = p_to.write();
+
+		for (int i = 0; i < p_from.size(); i++) {
+			w[i] = r[i];
+		}
+	}
 
 public:
 	HBoxContainer *toolbar = nullptr;
 
 	PoolRealArray stashed_data;
+	PoolByteArray stashed_colour_data;
 
 	bool forward_spatial_input_event(Camera *p_camera, const Ref<InputEvent> &p_event);
 	void edit(MarchingCubesTerrain *p_marching_cubes);

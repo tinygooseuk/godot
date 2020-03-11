@@ -252,7 +252,9 @@ Vector3 MarchingCubesTerrain::get_world_position_from_grid_coordinates(Vector3 p
 }
 
 void MarchingCubesTerrain::generate_mesh() {
-	MC_ERR_FAIL_COND(terrain_data.is_null() || terrain_data->data.empty());
+	MC_ERR_FAIL_COND(terrain_data.is_null());
+	MC_ERR_FAIL_COND(terrain_data->use_colour && terrain_data->colour_data.empty());
+	MC_ERR_FAIL_COND(terrain_data->data.empty());
 
 #if TOOLS_ENABLED
 	if (debug_mode) {
@@ -301,12 +303,13 @@ void MarchingCubesTerrain::generate_mesh() {
 							grid_cell.colour[i] = Color(1.0f, 1.0f, 1.0f);
 						} else {
 							grid_cell.value[i] = data_read[index];
+							grid_cell.colour[i] = Color(1.0f, 1.0f, 1.0f);
 
-							const int colour_index = colour_read[index];
-							if (terrain_data->use_colour && colour_index < terrain_data->colour_palette.size()) {
-								grid_cell.colour[i] = colour_palette_read[colour_index];
-							} else {
-								grid_cell.colour[i] = Color(1.0f, 1.0f, 1.0f);
+							if (terrain_data->use_colour) {
+								const int colour_index = colour_read[index];
+								if (colour_index < terrain_data->colour_palette.size()) {
+									grid_cell.colour[i] = colour_palette_read[colour_index];
+								}
 							}
 						}
 					}
