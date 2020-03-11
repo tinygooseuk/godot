@@ -108,6 +108,8 @@ void MarchingCubesTerrain::set_value_at(const Vector3 &p_position, float p_value
 }
 
 int MarchingCubesTerrain::get_colour_at(const Vector3 &p_position) const {
+	MC_ERR_FAIL_COND_V(!terrain_data->use_colour, 0);
+
 	const int index = coord_to_index(p_position);
 	if (index == -1) {
 		return 0;
@@ -116,6 +118,8 @@ int MarchingCubesTerrain::get_colour_at(const Vector3 &p_position) const {
 	return terrain_data->colour_data.read()[index];
 }
 void MarchingCubesTerrain::set_colour_at(const Vector3 &p_position, int p_colour) {
+	MC_ERR_FAIL_COND(!terrain_data->use_colour);
+
 	const int index = coord_to_index(p_position);
 
 	if (index != -1) {
