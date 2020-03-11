@@ -799,6 +799,26 @@ MarchingCubesEditor::MarchingCubesEditor(EditorNode *p_editor) {
 	}
 	add_child(bump_box);
 
+	add_child(memnew(HSeparator));
+
+	HBoxContainer *colour_box = memnew(HBoxContainer);
+	colour_box->set_alignment(AlignMode::ALIGN_BEGIN);
+	colour_box->set_h_size_flags(SIZE_EXPAND_FILL);
+	{ 
+		Button *previous_colour = memnew(Button);
+		previous_colour->set_text("<-");
+		previous_colour->connect("pressed", this, "bump_data", make_binds(BUMP_LEFT));
+		colour_box->add_child(previous_colour);
+
+	
+	
+		Button *next_colour = memnew(Button);
+		next_colour->set_text("->");
+		next_colour->connect("pressed", this, "bump_data", make_binds(BUMP_BACKWARD));
+		colour_box->add_child(next_colour);
+	}
+	add_child(colour_box);
+
 	// Final setup
 	update_status();
 	tool_select(TOOL_CUBE);
