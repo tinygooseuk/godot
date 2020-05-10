@@ -11,12 +11,13 @@
 # Adolfo Jayme Barrientos <fitojb@ubuntu.com>, 2020.
 # Xavier Gomez <hiulit@gmail.com>, 2020.
 # Aina <ainasoga@gmail.com>, 2020.
+# Alex Mancha <codingstain@gmail.com>, 2020.
 msgid ""
 msgstr ""
 "Project-Id-Version: Godot Engine editor\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2020-02-07 10:32+0000\n"
-"Last-Translator: Roger Blanco Ribera <roger.blancoribera@gmail.com>\n"
+"PO-Revision-Date: 2020-03-11 12:20+0000\n"
+"Last-Translator: Alex Mancha <codingstain@gmail.com>\n"
 "Language-Team: Catalan <https://hosted.weblate.org/projects/godot-engine/"
 "godot/ca/>\n"
 "Language: ca\n"
@@ -24,7 +25,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 3.11-dev\n"
+"X-Generator: Weblate 4.0-dev\n"
 
 #: core/math/expression.cpp modules/gdscript/gdscript_functions.cpp
 #: modules/visual_script/visual_script_builtin_funcs.cpp
@@ -694,9 +695,8 @@ msgid "Line Number:"
 msgstr "Línia:"
 
 #: editor/code_editor.cpp
-#, fuzzy
 msgid "%d replaced."
-msgstr "Substitueix..."
+msgstr "%d reemplaçat."
 
 #: editor/code_editor.cpp editor/editor_help.cpp
 msgid "%d match."
@@ -1452,7 +1452,7 @@ msgstr "Mou l'AutoCàrrega"
 msgid "Remove Autoload"
 msgstr "Treu Autocàrrega"
 
-#: editor/editor_autoload_settings.cpp
+#: editor/editor_autoload_settings.cpp editor/editor_plugin_settings.cpp
 msgid "Enable"
 msgstr "Activa"
 
@@ -2756,7 +2756,6 @@ msgid "Set Up Version Control"
 msgstr "Configurar Control de Versions"
 
 #: editor/editor_node.cpp
-#, fuzzy
 msgid "Shut Down Version Control"
 msgstr "Desactivar el control de versions"
 
@@ -2954,8 +2953,13 @@ msgid "Q&A"
 msgstr "Preguntes i Respostes"
 
 #: editor/editor_node.cpp
-msgid "Issue Tracker"
-msgstr "Seguiment d'Incidències"
+#, fuzzy
+msgid "Report a Bug"
+msgstr "ReImportar"
+
+#: editor/editor_node.cpp
+msgid "Send Docs Feedback"
+msgstr ""
 
 #: editor/editor_node.cpp editor/plugins/asset_library_editor_plugin.cpp
 msgid "Community"
@@ -4028,7 +4032,8 @@ msgid "Reimport"
 msgstr "ReImportar"
 
 #: editor/import_dock.cpp
-msgid "Save scenes, re-import and restart"
+#, fuzzy
+msgid "Save Scenes, Re-Import, and Restart"
 msgstr "Guardar escenes, reimportar i reiniciar"
 
 #: editor/import_dock.cpp
@@ -5974,7 +5979,7 @@ msgstr ""
 
 #: editor/plugins/mesh_instance_editor_plugin.cpp
 msgid "Couldn't create a single convex collision shape."
-msgstr ""
+msgstr "No s'ha pogut crear una capa de col·lisió convexa."
 
 #: editor/plugins/mesh_instance_editor_plugin.cpp
 #, fuzzy
@@ -6957,15 +6962,6 @@ msgid "Open Godot online documentation."
 msgstr "Obrir la documentació en línia de Godot."
 
 #: editor/plugins/script_editor_plugin.cpp
-msgid "Request Docs"
-msgstr "Sol·licitar Documentació"
-
-#: editor/plugins/script_editor_plugin.cpp
-#, fuzzy
-msgid "Help improve the Godot documentation by giving feedback."
-msgstr "Ajudeu a millorar la documentació de Godot donant comentaris"
-
-#: editor/plugins/script_editor_plugin.cpp
 msgid "Search the reference documentation."
 msgstr "Cerca dins la documentació de referència."
 
@@ -7417,6 +7413,11 @@ msgid "This operation requires a single selected node."
 msgstr "Aquesta operació requereix un únic node seleccionat."
 
 #: editor/plugins/spatial_editor_plugin.cpp
+#, fuzzy
+msgid "Auto Orthogonal Enabled"
+msgstr "Ortogonal"
+
+#: editor/plugins/spatial_editor_plugin.cpp
 msgid "Lock View Rotation"
 msgstr "Bloquejar Rotació de la Vista"
 
@@ -7508,6 +7509,10 @@ msgid "Freelook Slow Modifier"
 msgstr "Modificador de la Velocitat de la Vista Lliure"
 
 #: editor/plugins/spatial_editor_plugin.cpp
+msgid "View Rotation Locked"
+msgstr "Rotació de la Vista Bloquejada"
+
+#: editor/plugins/spatial_editor_plugin.cpp
 #, fuzzy
 msgid ""
 "Note: The FPS value displayed is the editor's framerate.\n"
@@ -7515,10 +7520,6 @@ msgid ""
 msgstr ""
 "Nota: el valor FPS mostrat és la taxa de fotogrames de l'editor.\n"
 "No es pot utilitzar com una indicació fiable del rendiment en el joc."
-
-#: editor/plugins/spatial_editor_plugin.cpp
-msgid "View Rotation Locked"
-msgstr "Rotació de la Vista Bloquejada"
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "XForm Dialog"
@@ -10188,6 +10189,13 @@ msgstr ""
 "Actualment no teniu cap projecte.\n"
 "Us agradaria explorar projectes d'exemple oficials a la biblioteca d'actius?"
 
+#: editor/project_manager.cpp
+msgid ""
+"The search box filters projects by name and last path component.\n"
+"To filter projects by name and full path, the query must contain at least "
+"one `/` character."
+msgstr ""
+
 #: editor/project_settings_editor.cpp
 msgid "Key "
 msgstr "Tecla "
@@ -11210,6 +11218,12 @@ msgid "Script file already exists."
 msgstr "L'Acció '%s' ja existeix!"
 
 #: editor/script_create_dialog.cpp
+msgid ""
+"Note: Built-in scripts have some limitations and can't be edited using an "
+"external editor."
+msgstr ""
+
+#: editor/script_create_dialog.cpp
 #, fuzzy
 msgid "Class Name:"
 msgstr "Nom de Classe"
@@ -11342,6 +11356,11 @@ msgstr "Llista d'Ús de la Memòria de Vídeo per Recurs:"
 #: editor/script_editor_debugger.cpp
 msgid "Total:"
 msgstr "Total:"
+
+#: editor/script_editor_debugger.cpp
+#, fuzzy
+msgid "Export list to a CSV file"
+msgstr "Exportar Perfil"
 
 #: editor/script_editor_debugger.cpp
 msgid "Resource Path"
@@ -13064,6 +13083,10 @@ msgstr ""
 "forma per tal d'obtenir-ne la mida. Altrament, establiu-la com a Destinació "
 "de Renderització i assigneu-ne la textura interna a algun node."
 
+#: scene/main/viewport.cpp
+msgid "Viewport size must be greater than 0 to render anything."
+msgstr ""
+
 #: scene/resources/visual_shader_nodes.cpp
 #, fuzzy
 msgid "Invalid source for preview."
@@ -13093,6 +13116,16 @@ msgstr ""
 #: servers/visual/shader_language.cpp
 msgid "Constants cannot be modified."
 msgstr "Les constants no es poden modificar."
+
+#~ msgid "Issue Tracker"
+#~ msgstr "Seguiment d'Incidències"
+
+#~ msgid "Request Docs"
+#~ msgstr "Sol·licitar Documentació"
+
+#, fuzzy
+#~ msgid "Help improve the Godot documentation by giving feedback."
+#~ msgstr "Ajudeu a millorar la documentació de Godot donant comentaris"
 
 #~ msgid "Replaced %d occurrence(s)."
 #~ msgstr "%d ocurrència/es reemplaçades."

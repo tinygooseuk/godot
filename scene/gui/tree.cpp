@@ -777,6 +777,9 @@ void TreeItem::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_text", "column", "text"), &TreeItem::set_text);
 	ClassDB::bind_method(D_METHOD("get_text", "column"), &TreeItem::get_text);
 
+	ClassDB::bind_method(D_METHOD("set_suffix", "column", "text"), &TreeItem::set_suffix);
+	ClassDB::bind_method(D_METHOD("get_suffix", "column"), &TreeItem::get_suffix);
+
 	ClassDB::bind_method(D_METHOD("set_icon", "column", "texture"), &TreeItem::set_icon);
 	ClassDB::bind_method(D_METHOD("get_icon", "column"), &TreeItem::get_icon);
 
@@ -3032,13 +3035,6 @@ void Tree::_notification(int p_what) {
 		if (root) {
 
 			draw_item(Point2(), draw_ofs, draw_size, root);
-		}
-
-		int ofs = 0;
-
-		for (int i = 0; i < (columns.size() - 1 - 1); i++) {
-
-			ofs += get_column_width(i);
 		}
 
 		if (show_column_titles) {

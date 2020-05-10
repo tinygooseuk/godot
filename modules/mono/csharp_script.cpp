@@ -308,7 +308,8 @@ void CSharpLanguage::get_string_delimiters(List<String> *p_delimiters) const {
 
 	p_delimiters->push_back("' '"); // character literal
 	p_delimiters->push_back("\" \""); // regular string literal
-	p_delimiters->push_back("@\" \""); // verbatim string literal
+	// Verbatim string literals (`@" "`) don't render correctly, so don't highlight them.
+	// Generic string highlighting suffices as a workaround for now.
 }
 
 static String get_base_class_name(const String &p_base_class_name, const String p_class_name) {
@@ -736,7 +737,7 @@ bool CSharpLanguage::is_assembly_reloading_needed() {
 	if (proj_assembly) {
 		String proj_asm_path = proj_assembly->get_path();
 
-		if (!FileAccess::exists(proj_assembly->get_path())) {
+		if (!FileAccess::exists(proj_asm_path)) {
 			// Maybe it wasn't loaded from the default path, so check this as well
 			proj_asm_path = GodotSharpDirs::get_res_temp_assemblies_dir().plus_file(appname_safe);
 			if (!FileAccess::exists(proj_asm_path))
@@ -2880,22 +2881,6 @@ void CSharpScript::initialize_for_managed_type(Ref<CSharpScript> p_script, GDMon
 }
 
 bool CSharpScript::can_instance() const {
-
-#ifdef TOOLS_ENABLED
-	if (Engine::get_singleton()->is_editor_hint()) {
-
-		// Hack to lower the risk of attached scripts not being added to the C# project
-		if (!get_path().empty() && get_path().find("::") == -1) { // Ignore if built-in script. Can happen if the file is deleted...
-			if (_create_project_solution_if_needed()) {
-				CSharpProject::add_item(GodotSharpDirs::get_project_csproj_path(),
-						"Compile",
-						ProjectSettings::get_singleton()->globalize_path(get_path()));
-			} else {
-				ERR_PRINTS("C# project could not be created; cannot add file: '" + get_path() + "'.");
-			}
-		}
-	}
-#endif
 
 #ifdef TOOLS_ENABLED
 	bool extra_cond = tool || ScriptServer::is_scripting_enabled();

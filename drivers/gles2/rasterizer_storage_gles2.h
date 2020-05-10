@@ -149,6 +149,8 @@ public:
 			uint32_t surface_switch_count;
 			uint32_t shader_rebind_count;
 			uint32_t vertices_count;
+			uint32_t _2d_item_count;
+			uint32_t _2d_draw_call_count;
 
 			void reset() {
 				object_count = 0;
@@ -157,6 +159,8 @@ public:
 				surface_switch_count = 0;
 				shader_rebind_count = 0;
 				vertices_count = 0;
+				_2d_item_count = 0;
+				_2d_draw_call_count = 0;
 			}
 		} render, render_final, snap;
 
@@ -446,6 +450,13 @@ public:
 			bool uses_screen_texture;
 			bool uses_screen_uv;
 			bool uses_time;
+			bool uses_modulate;
+			bool reads_color;
+
+			// this flag is specifically for batching
+			// some of the logic is thus in rasterizer_storage.cpp
+			// we could alternatively set some bitflags here and test on the fly
+			bool prevent_color_baking;
 
 		} canvas_item;
 
@@ -524,6 +535,10 @@ public:
 
 	virtual void shader_set_default_texture_param(RID p_shader, const StringName &p_name, RID p_texture);
 	virtual RID shader_get_default_texture_param(RID p_shader, const StringName &p_name) const;
+
+	virtual void shader_add_custom_define(RID p_shader, const String &p_define);
+	virtual void shader_get_custom_defines(RID p_shader, Vector<String> *p_defines) const;
+	virtual void shader_clear_custom_defines(RID p_shader);
 
 	void _update_shader(Shader *p_shader) const;
 	void update_dirty_shaders();
@@ -1284,7 +1299,6 @@ public:
 
 		bool clear_request;
 		Color clear_request_color;
-		int canvas_draw_commands;
 		float time[4];
 		float delta;
 		uint64_t count;

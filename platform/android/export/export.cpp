@@ -692,6 +692,8 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 
 		int xr_mode_index = p_preset->get("xr_features/xr_mode");
 
+		String plugins = p_preset->get("custom_template/plugins");
+
 		Vector<String> perms;
 
 		const char **aperms = android_perms;
@@ -858,6 +860,11 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 							if (xr_mode_index == 1 /* XRMode.OVR */) {
 								string_table.write[attr_value] = "vr_only";
 							}
+						}
+
+						if (tname == "meta-data" && attrname == "value" && value == "custom_template_plugins_value") {
+							// Update the meta-data 'android:value' attribute with the list of enabled plugins.
+							string_table.write[attr_value] = plugins;
 						}
 
 						iofs += 20;
@@ -1181,14 +1188,32 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 	static String _parse_string(const uint8_t *p_bytes, bool p_utf8) {
 
 		uint32_t offset = 0;
-		uint32_t len = decode_uint16(&p_bytes[offset]);
+		uint32_t len = 0;
 
 		if (p_utf8) {
-			//don't know how to read extended utf8, this will have to be for now
-			len >>= 8;
+			uint8_t byte = p_bytes[offset];
+			if (byte & 0x80)
+				offset += 2;
+			else
+				offset += 1;
+			byte = p_bytes[offset];
+			offset++;
+			if (byte & 0x80) {
+				len = byte & 0x7F;
+				len = (len << 8) + p_bytes[offset];
+				offset++;
+			} else {
+				len = byte;
+			}
+		} else {
+			len = decode_uint16(&p_bytes[offset]);
+			offset += 2;
+			if (len & 0x8000) {
+				len &= 0x7FFF;
+				len = (len << 16) + decode_uint16(&p_bytes[offset]);
+				offset += 2;
+			}
 		}
-		offset += 2;
-		//printf("len %i, unicode: %i\n",len,int(p_utf8));
 
 		if (p_utf8) {
 
@@ -1373,6 +1398,7 @@ public:
 		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "custom_template/debug", PROPERTY_HINT_GLOBAL_FILE, "*.apk"), ""));
 		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "custom_template/release", PROPERTY_HINT_GLOBAL_FILE, "*.apk"), ""));
 		r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "custom_template/use_custom_build"), false));
+		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "custom_template/plugins", PROPERTY_HINT_PLACEHOLDER_TEXT, "Plugin1,Plugin2,..."), ""));
 		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "command_line/extra_args"), ""));
 		r_options->push_back(ExportOption(PropertyInfo(Variant::INT, "version/code", PROPERTY_HINT_RANGE, "1,4096,1,or_greater"), 1));
 		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "version/name"), "1.0"));
@@ -1709,7 +1735,7 @@ public:
 				valid = false;
 			} else {
 				Error errn;
-				DirAccessRef da = DirAccess::open(sdk_path.plus_file("tools"), &errn);
+				DirAccessRef da = DirAccess::open(sdk_path.plus_file("platform-tools"), &errn);
 				if (errn != OK) {
 					err += TTR("Invalid Android SDK path for custom build in Editor Settings.") + "\n";
 					valid = false;
@@ -2083,14 +2109,18 @@ public:
 #endif
 
 			String build_path = ProjectSettings::get_singleton()->get_resource_path().plus_file("android/build");
+			String plugins_dir = ProjectSettings::get_singleton()->get_resource_path().plus_file("android/plugins");
 
 			build_command = build_path.plus_file(build_command);
 
 			String package_name = get_package_name(p_preset->get("package/unique_name"));
+			String plugins = p_preset->get("custom_template/plugins");
 
 			List<String> cmdline;
 			cmdline.push_back("build");
 			cmdline.push_back("-Pexport_package_name=" + package_name); // argument to specify the package name.
+			cmdline.push_back("-Pcustom_template_plugins_dir=" + plugins_dir); // argument to specify the plugins directory.
+			cmdline.push_back("-Pcustom_template_plugins=" + plugins); // argument to specify the list of plugins to enable.
 			cmdline.push_back("-p"); // argument to specify the start directory.
 			cmdline.push_back(build_path); // start directory.
 			/*{ used for debug
@@ -2222,6 +2252,7 @@ public:
 			ImageLoader::load_image(path, launcher_adaptive_icon_background_image);
 		}
 
+		Vector<String> invalid_abis(enabled_abis);
 		while (ret == UNZ_OK) {
 
 			//get filename
@@ -2267,6 +2298,7 @@ public:
 				bool enabled = false;
 				for (int i = 0; i < enabled_abis.size(); ++i) {
 					if (file.begins_with("lib/" + enabled_abis[i] + "/")) {
+						invalid_abis.erase(enabled_abis[i]);
 						enabled = true;
 						break;
 					}
@@ -2304,6 +2336,13 @@ public:
 			}
 
 			ret = unzGoToNextFile(pkg);
+		}
+
+		if (!invalid_abis.empty()) {
+			String unsupported_arch = String(", ").join(invalid_abis);
+			EditorNode::add_io_error("Missing libraries in the export template for the selected architectures: " + unsupported_arch + ".\n" +
+									 "Please build a template with all required libraries, or uncheck the missing architectures in the export preset.");
+			CLEANUP_AND_RETURN(ERR_FILE_NOT_FOUND);
 		}
 
 		if (ep.step("Adding files...", 1)) {

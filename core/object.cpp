@@ -33,6 +33,7 @@
 #include "core/class_db.h"
 #include "core/core_string_names.h"
 #include "core/message_queue.h"
+#include "core/object_rc.h"
 #include "core/os/os.h"
 #include "core/print_string.h"
 #include "core/resource.h"
@@ -968,6 +969,37 @@ void Object::cancel_delete() {
 	_predelete_ok = true;
 }
 
+#ifdef DEBUG_ENABLED
+ObjectRC *Object::_use_rc() {
+
+	// The RC object is lazily created the first time it's requested;
+	// that way, there's no need to allocate and release it at all if this Object
+	// is not being referred by any Variant at all.
+
+	// Although when dealing with Objects from multiple threads some locking
+	// mechanism should be used, this at least makes safe the case of first
+	// assignment.
+
+	ObjectRC *rc = nullptr;
+	ObjectRC *const creating = reinterpret_cast<ObjectRC *>(1);
+	if (unlikely(_rc.compare_exchange_strong(rc, creating, std::memory_order_acq_rel))) {
+		// Not created yet
+		rc = memnew(ObjectRC(this));
+		_rc.store(rc, std::memory_order_release);
+		return rc;
+	}
+
+	// Spin-wait until we know it's created (or just return if it's already created)
+	for (;;) {
+		if (likely(rc != creating)) {
+			rc->increment();
+			return rc;
+		}
+		rc = _rc.load(std::memory_order_acquire);
+	}
+}
+#endif
+
 void Object::set_script_and_instance(const RefPtr &p_script, ScriptInstance *p_instance) {
 
 	//this function is not meant to be used in any of these ways
@@ -1353,6 +1385,25 @@ Array Object::_get_incoming_connections() const {
 	return ret;
 }
 
+bool Object::has_signal(const StringName &p_name) const {
+	if (!script.is_null()) {
+		Ref<Script> scr = script;
+		if (scr.is_valid() && scr->has_script_signal(p_name)) {
+			return true;
+		}
+	}
+
+	if (ClassDB::has_signal(get_class_name(), p_name)) {
+		return true;
+	}
+
+	if (_has_user_signal(p_name)) {
+		return true;
+	}
+
+	return false;
+}
+
 void Object::get_signal_list(List<MethodInfo> *p_signals) const {
 
 	if (!script.is_null()) {
@@ -1707,6 +1758,7 @@ void Object::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("has_method", "method"), &Object::has_method);
 
+	ClassDB::bind_method(D_METHOD("has_signal", "signal"), &Object::has_signal);
 	ClassDB::bind_method(D_METHOD("get_signal_list"), &Object::_get_signal_list);
 	ClassDB::bind_method(D_METHOD("get_signal_connection_list", "signal"), &Object::_get_signal_connection_list);
 	ClassDB::bind_method(D_METHOD("get_incoming_connections"), &Object::_get_incoming_connections);
@@ -1924,6 +1976,9 @@ Object::Object() {
 	instance_binding_count = 0;
 	memset(_script_instance_bindings, 0, sizeof(void *) * MAX_SCRIPT_INSTANCE_BINDINGS);
 	script_instance = NULL;
+#ifdef DEBUG_ENABLED
+	_rc.store(nullptr, std::memory_order_release);
+#endif
 #ifdef TOOLS_ENABLED
 
 	_edited = false;
@@ -1936,6 +1991,15 @@ Object::Object() {
 }
 
 Object::~Object() {
+
+#ifdef DEBUG_ENABLED
+	ObjectRC *rc = _rc.load(std::memory_order_acquire);
+	if (rc) {
+		if (rc->invalidate()) {
+			memfree(rc);
+		}
+	}
+#endif
 
 	if (script_instance)
 		memdelete(script_instance);
