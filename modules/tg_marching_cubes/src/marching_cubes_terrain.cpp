@@ -304,7 +304,12 @@ void MarchingCubesTerrain::generate_mesh() {
 						const int index = coord_to_index(grid_cell.position[i]);
 						if (index == -1) {
 							grid_cell.value[i] = 0.0f;
-							grid_cell.colour[i] = Color(1.0f, 1.0f, 1.0f);
+
+							if (terrain_data->use_colour && terrain_data->colour_palette.size() > 0) {
+								grid_cell.colour[i] = colour_palette_read[0];
+							} else {
+								grid_cell.colour[i] = Color(1.0f, 1.0f, 1.0f);
+							}
 						} else {
 							grid_cell.value[i] = data_read[index];
 							grid_cell.colour[i] = Color(1.0f, 1.0f, 1.0f);
