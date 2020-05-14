@@ -39,8 +39,6 @@
 #include "editor_settings.h"
 
 #define CONTRIBUTE_URL "https://docs.godotengine.org/en/latest/community/contributing/updating_the_class_reference.html"
-#define CONTRIBUTE2_URL "https://github.com/godotengine/godot-docs"
-#define REQUEST_URL "https://github.com/godotengine/godot-docs/issues/new"
 
 DocData *EditorHelp::doc = NULL;
 
@@ -1042,6 +1040,7 @@ void EditorHelp::_update_doc() {
 				class_desc->pop(); // color
 				class_desc->pop(); // font
 				class_desc->pop(); // cell
+				method_line[cd.properties[i].setter] = property_line[cd.properties[i].name];
 			}
 
 			if (cd.properties[i].getter != "") {
@@ -1059,6 +1058,7 @@ void EditorHelp::_update_doc() {
 				class_desc->pop(); //color
 				class_desc->pop(); //font
 				class_desc->pop(); //cell
+				method_line[cd.properties[i].getter] = property_line[cd.properties[i].name];
 			}
 
 			class_desc->pop(); // table

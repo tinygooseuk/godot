@@ -32,6 +32,7 @@ package org.godotengine.godot;
 
 import android.app.Activity;
 import android.hardware.SensorEvent;
+
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
@@ -174,22 +175,6 @@ public class GodotLib {
 	 * Invoked when the audio thread is started.
 	 */
 	public static native void audio();
-
-	/**
-	 * Used to setup a {@link org.godotengine.godot.Godot.SingletonBase} instance.
-	 * @param p_name Name of the instance.
-	 * @param p_object Reference to the singleton instance.
-	 */
-	public static native void singleton(String p_name, Object p_object);
-
-	/**
-	 * Used to complete registration of the {@link org.godotengine.godot.Godot.SingletonBase} instance's methods.
-	 * @param p_sname Name of the instance
-	 * @param p_name Name of the method to register
-	 * @param p_ret Return type of the registered method
-	 * @param p_params Method parameters types
-	 */
-	public static native void method(String p_sname, String p_name, String p_ret, String[] p_params);
 
 	/**
 	 * Used to access Godot global properties.

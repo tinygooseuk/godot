@@ -93,6 +93,7 @@ public:
 
 	enum TextureType {
 		TEXTURE_TYPE_2D,
+		TEXTURE_TYPE_EXTERNAL,
 		TEXTURE_TYPE_CUBEMAP,
 		TEXTURE_TYPE_2D_ARRAY,
 		TEXTURE_TYPE_3D,
@@ -192,6 +193,10 @@ public:
 
 	virtual void shader_set_default_texture_param(RID p_shader, const StringName &p_name, RID p_texture) = 0;
 	virtual RID shader_get_default_texture_param(RID p_shader, const StringName &p_name) const = 0;
+
+	virtual void shader_add_custom_define(RID p_shader, const String &p_define) = 0;
+	virtual void shader_get_custom_defines(RID p_shader, Vector<String> *p_defines) const = 0;
+	virtual void shader_clear_custom_defines(RID p_shader) = 0;
 
 	/* COMMON MATERIAL API */
 
@@ -684,6 +689,8 @@ public:
 		VIEWPORT_RENDER_INFO_SHADER_CHANGES_IN_FRAME,
 		VIEWPORT_RENDER_INFO_SURFACE_CHANGES_IN_FRAME,
 		VIEWPORT_RENDER_INFO_DRAW_CALLS_IN_FRAME,
+		VIEWPORT_RENDER_INFO_2D_ITEMS_IN_FRAME,
+		VIEWPORT_RENDER_INFO_2D_DRAW_CALLS_IN_FRAME,
 		VIEWPORT_RENDER_INFO_MAX
 	};
 
@@ -1011,6 +1018,8 @@ public:
 		INFO_SHADER_CHANGES_IN_FRAME,
 		INFO_SURFACE_CHANGES_IN_FRAME,
 		INFO_DRAW_CALLS_IN_FRAME,
+		INFO_2D_ITEMS_IN_FRAME,
+		INFO_2D_DRAW_CALLS_IN_FRAME,
 		INFO_USAGE_VIDEO_MEM_TOTAL,
 		INFO_VIDEO_MEM_USED,
 		INFO_TEXTURE_MEM_USED,
