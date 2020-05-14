@@ -7,7 +7,7 @@
 
 void register_tg_marching_cubes_types()
 {
-    ClassDB::register_class<MarchingCubesTerrain>();
+    ClassDB::register_class<MarchingCubesTerrain3D>();
     ClassDB::register_class<MarchingCubesData>();
 
 #ifdef TOOLS_ENABLED

@@ -29,6 +29,7 @@
 /*************************************************************************/
 
 #include "csg_gizmos.h"
+#include "scene/3d/mesh_instance_3d.h"
 
 ///////////
 
@@ -451,7 +452,7 @@ void EditorPluginCSG::_bake() {
 	const Transform xform = meshes[0];
 	const Ref<ArrayMesh> mesh = meshes[1];
 
-	MeshInstance *mesh_instance = memnew(MeshInstance);
+	MeshInstance3D *mesh_instance = memnew(MeshInstance3D);
 	mesh_instance->set_name(String("Baked ") + csg_shape->get_name());
 	mesh_instance->set_transform(csg_shape->get_transform() * xform);
 	mesh_instance->set_mesh(mesh);
@@ -470,7 +471,7 @@ void EditorPluginCSG::_bake() {
 }
 
 void EditorPluginCSG::edit(Object *p_object) {
-	CSGShape *s = Object::cast_to<CSGShape>(p_object);
+	CSGShape3D *s = Object::cast_to<CSGShape3D>(p_object);
 	if (!s) {
 		csg_shape = NULL;
 		return;
@@ -504,11 +505,13 @@ EditorPluginCSG::EditorPluginCSG(EditorNode *p_editor) {
 // -- TINYGOOSE change:
 	editor = p_editor;
 
+	Ref<Theme> theme = EditorNode::get_singleton()->get_editor_theme();
+
 	bake = memnew(ToolButton);
-	bake->set_icon(editor->get_gui_base()->get_icon("Bake", "EditorIcons"));
+	bake->set_icon(theme->get_icon("Bake", "EditorIcons"));
 	bake->set_text(TTR("Bake to MeshInstance"));
 	bake->hide();
-	bake->connect("pressed", this, "_bake");
+	bake->connect("pressed", Callable(this, "_bake"));
 	add_control_to_container(CONTAINER_SPATIAL_EDITOR_MENU, bake);
 	csg_shape = NULL;
 // -- TINYGOOSE end.

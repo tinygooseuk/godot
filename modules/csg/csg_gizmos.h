@@ -59,7 +59,7 @@ class EditorPluginCSG : public EditorPlugin {
 
 
 // -- TINYGOOSE change:
-	CSGShape *csg_shape;
+	CSGShape3D *csg_shape;
 
 	ToolButton *bake;
 	EditorNode *editor;

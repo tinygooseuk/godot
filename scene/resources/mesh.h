@@ -210,7 +210,7 @@ public:
 	void surface_update_region(int p_surface, int p_offset, const Vector<uint8_t> &p_data);
 
 	int get_surface_count() const;
-	void surface_remove(int p_idx);
+	void surface_remove(int p_idx) {} // -- TINYGOOSE change: this has been removed from mesh.cpp ?!
 
 	void clear_surfaces();
 

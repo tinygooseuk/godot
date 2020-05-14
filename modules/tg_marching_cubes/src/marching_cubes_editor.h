@@ -1,7 +1,7 @@
 #pragma once
 #include "scene/gui/box_container.h"
 
-class MarchingCubesTerrain;
+class MarchingCubesTerrain3D;
 class EditorNode;
 class MenuButton;
 class ToolButton;
@@ -15,7 +15,7 @@ class MarchingCubesEditor : public VBoxContainer {
 	GDCLASS(MarchingCubesEditor, VBoxContainer);
 
 	// Main refs.
-	MarchingCubesTerrain *node = nullptr;
+	MarchingCubesTerrain3D *node = nullptr;
 	EditorNode *editor = nullptr;
 	MenuButton *options = nullptr;
 
@@ -91,7 +91,7 @@ class MarchingCubesEditor : public VBoxContainer {
 	ColorRect *colour_rect;
 
 	// State
-	Camera *editor_camera = nullptr;
+	Camera3D *editor_camera = nullptr;
 	Vector3 tool_position;
 	int mouse_button_down = 0;
 	bool shift = false;
@@ -126,29 +126,26 @@ class MarchingCubesEditor : public VBoxContainer {
 
 	void begin_editing();
 	void end_editing();
-	void apply_data(const PoolRealArray &p_data, const PoolByteArray &p_colour_data);
+	void apply_data(const PackedFloat32Array &p_data, const PackedByteArray &p_colour_data);
 
-	template <typename PoolType>
-	inline void copy_data(const PoolType &p_from, PoolType &p_to) {
+	template <typename PackedType>
+	inline void copy_data(const PackedType &p_from, PackedType &p_to) {
 		// Store current data into a stashed variable
 		p_to.resize(p_from.size());
 
-		auto r = p_from.read();
-		auto w = p_to.write();
-
 		for (int i = 0; i < p_from.size(); i++) {
-			w[i] = r[i];
+			p_to.set(i, p_from[i]);
 		}
 	}
 
 public:
 	HBoxContainer *toolbar = nullptr;
 
-	PoolRealArray stashed_data;
-	PoolByteArray stashed_colour_data;
+	PackedFloat32Array stashed_data;
+	PackedByteArray stashed_colour_data;
 
-	bool forward_spatial_input_event(Camera *p_camera, const Ref<InputEvent> &p_event);
-	void edit(MarchingCubesTerrain *p_marching_cubes);
+	bool forward_spatial_input_event(Camera3D *p_camera, const Ref<InputEvent> &p_event);
+	void edit(MarchingCubesTerrain3D *p_marching_cubes);
 
 	MarchingCubesEditor(EditorNode *p_editor);
 

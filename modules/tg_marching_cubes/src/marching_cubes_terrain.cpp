@@ -1,8 +1,8 @@
 #include "marching_cubes_terrain.h"
 #include "core/engine.h"
 #include "modules/opensimplex/open_simplex_noise.h"
-#include "scene/3d/collision_shape.h"
-#include "scene/resources/concave_polygon_shape.h"
+#include "scene/3d/collision_shape_3d.h"
+#include "scene/resources/concave_polygon_shape_3d.h"
 #include "scene/resources/surface_tool.h"
 
 #include "marching_cubes_algorithm.h"
@@ -27,35 +27,35 @@
 	} while (false);
 #endif
 
-void MarchingCubesTerrain::_bind_methods() {
-	IMPLEMENT_PROPERTY_RESOURCE(MarchingCubesTerrain, MarchingCubesData, terrain_data);
-	IMPLEMENT_PROPERTY_RESOURCE(MarchingCubesTerrain, Material, tops_material);
-	IMPLEMENT_PROPERTY_RESOURCE(MarchingCubesTerrain, Material, sides_material);
+void MarchingCubesTerrain3D::_bind_methods() {
+	IMPLEMENT_PROPERTY_RESOURCE(MarchingCubesTerrain3D, MarchingCubesData, terrain_data);
+	IMPLEMENT_PROPERTY_RESOURCE(MarchingCubesTerrain3D, Material, tops_material);
+	IMPLEMENT_PROPERTY_RESOURCE(MarchingCubesTerrain3D, Material, sides_material);
 
-	IMPLEMENT_PROPERTY(MarchingCubesTerrain, REAL, mesh_scale);
-	IMPLEMENT_PROPERTY(MarchingCubesTerrain, BOOL, generate_collision);
+	IMPLEMENT_PROPERTY(MarchingCubesTerrain3D, FLOAT, mesh_scale);
+	IMPLEMENT_PROPERTY(MarchingCubesTerrain3D, BOOL, generate_collision);
 #if TOOLS_ENABLED
-	IMPLEMENT_PROPERTY(MarchingCubesTerrain, BOOL, debug_mode);
+	IMPLEMENT_PROPERTY(MarchingCubesTerrain3D, BOOL, debug_mode);
 #endif
-	IMPLEMENT_PROPERTY(MarchingCubesTerrain, BOOL, is_destructible);
+	IMPLEMENT_PROPERTY(MarchingCubesTerrain3D, BOOL, is_destructible);
 
-	ClassDB::bind_method(D_METHOD("get_value_at", "position"), &MarchingCubesTerrain::get_value_at);
-	ClassDB::bind_method(D_METHOD("set_value_at", "position", "value"), &MarchingCubesTerrain::set_value_at);
+	ClassDB::bind_method(D_METHOD("get_value_at", "position"), &MarchingCubesTerrain3D::get_value_at);
+	ClassDB::bind_method(D_METHOD("set_value_at", "position", "value"), &MarchingCubesTerrain3D::set_value_at);
 
-	ClassDB::bind_method(D_METHOD("brush_cube", "centre", "radius", "power", "additive"), &MarchingCubesTerrain::brush_cube);
-	ClassDB::bind_method(D_METHOD("brush_sphere", "centre", "radius", "power", "additive"), &MarchingCubesTerrain::brush_sphere);
-	ClassDB::bind_method(D_METHOD("flatten_cube", "centre", "radius", "power"), &MarchingCubesTerrain::flatten_cube);
-	ClassDB::bind_method(D_METHOD("ruffle_cube", "centre", "radius", "power"), &MarchingCubesTerrain::ruffle_cube);
+	ClassDB::bind_method(D_METHOD("brush_cube", "centre", "radius", "power", "additive"), &MarchingCubesTerrain3D::brush_cube);
+	ClassDB::bind_method(D_METHOD("brush_sphere", "centre", "radius", "power", "additive"), &MarchingCubesTerrain3D::brush_sphere);
+	ClassDB::bind_method(D_METHOD("flatten_cube", "centre", "radius", "power"), &MarchingCubesTerrain3D::flatten_cube);
+	ClassDB::bind_method(D_METHOD("ruffle_cube", "centre", "radius", "power"), &MarchingCubesTerrain3D::ruffle_cube);
 
-	ClassDB::bind_method(D_METHOD("are_grid_coordinates_valid", "grid_position"), &MarchingCubesTerrain::are_grid_coordinates_valid);
-	ClassDB::bind_method(D_METHOD("get_grid_coordinates_from_world_position", "world_position"), &MarchingCubesTerrain::get_grid_coordinates_from_world_position);
-	ClassDB::bind_method(D_METHOD("get_world_position_from_grid_coordinates", "grid_position"), &MarchingCubesTerrain::get_world_position_from_grid_coordinates);
+	ClassDB::bind_method(D_METHOD("are_grid_coordinates_valid", "grid_position"), &MarchingCubesTerrain3D::are_grid_coordinates_valid);
+	ClassDB::bind_method(D_METHOD("get_grid_coordinates_from_world_position", "world_position"), &MarchingCubesTerrain3D::get_grid_coordinates_from_world_position);
+	ClassDB::bind_method(D_METHOD("get_world_position_from_grid_coordinates", "grid_position"), &MarchingCubesTerrain3D::get_world_position_from_grid_coordinates);
 
-	ClassDB::bind_method(D_METHOD("generate_mesh"), &MarchingCubesTerrain::generate_mesh);
-	ClassDB::bind_method(D_METHOD("generate_collision_shape"), &MarchingCubesTerrain::generate_collision_shape);
+	ClassDB::bind_method(D_METHOD("generate_mesh"), &MarchingCubesTerrain3D::generate_mesh);
+	ClassDB::bind_method(D_METHOD("generate_collision_shape"), &MarchingCubesTerrain3D::generate_collision_shape);
 }
 
-void MarchingCubesTerrain::_notification(int p_what) {
+void MarchingCubesTerrain3D::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_ENTER_TREE:
 			ready();
@@ -69,17 +69,17 @@ void MarchingCubesTerrain::_notification(int p_what) {
 	}
 }
 
-void MarchingCubesTerrain::_init() {
+void MarchingCubesTerrain3D::_init() {
 	if (terrain_data.is_null()) {
 		//TODO: memory leak?
 		terrain_data = Ref<MarchingCubesData>(memnew(MarchingCubesData));
 	}
 }
 
-void MarchingCubesTerrain::ready() {
+void MarchingCubesTerrain3D::ready() {
 }
 
-void MarchingCubesTerrain::process(const float delta) {
+void MarchingCubesTerrain3D::process(const float delta) {
 #if TOOLS_ENABLED
 	if (old_debug_mode != debug_mode) {
 		old_debug_mode = debug_mode;
@@ -88,14 +88,14 @@ void MarchingCubesTerrain::process(const float delta) {
 #endif
 }
 
-String MarchingCubesTerrain::get_configuration_warning() const {
+String MarchingCubesTerrain3D::get_configuration_warning() const {
 	if (terrain_data.is_null()) {
 		return "No terrain data specified!";
 	}
 	return "";
 }
 
-float MarchingCubesTerrain::get_value_at(const Vector3 &p_position) const {
+float MarchingCubesTerrain3D::get_value_at(const Vector3 &p_position) const {
 	MC_ERR_FAIL_COND_V(terrain_data.is_null(), 0.0f);
 	MC_ERR_FAIL_COND_V(terrain_data->width < p_position.x, 0.0f);
 	MC_ERR_FAIL_COND_V(terrain_data->height < p_position.y, 0.0f);
@@ -108,9 +108,9 @@ float MarchingCubesTerrain::get_value_at(const Vector3 &p_position) const {
 
 	MC_ERR_FAIL_COND_V(terrain_data->data.size() <= index, 0.0f);
 
-	return terrain_data->data.read()[index];
+	return terrain_data->data[index];
 }
-void MarchingCubesTerrain::set_value_at(const Vector3 &p_position, float p_value) {
+void MarchingCubesTerrain3D::set_value_at(const Vector3 &p_position, float p_value) {
 	MC_ERR_FAIL_COND(terrain_data.is_null());
 	MC_ERR_FAIL_COND(terrain_data->width < p_position.x);
 	MC_ERR_FAIL_COND(terrain_data->height < p_position.y);
@@ -121,11 +121,11 @@ void MarchingCubesTerrain::set_value_at(const Vector3 &p_position, float p_value
 
 	if (index != -1) {
 		MC_ERR_FAIL_COND(terrain_data->data.size() <= index);
-		terrain_data->data.write()[index] = clamp(p_value, -1.0f, +1.0f);
+		terrain_data->data.set(index, clamp(p_value, -1.0f, +1.0f));
 	}
 }
 
-int MarchingCubesTerrain::get_colour_at(const Vector3 &p_position) const {
+int MarchingCubesTerrain3D::get_colour_at(const Vector3 &p_position) const {
 	MC_ERR_FAIL_COND_V(terrain_data.is_null(), 0);
 	MC_ERR_FAIL_COND_V(terrain_data->width < p_position.x, 0);
 	MC_ERR_FAIL_COND_V(terrain_data->height < p_position.y, 0);
@@ -139,9 +139,9 @@ int MarchingCubesTerrain::get_colour_at(const Vector3 &p_position) const {
 	}
 
 	MC_ERR_FAIL_COND_V(terrain_data->data.size() <= index, 0);
-	return terrain_data->colour_data.read()[index];
+	return terrain_data->colour_data[index];
 }
-void MarchingCubesTerrain::set_colour_at(const Vector3 &p_position, int p_colour) {
+void MarchingCubesTerrain3D::set_colour_at(const Vector3 &p_position, int p_colour) {
 	MC_ERR_FAIL_COND(terrain_data.is_null());
 	MC_ERR_FAIL_COND(terrain_data->width < p_position.x);
 	MC_ERR_FAIL_COND(terrain_data->height < p_position.y);
@@ -153,11 +153,11 @@ void MarchingCubesTerrain::set_colour_at(const Vector3 &p_position, int p_colour
 
 	if (index != -1) {
 		MC_ERR_FAIL_COND(terrain_data->data.size() <= index);
-		terrain_data->colour_data.write()[index] = p_colour;
+		terrain_data->colour_data.set(index, p_colour);
 	}
 }
 
-void MarchingCubesTerrain::brush_cube(const Vector3 &centre, float radius, float power, bool additive) {
+void MarchingCubesTerrain3D::brush_cube(const Vector3 &centre, float radius, float power, bool additive) {
 	for (float x = -radius; x <= +radius; x += 1.0f) {
 		for (float y = -radius; y <= +radius; y += 1.0f) {
 			for (float z = -radius; z <= +radius; z += 1.0f) {
@@ -177,7 +177,7 @@ void MarchingCubesTerrain::brush_cube(const Vector3 &centre, float radius, float
 	}
 }
 
-void MarchingCubesTerrain::brush_sphere(const Vector3 &centre, float radius, float power, bool additive) {
+void MarchingCubesTerrain3D::brush_sphere(const Vector3 &centre, float radius, float power, bool additive) {
 	for (float x = -radius; x <= +radius; x += 1.0f) {
 		for (float y = -radius; y <= +radius; y += 1.0f) {
 			for (float z = -radius; z <= +radius; z += 1.0f) {
@@ -199,7 +199,7 @@ void MarchingCubesTerrain::brush_sphere(const Vector3 &centre, float radius, flo
 	}
 }
 
-void MarchingCubesTerrain::paint_sphere(const Vector3 &centre, float radius, int colour) {
+void MarchingCubesTerrain3D::paint_sphere(const Vector3 &centre, float radius, int colour) {
 	for (float x = -radius; x <= +radius; x += 1.0f) {
 		for (float y = -radius; y <= +radius; y += 1.0f) {
 			for (float z = -radius; z <= +radius; z += 1.0f) {
@@ -214,7 +214,7 @@ void MarchingCubesTerrain::paint_sphere(const Vector3 &centre, float radius, int
 	}
 }
 
-void MarchingCubesTerrain::flatten_cube(const Vector3 &centre, float radius, float power) {
+void MarchingCubesTerrain3D::flatten_cube(const Vector3 &centre, float radius, float power) {
 	const int half_range = (int)Math::ceil(radius / mesh_scale);
 
 	const Vector3 coord = get_grid_coordinates_from_world_position(centre);
@@ -235,7 +235,7 @@ void MarchingCubesTerrain::flatten_cube(const Vector3 &centre, float radius, flo
 	}
 }
 
-void MarchingCubesTerrain::ruffle_cube(const Vector3 &centre, float radius, float power) {
+void MarchingCubesTerrain3D::ruffle_cube(const Vector3 &centre, float radius, float power) {
 	const int half_range = (int)Math::ceil(radius / mesh_scale);
 
 	for (int x = -half_range; x <= +half_range; x++) {
@@ -256,7 +256,7 @@ void MarchingCubesTerrain::ruffle_cube(const Vector3 &centre, float radius, floa
 	}
 }
 
-bool MarchingCubesTerrain::are_grid_coordinates_valid(const Vector3 &p_coords) const {
+bool MarchingCubesTerrain3D::are_grid_coordinates_valid(const Vector3 &p_coords) const {
 	MC_ERR_FAIL_COND_V(p_coords.x < 0.0f || p_coords.x > terrain_data->width, false);
 	MC_ERR_FAIL_COND_V(p_coords.y < 0.0f || p_coords.y > terrain_data->height, false);
 	MC_ERR_FAIL_COND_V(p_coords.z < 0.0f || p_coords.z > terrain_data->depth, false);
@@ -264,7 +264,7 @@ bool MarchingCubesTerrain::are_grid_coordinates_valid(const Vector3 &p_coords) c
 	return true;
 }
 
-Vector3 MarchingCubesTerrain::get_grid_coordinates_from_world_position(Vector3 p_world_pos) const {
+Vector3 MarchingCubesTerrain3D::get_grid_coordinates_from_world_position(Vector3 p_world_pos) const {
 	p_world_pos -= get_global_transform().get_origin();
 	p_world_pos /= mesh_scale;
 
@@ -274,7 +274,7 @@ Vector3 MarchingCubesTerrain::get_grid_coordinates_from_world_position(Vector3 p
 
 	return p_world_pos.round();
 }
-Vector3 MarchingCubesTerrain::get_world_position_from_grid_coordinates(Vector3 p_coords) const {
+Vector3 MarchingCubesTerrain3D::get_world_position_from_grid_coordinates(Vector3 p_coords) const {
 	MC_ERR_FAIL_COND_V(p_coords.x < 0.0f || p_coords.x > terrain_data->width, p_coords);
 	MC_ERR_FAIL_COND_V(p_coords.y < 0.0f || p_coords.y > terrain_data->height, p_coords);
 	MC_ERR_FAIL_COND_V(p_coords.z < 0.0f || p_coords.z > terrain_data->depth, p_coords);
@@ -285,7 +285,7 @@ Vector3 MarchingCubesTerrain::get_world_position_from_grid_coordinates(Vector3 p
 	return p_coords;
 }
 
-void MarchingCubesTerrain::generate_mesh() {
+void MarchingCubesTerrain3D::generate_mesh() {
 	MC_ERR_FAIL_COND(terrain_data.is_null());
 	MC_ERR_FAIL_COND(terrain_data->use_colour && terrain_data->colour_data.empty());
 	MC_ERR_FAIL_COND(terrain_data->data.empty());
@@ -295,10 +295,6 @@ void MarchingCubesTerrain::generate_mesh() {
 		return generate_debug_mesh();
 	}
 #endif
-
-	auto data_read = terrain_data->data.read();
-	auto colour_read = terrain_data->colour_data.read();
-	auto colour_palette_read = terrain_data->colour_palette.read();
 
 	Ref<ArrayMesh> new_mesh = get_mesh();
 
@@ -336,18 +332,18 @@ void MarchingCubesTerrain::generate_mesh() {
 							grid_cell.value[i] = 0.0f;
 
 							if (terrain_data->use_colour && terrain_data->colour_palette.size() > 0) {
-								grid_cell.colour[i] = colour_palette_read[0];
+								grid_cell.colour[i] = terrain_data->colour_palette[0];
 							} else {
 								grid_cell.colour[i] = Color(1.0f, 1.0f, 1.0f);
 							}
 						} else {
-							grid_cell.value[i] = data_read[index];
+							grid_cell.value[i] = terrain_data->data[index];
 							grid_cell.colour[i] = Color(1.0f, 1.0f, 1.0f);
 
 							if (terrain_data->use_colour) {
-								const int colour_index = colour_read[index];
+								const int colour_index = terrain_data->colour_data[index];
 								if (colour_index < terrain_data->colour_palette.size()) {
-									grid_cell.colour[i] = colour_palette_read[colour_index];
+									grid_cell.colour[i] = terrain_data->colour_palette[colour_index];
 								}
 							}
 						}
@@ -399,10 +395,10 @@ void MarchingCubesTerrain::generate_mesh() {
 
 	// Set collision
 	if (generate_collision && new_mesh.is_valid()) {
-		Ref<Shape> shape = new_mesh->create_trimesh_shape();
+		Ref<Shape3D> shape = new_mesh->create_trimesh_shape();
 
 		if (!shape.is_null()) {
-			CollisionShape *old_coll_shape = find_collision_sibling();
+			CollisionShape3D *old_coll_shape = find_collision_sibling();
 			if (old_coll_shape) {
 				// Tweak old collision
 				old_coll_shape->set_shape(shape);
@@ -414,10 +410,8 @@ void MarchingCubesTerrain::generate_mesh() {
 	}
 }
 
-void MarchingCubesTerrain::generate_debug_mesh() {
+void MarchingCubesTerrain3D::generate_debug_mesh() {
 	MC_ERR_FAIL_COND(terrain_data.is_null() || terrain_data->data.empty());
-
-	auto data_read = terrain_data->data.read();
 
 	Ref<ArrayMesh> new_mesh = get_mesh();
 
@@ -438,7 +432,7 @@ void MarchingCubesTerrain::generate_debug_mesh() {
 				for (int z = 0; z < terrain_data->depth; z++) {
 					const Vector3 coord = Vector3((float)x, (float)y, (float)z);
 					const int index = coord_to_index(coord);
-					const float value = data_read[index];
+					const float value = terrain_data->data[index];
 
 					auto add_cube = [&debug](const Vector3 &centre, float half_extents, const Color &color) {
 						const Vector3 FBL = centre + Vector3(-half_extents, -half_extents, +half_extents);
@@ -515,12 +509,12 @@ void MarchingCubesTerrain::generate_debug_mesh() {
 	debug.commit(new_mesh);
 
 	// Set materials (forwards!)
-	SpatialMaterial *spat_mat = memnew(SpatialMaterial);
-	spat_mat->set_flag(SpatialMaterial::FLAG_ALBEDO_FROM_VERTEX_COLOR, true);
+	StandardMaterial3D *spat_mat = memnew(StandardMaterial3D);
+	spat_mat->set_flag(StandardMaterial3D::FLAG_ALBEDO_FROM_VERTEX_COLOR, true);
 	new_mesh->surface_set_material(0, spat_mat);
 }
 
-int MarchingCubesTerrain::coord_to_index(const Vector3 &p_position) const {
+int MarchingCubesTerrain3D::coord_to_index(const Vector3 &p_position) const {
 	if (p_position.x >= terrain_data->width || p_position.y >= terrain_data->height || p_position.z >= terrain_data->depth ||
 			p_position.x < 0 || p_position.y < 0 || p_position.z < 0) {
 		return -1;
@@ -531,7 +525,7 @@ int MarchingCubesTerrain::coord_to_index(const Vector3 &p_position) const {
 		   p_position.x;
 }
 
-Vector3 MarchingCubesTerrain::index_to_coord(int p_index) const {
+Vector3 MarchingCubesTerrain3D::index_to_coord(int p_index) const {
 	Vector3 out;
 
 	out.z = floorf((float)p_index / (terrain_data->width * terrain_data->height));
@@ -544,8 +538,8 @@ Vector3 MarchingCubesTerrain::index_to_coord(int p_index) const {
 	return out;
 }
 
-CollisionShape *MarchingCubesTerrain::generate_collision_shape(Ref<Shape> p_shape) {
-	CollisionShape *cshape = memnew(CollisionShape);
+CollisionShape3D *MarchingCubesTerrain3D::generate_collision_shape(Ref<Shape3D> p_shape) {
+	CollisionShape3D *cshape = memnew(CollisionShape3D);
 	cshape->set_shape(p_shape);
 	cshape->set_name((String)get_name() + "_Collision");
 
@@ -555,26 +549,25 @@ CollisionShape *MarchingCubesTerrain::generate_collision_shape(Ref<Shape> p_shap
 	return cshape;
 }
 
-CollisionShape *MarchingCubesTerrain::find_collision_sibling() const {
+CollisionShape3D *MarchingCubesTerrain3D::find_collision_sibling() const {
 	Node *parent_node = get_parent();
 	for (int i = 0; i < parent_node->get_child_count(); i++) {
 		Node *sibling_node = parent_node->get_child(i);
-		if (sibling_node->get_class() == "CollisionShape") {
-			return (CollisionShape *)sibling_node;
+		if (sibling_node->get_class() == "CollisionShape3D") {
+			return (CollisionShape3D *)sibling_node;
 		}
 	}
 
 	return nullptr;
 }
 
-void MarchingCubesTerrain::clear_mesh() {
-	auto data_write = terrain_data->data.write();
+void MarchingCubesTerrain3D::clear_mesh() {
 	for (int i = 0; i < terrain_data->data.size(); i++) {
-		data_write[i] = 1.0f;
+		terrain_data->data.set(1, 1.0f);
 	}
 }
 
-void MarchingCubesTerrain::reallocate_memory() {
+void MarchingCubesTerrain3D::reallocate_memory() {
 	MC_ERR_FAIL_COND(terrain_data.is_null());
 
 	int size = terrain_data->width * terrain_data->height * terrain_data->depth;
@@ -598,13 +591,11 @@ void MarchingCubesTerrain::reallocate_memory() {
 	}
 }
 
-void MarchingCubesTerrain::fill_with_noise() {
+void MarchingCubesTerrain3D::fill_with_noise() {
 	MC_ERR_FAIL_COND(terrain_data.is_null());
 
 	const int size = terrain_data->width * terrain_data->height * terrain_data->depth;
 	terrain_data->data.resize(size);
-
-	auto data_write = terrain_data->data.write();
 
 	OpenSimplexNoise noiser;
 	noiser.set_seed(terrain_data->random_seed);
@@ -615,17 +606,16 @@ void MarchingCubesTerrain::fill_with_noise() {
 	for (int i = 0; i < size; i++) {
 		Vector3 coord = index_to_coord(i);
 
-		data_write[i] = noiser.get_noise_3dv(coord) + 0.2f; // bias the noise a little
+		terrain_data->data.set(i, noiser.get_noise_3dv(coord) + 0.2f); // bias the noise a little
 	}
 }
 
-void MarchingCubesTerrain::invert_data_sign() {
+void MarchingCubesTerrain3D::invert_data_sign() {
 	MC_ERR_FAIL_COND(terrain_data.is_null());
 
 	const int size = terrain_data->width * terrain_data->height * terrain_data->depth;
-	auto data_write = terrain_data->data.write();
 
 	for (int i = 0; i < size; i++) {
-		data_write[i] = -data_write[i];
+		terrain_data->data.set(i, -terrain_data->data[i]);
 	}
 }

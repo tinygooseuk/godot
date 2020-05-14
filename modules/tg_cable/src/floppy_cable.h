@@ -1,5 +1,5 @@
 #pragma once
-#include <scene/3d/mesh_instance.h>
+#include <scene/3d/mesh_instance_3d.h>
 #include <core/tg_util.h>
 #include <vector>
 
@@ -10,8 +10,8 @@ struct CableParticle
 	Vector3 old_translation;
 };
 
-class FloppyCable : public MeshInstance {
-	GDCLASS(FloppyCable, MeshInstance)
+class FloppyCable3D : public MeshInstance3D {
+	GDCLASS(FloppyCable3D, MeshInstance3D)
 
 public:
 	static void _bind_methods();

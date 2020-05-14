@@ -26,28 +26,28 @@ const Vector3 VECTOR_Y = Vector3(0.0f, 1.0f, 0.0f);
 const Vector3 VECTOR_Z = Vector3(0.0f, 0.0f, 1.0f);
 } // namespace
 
-void FloppyCable::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("get_position_on_cable", "distance_along_cable"), &FloppyCable::get_position_on_cable);
+void FloppyCable3D::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("get_position_on_cable", "distance_along_cable"), &FloppyCable3D::get_position_on_cable);
 
-	IMPLEMENT_PROPERTY(FloppyCable, BOOL, is_start_attached);
+	IMPLEMENT_PROPERTY(FloppyCable3D, BOOL, is_start_attached);
 
-	IMPLEMENT_PROPERTY(FloppyCable, VECTOR3, start_location);
+	IMPLEMENT_PROPERTY(FloppyCable3D, VECTOR3, start_location);
 
-	IMPLEMENT_PROPERTY(FloppyCable, BOOL, is_end_attached);
-	IMPLEMENT_PROPERTY(FloppyCable, VECTOR3, end_location);
+	IMPLEMENT_PROPERTY(FloppyCable3D, BOOL, is_end_attached);
+	IMPLEMENT_PROPERTY(FloppyCable3D, VECTOR3, end_location);
 
-	IMPLEMENT_PROPERTY(FloppyCable, REAL, stiffness_coefficient);
+	IMPLEMENT_PROPERTY(FloppyCable3D, FLOAT, stiffness_coefficient);
 
-	IMPLEMENT_PROPERTY(FloppyCable, REAL, cable_length);
-	IMPLEMENT_PROPERTY(FloppyCable, REAL, cable_width);
-	IMPLEMENT_PROPERTY(FloppyCable, INT, cable_num_segments);
-	IMPLEMENT_PROPERTY(FloppyCable, INT, cable_num_sides);
-	IMPLEMENT_PROPERTY(FloppyCable, BOOL, reverse_winding_order);
+	IMPLEMENT_PROPERTY(FloppyCable3D, FLOAT, cable_length);
+	IMPLEMENT_PROPERTY(FloppyCable3D, FLOAT, cable_width);
+	IMPLEMENT_PROPERTY(FloppyCable3D, INT, cable_num_segments);
+	IMPLEMENT_PROPERTY(FloppyCable3D, INT, cable_num_sides);
+	IMPLEMENT_PROPERTY(FloppyCable3D, BOOL, reverse_winding_order);
 
-	IMPLEMENT_PROPERTY_RESOURCE(FloppyCable, Material, cable_material);
+	IMPLEMENT_PROPERTY_RESOURCE(FloppyCable3D, Material, cable_material);
 }
 
-void FloppyCable::_notification(int p_what) {
+void FloppyCable3D::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_ENTER_TREE:
 			_ready();
@@ -64,11 +64,11 @@ void FloppyCable::_notification(int p_what) {
 	//ODO: hookup!
 }
 
-void FloppyCable::_ready() {
+void FloppyCable3D::_ready() {
 	reset_cable();
 }
 
-void FloppyCable::_process(const float delta) {
+void FloppyCable3D::_process(const float delta) {
 	// Update end points
 	CableParticle &start_particle = particles[0];
 	CableParticle &end_particle = particles[cable_num_segments];
@@ -112,7 +112,7 @@ void FloppyCable::_process(const float delta) {
 	rebuild_mesh();
 }
 
-Vector3 FloppyCable::get_position_on_cable(float alpha) const {
+Vector3 FloppyCable3D::get_position_on_cable(float alpha) const {
 	const float particle_pos = alpha * static_cast<float>(particles.size());
 
 	const int32_t particle_idx = static_cast<int32_t>(particle_pos);
@@ -125,7 +125,7 @@ Vector3 FloppyCable::get_position_on_cable(float alpha) const {
 	return particle1_pos + diff * particle_alpha;
 }
 
-void FloppyCable::reset_cable() {
+void FloppyCable3D::reset_cable() {
 	const Vector3 delta = to_global(end_location) - to_global(start_location);
 
 	particles.resize(cable_num_segments + 1);
@@ -141,7 +141,7 @@ void FloppyCable::reset_cable() {
 	}
 }
 
-void FloppyCable::solve_constraints() {
+void FloppyCable3D::solve_constraints() {
 	const float segment_length = cable_length / float(cable_num_segments);
 
 	// Solve distance constraint for each segment
@@ -165,7 +165,7 @@ void FloppyCable::solve_constraints() {
 	}
 }
 
-void FloppyCable::verlet_integrate(const float substep_time) {
+void FloppyCable3D::verlet_integrate(const float substep_time) {
 	const float gravity_amount = ProjectSettings::get_singleton()->get_setting("physics/3d/default_gravity");
 	const Vector3 gravity = Vector3(0.0f, -gravity_amount, 0.0f);
 
@@ -187,24 +187,21 @@ void FloppyCable::verlet_integrate(const float substep_time) {
 	}
 }
 
-void FloppyCable::rebuild_mesh() {
+void FloppyCable3D::rebuild_mesh() {
 	const int num_points = cable_num_segments + 1;
 
 	// We double up the first and last vert of the ring, because the UVs are different
 	const int num_ring_verts = cable_num_sides + 1;
 
-	PoolVector3Array vertices;
+	PackedVector3Array vertices;
 	vertices.resize(num_ring_verts * num_points);
-	PoolVector2Array tex_coords;
+	PackedVector2Array tex_coords;
 	tex_coords.resize(num_ring_verts * num_points);
-	PoolVector3Array normals;
+	PackedVector3Array normals;
 	normals.resize(num_ring_verts * num_points);
 
-	auto v_writer = vertices.write();
 	uint32_t vertex_idx = 0;
-	auto tc_writer = tex_coords.write();
 	uint32_t texcoord_idx = 0;
-	auto n_writer = normals.write();
 	uint32_t normal_idx = 0;
 
 	const float winding_inversion_factor = reverse_winding_order ? -1.0f : +1.0f;
@@ -246,17 +243,16 @@ void FloppyCable::rebuild_mesh() {
 			// Find direction from center of cable to this vertex
 			const Vector3 out_dir = (cosf(rad_angle) * up_dir) + (winding_inversion_factor * sinf(rad_angle) * right_dir);
 
-			v_writer[vertex_idx++] = to_local(curr_particle.translation + (out_dir * 0.5f * cable_width));
-			tc_writer[texcoord_idx++] = Vector2(along_frac, around_frac); // unreal had : FVector2D(AlongFrac * TileMaterial, AroundFrac);
-			n_writer[normal_idx++] = out_dir;
+			vertices.set(vertex_idx++, to_local(curr_particle.translation + (out_dir * 0.5f * cable_width)));
+			tex_coords.set(texcoord_idx++, Vector2(along_frac, around_frac)); // unreal had : FVector2D(AlongFrac * TileMaterial, AroundFrac);
+			normals.set(normal_idx++, out_dir);
 		}
 	}
 
 	// Build triangles
-	PoolIntArray indices;
+	PackedInt32Array indices;
 	indices.resize(2 * 3 * cable_num_segments * cable_num_sides);
 
-	auto i_writer = indices.write();
 	uint32_t index_idx = 0;
 	
 	for (int seg_idx = 0; seg_idx < cable_num_segments; seg_idx++) {
@@ -266,13 +262,13 @@ void FloppyCable::rebuild_mesh() {
 			const int tr = get_vert_index(seg_idx + 1, side_idx);
 			const int br = get_vert_index(seg_idx + 1, side_idx + 1);
 
-			i_writer[index_idx++] = tl;
-			i_writer[index_idx++] = bl;
-			i_writer[index_idx++] = tr;
+			indices.set(index_idx++, tl);
+			indices.set(index_idx++, bl);
+			indices.set(index_idx++, tr);
 
-			i_writer[index_idx++] = bl;
-			i_writer[index_idx++] = br;
-			i_writer[index_idx++] = tr;
+			indices.set(index_idx++, bl);
+			indices.set(index_idx++, br);
+			indices.set(index_idx++, tr);
 		}
 	}
 
@@ -297,6 +293,6 @@ void FloppyCable::rebuild_mesh() {
 	set_mesh(mesh);
 }
 
-int FloppyCable::get_vert_index(const int along_idx, const int around_idx) const {
+int FloppyCable3D::get_vert_index(const int along_idx, const int around_idx) const {
 	return (along_idx * (cable_num_sides + 1)) + around_idx;
 }

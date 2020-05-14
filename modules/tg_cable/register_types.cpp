@@ -5,7 +5,7 @@
 
 void register_tg_cable_types()
 {
-    ClassDB::register_class<FloppyCable>();
+    ClassDB::register_class<FloppyCable3D>();
 }
 
 void unregister_tg_cable_types()

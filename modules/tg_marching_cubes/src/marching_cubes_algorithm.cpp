@@ -42,7 +42,7 @@ constexpr int EDGE_TABLE[256] = {
 	0xf00, 0xe09, 0xd03, 0xc0a, 0xb06, 0xa0f, 0x905, 0x80c,
 	0x70c, 0x605, 0x50f, 0x406, 0x30a, 0x203, 0x109, 0x000
 };
-constexpr char TRI_TABLE[256][16] = {
+constexpr int8_t TRI_TABLE[256][16] = {
 	{ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
 	{ 0, 8, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
 	{ 0, 1, 9, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
@@ -305,7 +305,7 @@ constexpr char TRI_TABLE[256][16] = {
 int polygonise(GridCell &cell, Face *faces, int &new_vertex_count, Vector3 *vertices) {
 	Vector3 vertex_list[12];
 	Vector3 new_vertex_list[12];
-	char local_remap[12];
+	int8_t local_remap[12];
 
 	//Determine the index into the edge table which
 	//tells us which vertices are inside of the surface

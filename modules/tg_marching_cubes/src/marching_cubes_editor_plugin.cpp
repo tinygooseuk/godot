@@ -1,9 +1,8 @@
 #include "marching_cubes_editor_plugin.h"
-#include "core/os/input.h"
 #include "editor/editor_scale.h"
 #include "editor/editor_settings.h"
-#include "editor/plugins/spatial_editor_plugin.h"
-#include "scene/3d/camera.h"
+#include "editor/plugins/node_3d_editor_plugin.h"
+#include "scene/3d/camera_3d.h"
 
 #include "core/math/geometry.h"
 #include "core/os/keyboard.h"
@@ -14,17 +13,17 @@ void MarchingCubesEditorPlugin::_notification(int p_what) {
 
 		switch ((int)EditorSettings::get_singleton()->get("editors/marching_cubes/editor_side")) {
 			case 0: { // Left.
-				SpatialEditor::get_singleton()->get_palette_split()->move_child(marching_cubes_editor, 0);
+				Node3DEditor::get_singleton()->get_palette_split()->move_child(marching_cubes_editor, 0);
 			} break;
 			case 1: { // Right.
-				SpatialEditor::get_singleton()->get_palette_split()->move_child(marching_cubes_editor, 1);
+				Node3DEditor::get_singleton()->get_palette_split()->move_child(marching_cubes_editor, 1);
 			} break;
 		}
 	}
 }
 
 void MarchingCubesEditorPlugin::edit(Object *p_object) {
-	marching_cubes_editor->edit(Object::cast_to<MarchingCubesTerrain>(p_object));
+	marching_cubes_editor->edit(Object::cast_to<MarchingCubesTerrain3D>(p_object));
 }
 
 bool MarchingCubesEditorPlugin::handles(Object *p_object) const {

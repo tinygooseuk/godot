@@ -2,16 +2,17 @@
 #include "marching_cubes_terrain.h"
 
 #include "core/os/keyboard.h"
+#include "core/input/input_event.h"
 #include "editor/editor_node.h"
-#include "editor/plugins/spatial_editor_plugin.h"
-#include "scene/3d/camera.h"
+#include "editor/plugins/node_3d_editor_plugin.h"
+#include "scene/3d/camera_3d.h"
 #include "scene/gui/menu_button.h"
 #include "scene/gui/color_rect.h"
 #include "scene/main/viewport.h"
-#include "scene/resources/box_shape.h"
+#include "scene/resources/box_shape_3d.h"
 #include "scene/resources/mesh_data_tool.h"
 #include "scene/resources/primitive_meshes.h"
-#include "scene/resources/sphere_shape.h"
+#include "scene/resources/sphere_shape_3d.h"
 
 #if TOOLS_ENABLED
 
@@ -35,11 +36,13 @@ void MarchingCubesEditor::_notification(int p_what) {
 }
 
 void MarchingCubesEditor::enter_tree() {
-	tool_cube->set_icon(get_icon("BoxShape", "EditorIcons"));
-	tool_sphere->set_icon(get_icon("SphereShape", "EditorIcons"));
-	tool_paint->set_icon(get_icon("CanvasItem", "EditorIcons"));
-	tool_flatten->set_icon(get_icon("PlaneShape", "EditorIcons"));
-	tool_ruffle->set_icon(get_icon("SpriteSheet", "EditorIcons"));
+	Ref<Theme> theme = EditorNode::get_singleton()->get_editor_theme();
+
+	tool_cube->set_icon(theme->get_icon("BoxShape", "EditorIcons"));
+	tool_sphere->set_icon(theme->get_icon("SphereShape", "EditorIcons"));
+	tool_paint->set_icon(theme->get_icon("CanvasItem", "EditorIcons"));
+	tool_flatten->set_icon(theme->get_icon("PlaneShape", "EditorIcons"));
+	tool_ruffle->set_icon(theme->get_icon("SpriteSheet", "EditorIcons"));
 }
 
 void MarchingCubesEditor::process(float delta) {
@@ -130,7 +133,7 @@ void MarchingCubesEditor::menu_option(int p_option) {
 			}
 
 			// Finally save the mesh
-			MeshInstance *mesh_instance = memnew(MeshInstance);
+			MeshInstance3D *mesh_instance = memnew(MeshInstance3D);
 			mesh_instance->set_name((String)get_name() + " (Baked)");
 			mesh_instance->set_mesh(new_mesh);
 
@@ -210,16 +213,16 @@ void MarchingCubesEditor::update_tool_position() {
 	// Move tool position
 	switch (axis) {
 		case AXIS_NONE: {
-			auto *space = editor_camera->get_world()->get_direct_space_state();
+			auto *space = editor_camera->get_world_3d()->get_direct_space_state();
 
-			PhysicsDirectSpaceState::RayResult ray;
+			PhysicsDirectSpaceState3D::RayResult ray;
 			bool is_hit = space->intersect_ray(ray_origin, ray_origin + ray_dir * 500.0f, ray);
 			if (is_hit) {
 				tool_position = node->get_world_position_from_grid_coordinates(node->get_grid_coordinates_from_world_position(ray.position));
 			}
 
 			if (editor_grid.is_valid()) {
-				VS::get_singleton()->instance_set_visible(editor_grid, false);
+				RS::get_singleton()->instance_set_visible(editor_grid, false);
 			}
 		} break;
 		case AXIS_X: {
@@ -238,8 +241,8 @@ void MarchingCubesEditor::update_tool_position() {
 				xform.set_basis(Basis(Vector3(0.0f, 0.0f, M_PI_2)));
 				xform.set_origin(position);
 
-				VS::get_singleton()->instance_set_transform(editor_grid, xform);
-				VS::get_singleton()->instance_set_visible(editor_grid, true);
+				RS::get_singleton()->instance_set_transform(editor_grid, xform);
+				RS::get_singleton()->instance_set_visible(editor_grid, true);
 			}
 		} break;
 
@@ -259,8 +262,8 @@ void MarchingCubesEditor::update_tool_position() {
 				xform.set_basis(Basis(Vector3(0.0f, 0.0f, 0.0f)));
 				xform.set_origin(position);
 
-				VS::get_singleton()->instance_set_transform(editor_grid, xform);
-				VS::get_singleton()->instance_set_visible(editor_grid, true);
+				RS::get_singleton()->instance_set_transform(editor_grid, xform);
+				RS::get_singleton()->instance_set_visible(editor_grid, true);
 			}
 		} break;
 
@@ -280,8 +283,8 @@ void MarchingCubesEditor::update_tool_position() {
 				xform.set_basis(Basis(Vector3(M_PI_2, 0.0f, 0.0f)));
 				xform.set_origin(position);
 
-				VS::get_singleton()->instance_set_transform(editor_grid, xform);
-				VS::get_singleton()->instance_set_visible(editor_grid, true);
+				RS::get_singleton()->instance_set_transform(editor_grid, xform);
+				RS::get_singleton()->instance_set_visible(editor_grid, true);
 			}
 		} break;
 	}
@@ -290,7 +293,6 @@ void MarchingCubesEditor::update_tool_position() {
 }
 
 void MarchingCubesEditor::update_gizmo() {
-	VisualServer *vs = VisualServer::get_singleton();
 	if (debug_gizmo.is_valid()) {
 		Transform gizmo_transform;
 		gizmo_transform.set_origin(tool_position);
@@ -309,7 +311,7 @@ void MarchingCubesEditor::update_gizmo() {
 				gizmo_transform.set_basis(Basis().scaled(Vector3(radius, radius, radius) * 2.0f));
 			} break;
 		}
-		vs->instance_set_transform(debug_gizmo, gizmo_transform);
+		RS::get_singleton()->instance_set_transform(debug_gizmo, gizmo_transform);
 	}
 }
 
@@ -335,53 +337,47 @@ void MarchingCubesEditor::recreate_gizmo() {
 }
 
 void MarchingCubesEditor::create_sphere_gizmo() {
-	VisualServer *vs = VisualServer::get_singleton();
-	
 	// Remove existing
 	free_gizmo();
 	
 	// New gizmo
-	SphereShape *shape = memnew(SphereShape);
+	SphereShape3D *shape = memnew(SphereShape3D);
 	shape->set_radius(1.0f);
 
-	RID scenario = node->get_world()->get_scenario();
+	RID scenario = node->get_world_3d()->get_scenario();
 	RID cube_rid = shape->get_debug_mesh()->get_rid(); //TODO: free this too?
 
-	debug_gizmo = vs->instance_create2(cube_rid, scenario);
+	debug_gizmo = RS::get_singleton()->instance_create2(cube_rid, scenario);
 }
 
 void MarchingCubesEditor::create_cube_gizmo() {
-	VisualServer *vs = VisualServer::get_singleton();
-
 	// Remove existing
 	free_gizmo();
 
 	// New gizmo
-	BoxShape *shape = memnew(BoxShape);
+	BoxShape3D *shape = memnew(BoxShape3D);
 	shape->set_extents(Vector3(1.0f, 1.0f, 1.0f));
 
-	RID scenario = node->get_world()->get_scenario();
+	RID scenario = node->get_world_3d()->get_scenario();
 	RID cube_rid = shape->get_debug_mesh()->get_rid(); //TODO: free this too?
 
-	debug_gizmo = vs->instance_create2(cube_rid, scenario);
+	debug_gizmo = RS::get_singleton()->instance_create2(cube_rid, scenario);
 }
 
 void MarchingCubesEditor::create_editor_grid() {
 	if (editor_grid.is_valid()) {
-		VS::get_singleton()->free(editor_grid);
+		RS::get_singleton()->free(editor_grid);
 	}
 
 	static constexpr int GRID_EXTENTS = 50;
 	static constexpr int HALF_GRID_EXTENTS = GRID_EXTENTS / 2;
 
-	PoolVector3Array verts;
+	PackedVector3Array verts;
 	verts.resize((GRID_EXTENTS + 1) * 2 * 2 * 2); // 10 lines of 2 verts on 2 layers in 2 axes
-	auto vert_write = verts.write();
 	int v_ptr = 0;
 
-	PoolColorArray vert_colours;
+	PackedColorArray vert_colours;
 	vert_colours.resize((GRID_EXTENTS + 1) * 2 * 2 * 2); // 10 lines of 2 verts on 2 layers in 2 axes
-	auto vc_write = vert_colours.write();
 	int vc_ptr = 0;
 
 	// Create grid	
@@ -390,52 +386,52 @@ void MarchingCubesEditor::create_editor_grid() {
 
 	for (int i = 0; i <= GRID_EXTENTS; i++) {
 		// Add vertices
-		vert_write[v_ptr++] = Vector3(-float(HALF_GRID_EXTENTS) * node->mesh_scale, -node->mesh_scale * radius * 0.5f, float(i * node->mesh_scale) - grid_offset);
-		vert_write[v_ptr++] = Vector3(+float(HALF_GRID_EXTENTS) * node->mesh_scale, -node->mesh_scale * radius * 0.5f, float(i * node->mesh_scale) - grid_offset);
+		verts.set(v_ptr++, Vector3(-float(HALF_GRID_EXTENTS) * node->mesh_scale, -node->mesh_scale * radius * 0.5f, float(i * node->mesh_scale) - grid_offset));
+		verts.set(v_ptr++, Vector3(+float(HALF_GRID_EXTENTS) * node->mesh_scale, -node->mesh_scale * radius * 0.5f, float(i * node->mesh_scale) - grid_offset));
 
-		vert_write[v_ptr++] = Vector3(float(i * node->mesh_scale) - grid_offset, -node->mesh_scale * radius * 0.5f, -float(HALF_GRID_EXTENTS) * node->mesh_scale);
-		vert_write[v_ptr++] = Vector3(float(i * node->mesh_scale) - grid_offset, -node->mesh_scale * radius * 0.5f, +float(HALF_GRID_EXTENTS) * node->mesh_scale);
+		verts.set(v_ptr++, Vector3(float(i * node->mesh_scale) - grid_offset, -node->mesh_scale * radius * 0.5f, -float(HALF_GRID_EXTENTS) * node->mesh_scale));
+		verts.set(v_ptr++, Vector3(float(i * node->mesh_scale) - grid_offset, -node->mesh_scale * radius * 0.5f, +float(HALF_GRID_EXTENTS) * node->mesh_scale));
 
-		vert_write[v_ptr++] = Vector3(-float(HALF_GRID_EXTENTS) * node->mesh_scale, +node->mesh_scale * radius * 0.5f, float(i * node->mesh_scale) - grid_offset);
-		vert_write[v_ptr++] = Vector3(+float(HALF_GRID_EXTENTS) * node->mesh_scale, +node->mesh_scale * radius * 0.5f, float(i * node->mesh_scale) - grid_offset);
+		verts.set(v_ptr++, Vector3(-float(HALF_GRID_EXTENTS) * node->mesh_scale, +node->mesh_scale * radius * 0.5f, float(i * node->mesh_scale) - grid_offset));
+		verts.set(v_ptr++, Vector3(+float(HALF_GRID_EXTENTS) * node->mesh_scale, +node->mesh_scale * radius * 0.5f, float(i * node->mesh_scale) - grid_offset));
 
-		vert_write[v_ptr++] = Vector3(float(i * node->mesh_scale) - grid_offset, +node->mesh_scale * radius * 0.5f, -float(HALF_GRID_EXTENTS) * node->mesh_scale);
-		vert_write[v_ptr++] = Vector3(float(i * node->mesh_scale) - grid_offset, +node->mesh_scale * radius * 0.5f, +float(HALF_GRID_EXTENTS) * node->mesh_scale);
+		verts.set(v_ptr++, Vector3(float(i * node->mesh_scale) - grid_offset, +node->mesh_scale * radius * 0.5f, -float(HALF_GRID_EXTENTS) * node->mesh_scale));
+		verts.set(v_ptr++, Vector3(float(i * node->mesh_scale) - grid_offset, +node->mesh_scale * radius * 0.5f, +float(HALF_GRID_EXTENTS) * node->mesh_scale));
 
 		// Add colours
 		float distance_to_centre = Math::absf(i - HALF_GRID_EXTENTS) / (float)HALF_GRID_EXTENTS;
 		for (int i = 0; i < 8; i++) {
-			vc_write[vc_ptr++] = Color(1.0f, 1.0f, 1.0f, Math::lerp(1.0f, 0.2f, distance_to_centre));
+			vert_colours.set(vc_ptr++, Color(1.0f, 1.0f, 1.0f, Math::lerp(1.0f, 0.2f, distance_to_centre)));
 		}
 	}
 
-	RID scenario = node->get_world()->get_scenario();
-	RID grid_rid = VS::get_singleton()->mesh_create(); //TODO: free this one!!
+	RID scenario = node->get_world_3d()->get_scenario();
+	RID grid_rid = RS::get_singleton()->mesh_create(); //TODO: free this one!!
 
 	Array mesh_info;
 	mesh_info.resize(ArrayMesh::ARRAY_MAX);
 	mesh_info[ArrayMesh::ARRAY_VERTEX] = verts;
 	mesh_info[ArrayMesh::ARRAY_COLOR] = vert_colours;
 
-	VS::get_singleton()->mesh_add_surface_from_arrays(grid_rid, VS::PRIMITIVE_LINES, mesh_info);
+	RS::get_singleton()->mesh_add_surface_from_arrays(grid_rid, RS::PRIMITIVE_LINES, mesh_info);
 
-	SpatialMaterial *spat_mat = memnew(SpatialMaterial);
-	spat_mat->set_flag(SpatialMaterial::FLAG_ALBEDO_FROM_VERTEX_COLOR, true);
-	VS::get_singleton()->mesh_surface_set_material(grid_rid, 0, spat_mat->get_rid());
+	StandardMaterial3D *spat_mat = memnew(StandardMaterial3D);
+	spat_mat->set_flag(StandardMaterial3D::FLAG_ALBEDO_FROM_VERTEX_COLOR, true);
+	RS::get_singleton()->mesh_surface_set_material(grid_rid, 0, spat_mat->get_rid());
 
-	editor_grid = VS::get_singleton()->instance_create2(grid_rid, scenario);
+	editor_grid = RS::get_singleton()->instance_create2(grid_rid, scenario);
 }
 
 void MarchingCubesEditor::free_gizmo() {
 	if (debug_gizmo.is_valid()) {
-		VisualServer::get_singleton()->free(debug_gizmo);
+		RS::get_singleton()->free(debug_gizmo);
 		debug_gizmo = {};
 	}
 }
 
 void MarchingCubesEditor::free_editor_grid() {
 	if (editor_grid.is_valid()) {
-		VisualServer::get_singleton()->free(editor_grid);
+		RS::get_singleton()->free(editor_grid);
 		editor_grid = {};
 	}
 }
@@ -491,8 +487,6 @@ void MarchingCubesEditor::bump_data(int direction) {
 		case BUMP_BACKWARD: 	bump_dir.z = +1; break;
 	}
 
-	auto read = old_data->data.read();
-	auto write = data->data.write();
 	for (float x = 0; x < data->width; x++) {
 		for (float y = 0; y < data->height; y++) {
 			for (float z = 0; z < data->depth; z++) {
@@ -502,7 +496,7 @@ void MarchingCubesEditor::bump_data(int direction) {
 				const Vector3 old_coord = coord + bump_dir;
 				const int old_index = node->coord_to_index(old_coord);
 
-				write[index] = read[old_index];
+				data->data.set(index, old_data->data[old_index]);
 			}
 		}
 	}
@@ -561,7 +555,7 @@ void MarchingCubesEditor::end_editing() {
 	is_editing = false;
 }
 
-void MarchingCubesEditor::apply_data(const PoolRealArray &p_data, const PoolByteArray &p_colour_data) {
+void MarchingCubesEditor::apply_data(const PackedFloat32Array &p_data, const PackedByteArray &p_colour_data) {
 	ERR_FAIL_COND(!node);
 
 	copy_data(p_data, node->get_terrain_data()->data);
@@ -571,7 +565,7 @@ void MarchingCubesEditor::apply_data(const PoolRealArray &p_data, const PoolByte
 
 
 //------------------------------ PUBLIC -------------------------
-bool MarchingCubesEditor::forward_spatial_input_event(Camera *p_camera, const Ref<InputEvent> &p_event) {
+bool MarchingCubesEditor::forward_spatial_input_event(Camera3D *p_camera, const Ref<InputEvent> &p_event) {
     if (!node) return false;
 
 	editor_camera = p_camera;
@@ -624,21 +618,21 @@ bool MarchingCubesEditor::forward_spatial_input_event(Camera *p_camera, const Re
 
 	Ref<InputEventKey> key_event = p_event;
 	if (key_event.is_valid() && key_event->is_pressed() && !key_event->is_echo()) {
-		if (key_event->get_scancode() == KEY_MINUS && axis_level > 0.0f) {
+		if (key_event->get_keycode() == KEY_MINUS && axis_level > 0.0f) {
 			axis_level -= 1.0f;
 			update_tool_position();
 			update_status();
-		} else if (key_event->get_scancode() == KEY_PLUS && axis_level < max_axislevel_value) {
+		} else if (key_event->get_keycode() == KEY_PLUS && axis_level < max_axislevel_value) {
 			axis_level += 1.0f;
 			update_tool_position();
 			update_status();
-		} else if (key_event->get_scancode() == KEY_SPACE) {
+		} else if (key_event->get_keycode() == KEY_SPACE) {
 			axis = (axis + 1) % AXIS_Count;
 			update_tool_position();
 			update_status();
 		}
 	}
-	if (key_event.is_valid() && key_event->get_scancode() == KEY_SHIFT) {
+	if (key_event.is_valid() && key_event->get_keycode() == KEY_SHIFT) {
 		shift = key_event->is_pressed();
 	}
 
@@ -650,7 +644,7 @@ bool MarchingCubesEditor::forward_spatial_input_event(Camera *p_camera, const Re
 
 	return true;
 }
-void MarchingCubesEditor::edit(MarchingCubesTerrain *p_marching_cubes) {
+void MarchingCubesEditor::edit(MarchingCubesTerrain3D *p_marching_cubes) {
 	node = p_marching_cubes;
 	
 	if (node && node->terrain_data.is_null()) {
@@ -664,7 +658,7 @@ MarchingCubesEditor::MarchingCubesEditor(EditorNode *p_editor) {
 	toolbar = memnew(HBoxContainer);
 	toolbar->set_h_size_flags(SIZE_EXPAND_FILL);
 	toolbar->set_alignment(BoxContainer::ALIGN_END);
-	SpatialEditor::get_singleton()->add_control_to_menu_panel(toolbar);
+	Node3DEditor::get_singleton()->add_control_to_menu_panel(toolbar);
 
     // Set up toolbar
 	options = memnew(MenuButton);
@@ -677,38 +671,38 @@ MarchingCubesEditor::MarchingCubesEditor(EditorNode *p_editor) {
 	options->get_popup()->add_item(TTR("Bake to MeshInstance"), MENU_OPTION_BAKE_TO_MESHINSTANCE);
 	options->get_popup()->add_item(TTR("Clear Mesh"), MENU_OPTION_CLEAR_MESH);
 
-	options->get_popup()->connect("id_pressed", this, "menu_option");
+	options->get_popup()->connect("id_pressed", Callable(this, "menu_option"));
 
 	toolbar->add_child(memnew(VSeparator));
 
 	// Tools
 	tool_cube = memnew(ToolButton);
 	tool_cube->set_shortcut(ED_SHORTCUT("marching_cubes_editor/tool_cube", TTR("Cube Tool"), KEY_Z));
-	tool_cube->connect("pressed", this, "tool_select", make_binds(TOOL_CUBE));
+	tool_cube->connect("pressed", Callable(this, "tool_select"), make_binds(TOOL_CUBE));
 	tool_cube->set_toggle_mode(true);
 	toolbar->add_child(tool_cube);
 
 	tool_sphere = memnew(ToolButton);
 	tool_sphere->set_shortcut(ED_SHORTCUT("marching_cubes_editor/tool_sphere", TTR("Sphere Tool"), KEY_X));
-	tool_sphere->connect("pressed", this, "tool_select", make_binds(TOOL_SPHERE));
+	tool_sphere->connect("pressed", Callable(this, "tool_select"), make_binds(TOOL_SPHERE));
 	tool_sphere->set_toggle_mode(true);
 	toolbar->add_child(tool_sphere);
 
 	tool_paint = memnew(ToolButton);
 	tool_paint->set_shortcut(ED_SHORTCUT("marching_cubes_editor/tool_paint", TTR("Paint Tool"), KEY_C));
-	tool_paint->connect("pressed", this, "tool_select", make_binds(TOOL_PAINT));
+	tool_paint->connect("pressed", Callable(this, "tool_select"), make_binds(TOOL_PAINT));
 	tool_paint->set_toggle_mode(true);
 	toolbar->add_child(tool_paint);
 
 	tool_flatten = memnew(ToolButton);
 	tool_flatten->set_shortcut(ED_SHORTCUT("marching_cubes_editor/tool_flatten", TTR("Flatten Tool"), KEY_V));
-	tool_flatten->connect("pressed", this, "tool_select", make_binds(TOOL_FLATTEN));
+	tool_flatten->connect("pressed", Callable(this, "tool_select"), make_binds(TOOL_FLATTEN));
 	tool_flatten->set_toggle_mode(true);
 	toolbar->add_child(tool_flatten);
 
 	tool_ruffle = memnew(ToolButton);
 	tool_ruffle->set_shortcut(ED_SHORTCUT("marching_cubes_editor/tool_ruffle", TTR("Ruffle Tool"), KEY_B));
-	tool_ruffle->connect("pressed", this, "tool_select", make_binds(TOOL_RUFFLE));
+	tool_ruffle->connect("pressed", Callable(this, "tool_select"), make_binds(TOOL_RUFFLE));
 	tool_ruffle->set_toggle_mode(true);
 	toolbar->add_child(tool_ruffle);
 
@@ -733,7 +727,7 @@ MarchingCubesEditor::MarchingCubesEditor(EditorNode *p_editor) {
 		radius_slider->set_max(10.0f);
 		radius_slider->set_step(0.25f);
 		radius_slider->set_value(2.0f);
-		radius_slider->connect("value_changed", this, "update_palette_labels");
+		radius_slider->connect("value_changed", Callable(this, "update_palette_labels"));
 		radius_box->add_child(radius_slider);
 	}
 	add_child(radius_box);
@@ -754,7 +748,7 @@ MarchingCubesEditor::MarchingCubesEditor(EditorNode *p_editor) {
 		power_slider->set_max(1.000f);
 		power_slider->set_step(0.001f);
 		power_slider->set_value(0.01f);
-		power_slider->connect("value_changed", this, "update_palette_labels");
+		power_slider->connect("value_changed", Callable(this, "update_palette_labels"));
 		power_box->add_child(power_slider);
 	}
 	add_child(power_box);
@@ -776,32 +770,32 @@ MarchingCubesEditor::MarchingCubesEditor(EditorNode *p_editor) {
 	{ 
 		Button *left_bump = memnew(Button);
 		left_bump->set_text("Left");
-		left_bump->connect("pressed", this, "bump_data", make_binds(BUMP_LEFT));
+		left_bump->connect("pressed", Callable(this, "bump_data"), make_binds(BUMP_LEFT));
 		bump_box->add_child(left_bump);
 
 		Button *up_bump = memnew(Button);
 		up_bump->set_text("Up");
-		up_bump->connect("pressed", this, "bump_data", make_binds(BUMP_UP));
+		up_bump->connect("pressed", Callable(this, "bump_data"), make_binds(BUMP_UP));
 		bump_box->add_child(up_bump);
 
 		Button *down_bump = memnew(Button);
 		down_bump->set_text("Down");
-		down_bump->connect("pressed", this, "bump_data", make_binds(BUMP_DOWN));
+		down_bump->connect("pressed", Callable(this, "bump_data"), make_binds(BUMP_DOWN));
 		bump_box->add_child(down_bump);
 	
 		Button *right_bump = memnew(Button);
 		right_bump->set_text("Right");
-		right_bump->connect("pressed", this, "bump_data", make_binds(BUMP_RIGHT));
+		right_bump->connect("pressed", Callable(this, "bump_data"), make_binds(BUMP_RIGHT));
 		bump_box->add_child(right_bump);
 	
 		Button *forward_bump = memnew(Button);
 		forward_bump->set_text("Forward");
-		forward_bump->connect("pressed", this, "bump_data", make_binds(BUMP_FORWARD));
+		forward_bump->connect("pressed", Callable(this, "bump_data"), make_binds(BUMP_FORWARD));
 		bump_box->add_child(forward_bump);
 	
 		Button *back_bump = memnew(Button);
 		back_bump->set_text("Back");
-		back_bump->connect("pressed", this, "bump_data", make_binds(BUMP_BACKWARD));
+		back_bump->connect("pressed", Callable(this, "bump_data"), make_binds(BUMP_BACKWARD));
 		bump_box->add_child(back_bump);
 	}
 	add_child(bump_box);
@@ -818,7 +812,7 @@ MarchingCubesEditor::MarchingCubesEditor(EditorNode *p_editor) {
 	{ 
 		Button *previous_colour = memnew(Button);
 		previous_colour->set_text("<-");
-		previous_colour->connect("pressed", this, "change_colour", make_binds(-1));
+		previous_colour->connect("pressed", Callable(this, "change_colour"), make_binds(-1));
 		previous_colour->set_custom_minimum_size(Size2(40.0f, 40.0f));
 		colour_box->add_child(previous_colour);
 
@@ -840,7 +834,7 @@ MarchingCubesEditor::MarchingCubesEditor(EditorNode *p_editor) {
 	
 		Button *next_colour = memnew(Button);
 		next_colour->set_text("->");
-		next_colour->connect("pressed", this, "change_colour", make_binds(+1));
+		next_colour->connect("pressed", Callable(this, "change_colour"), make_binds(+1));
 		next_colour->set_custom_minimum_size(Size2(40.0f, 40.0f));
 		colour_box->add_child(next_colour);
 	}

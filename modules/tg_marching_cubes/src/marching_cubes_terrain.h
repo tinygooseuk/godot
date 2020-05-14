@@ -1,13 +1,13 @@
 #pragma once
 #include <core/tg_util.h>
-#include <scene/3d/mesh_instance.h>
+#include <scene/3d/mesh_instance_3d.h>
 
 #include "marching_cubes_data.h"
 
-class CollisionShape;
+class CollisionShape3D;
 
-class MarchingCubesTerrain : public MeshInstance {
-	GDCLASS(MarchingCubesTerrain, MeshInstance)
+class MarchingCubesTerrain3D : public MeshInstance3D {
+	GDCLASS(MarchingCubesTerrain3D, MeshInstance3D)
 
 public:
 	static void _bind_methods();
@@ -58,8 +58,8 @@ private:
 	int coord_to_index(const Vector3 &p_position) const;
 	Vector3 index_to_coord(int p_index) const;
 
-	CollisionShape *generate_collision_shape(Ref<Shape> p_shape);
-	CollisionShape *find_collision_sibling() const;
+	CollisionShape3D *generate_collision_shape(Ref<Shape3D> p_shape);
+	CollisionShape3D *find_collision_sibling() const;
 
 	void clear_mesh();
 	void reallocate_memory();
