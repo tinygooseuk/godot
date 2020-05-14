@@ -1164,6 +1164,19 @@ Vector3 KinematicBody3D::get_floor_velocity() const {
 	return floor_velocity;
 }
 
+// -- TINYGOOSE change:
+PhysicsBody *KinematicBody::get_floor_body() const {
+
+	if (!on_floor_body.is_valid()) {
+		return NULL;
+	}
+	
+	const ObjectID instance_id = PhysicsServer::get_singleton()->body_get_object_instance_id(on_floor_body);
+	Object *obj = ObjectDB::get_instance(instance_id);
+	return Object::cast_to<PhysicsBody>(obj);
+}
+// -- TINYGOOSE end.
+
 bool KinematicBody3D::test_move(const Transform &p_from, const Vector3 &p_motion, bool p_infinite_inertia) {
 
 	ERR_FAIL_COND_V(!is_inside_tree(), false);
@@ -1279,6 +1292,10 @@ void KinematicBody3D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("is_on_wall"), &KinematicBody3D::is_on_wall);
 	ClassDB::bind_method(D_METHOD("get_floor_normal"), &KinematicBody3D::get_floor_normal);
 	ClassDB::bind_method(D_METHOD("get_floor_velocity"), &KinematicBody3D::get_floor_velocity);
+
+// -- TINYGOOSE change:
+	ClassDB::bind_method(D_METHOD("get_floor_body"), &KinematicBody3D::get_floor_body);
+// -- TINYGOOSE end.
 
 	ClassDB::bind_method(D_METHOD("set_axis_lock", "axis", "lock"), &KinematicBody3D::set_axis_lock);
 	ClassDB::bind_method(D_METHOD("get_axis_lock", "axis"), &KinematicBody3D::get_axis_lock);

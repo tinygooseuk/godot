@@ -439,7 +439,82 @@ void CSGShape3DGizmoPlugin::redraw(EditorNode3DGizmo *p_gizmo) {
 	}
 }
 
+// -- TINYGOOSE change:
+void EditorPluginCSG::_bake() {
+	if (csg_shape == NULL) {
+		return;
+	}
+
+	Array meshes = csg_shape->get_meshes();
+
+	// get_meshes returns an array of [transform, arraymesh]...
+	const Transform xform = meshes[0];
+	const Ref<ArrayMesh> mesh = meshes[1];
+
+	MeshInstance *mesh_instance = memnew(MeshInstance);
+	mesh_instance->set_name(String("Baked ") + csg_shape->get_name());
+	mesh_instance->set_transform(csg_shape->get_transform() * xform);
+	mesh_instance->set_mesh(mesh);
+
+	Node *owner = csg_shape->get_owner();
+
+	UndoRedo *ur = EditorNode::get_singleton()->get_undo_redo();
+	ur->create_action(TTR("Bake to MeshInstance"));
+
+	ur->add_do_method(csg_shape->get_parent(), "add_child", mesh_instance);
+	ur->add_do_method(csg_shape->get_parent(), "move_child", mesh_instance, csg_shape->get_index() + 1);
+	ur->add_do_method(mesh_instance, "set_owner", owner);
+	ur->add_do_reference(mesh_instance);
+	ur->add_undo_method(csg_shape->get_parent(), "remove_child", mesh_instance);
+	ur->commit_action();
+}
+
+void EditorPluginCSG::edit(Object *p_object) {
+
+	CSGShape *s = Object::cast_to<CSGShape>(p_object);
+	if (!s) {
+		csg_shape = NULL;
+		return;
+	}
+
+	csg_shape = s;
+}
+
+bool EditorPluginCSG::handles(Object *p_object) const {
+
+	return p_object->is_class("CSGShape");
+}
+
+void EditorPluginCSG::make_visible(bool p_visible) {
+
+	if (p_visible) {
+		bake->show();
+	} else {
+
+		bake->hide();
+	}
+}
+
+void EditorPluginCSG::_bind_methods() {
+
+	ClassDB::bind_method("_bake", &EditorPluginCSG::_bake);
+}
+// -- TINYGOOSE end.
+
+
 EditorPluginCSG::EditorPluginCSG(EditorNode *p_editor) {
 	Ref<CSGShape3DGizmoPlugin> gizmo_plugin = Ref<CSGShape3DGizmoPlugin>(memnew(CSGShape3DGizmoPlugin));
 	Node3DEditor::get_singleton()->add_gizmo_plugin(gizmo_plugin);
+
+// -- TINYGOOSE change:
+	editor = p_editor;
+
+	bake = memnew(ToolButton);
+	bake->set_icon(editor->get_gui_base()->get_icon("Bake", "EditorIcons"));
+	bake->set_text(TTR("Bake to MeshInstance"));
+	bake->hide();
+	bake->connect("pressed", this, "_bake");
+	add_control_to_container(CONTAINER_SPATIAL_EDITOR_MENU, bake);
+	csg_shape = NULL;
+// -- TINYGOOSE end.
 }
