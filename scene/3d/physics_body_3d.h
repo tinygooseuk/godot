@@ -331,7 +331,7 @@ public:
 	Vector3 get_floor_velocity() const;
 
 // -- TINYGOOSE change:
-	PhysicsBody *get_floor_body() const;
+	PhysicsBody3D *get_floor_body() const;
 // -- TINYGOOSE end.
 
 	int get_slide_count() const;

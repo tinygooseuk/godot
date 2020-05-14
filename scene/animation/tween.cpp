@@ -253,6 +253,7 @@ void Tween::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("targeting_property", "object", "property", "initial", "initial_val", "final_val", "duration", "trans_type", "ease_type", "delay"), &Tween::targeting_property, DEFVAL(TRANS_LINEAR), DEFVAL(EASE_IN_OUT), DEFVAL(0));
 	ClassDB::bind_method(D_METHOD("targeting_method", "object", "method", "initial", "initial_method", "final_val", "duration", "trans_type", "ease_type", "delay"), &Tween::targeting_method, DEFVAL(TRANS_LINEAR), DEFVAL(EASE_IN_OUT), DEFVAL(0));
 
+
 // -- TINYGOOSE change:
 	ClassDB::bind_method(D_METHOD("run_equation", "trans_type", "ease_type", "alpha",  "initial_value", "final_value"), &Tween::run_equation, DEFVAL(TRANS_LINEAR), DEFVAL(EASE_IN_OUT), DEFVAL(real_t(0)), DEFVAL(real_t(0)), DEFVAL(real_t(0)));
 // -- TINYGOOSE end.

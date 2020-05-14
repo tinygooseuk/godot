@@ -5,8 +5,7 @@ import shutil
 
 ##### CONSTS #########################
 DEFAULT_COMMAND = "glue"
-VERSION = "3.2.2.rc.mono"
-
+VERSION = "4.0.alpha.mono"
 
 
 ##### GENERIC HELPER FUNCS #########################
@@ -22,13 +21,13 @@ def print_banner(words):
 
 def get_godot_platform_name():
     if os.name == "posix":
-        return "x11"
+        return "linuxbsd"
     else:
         return "windows"
 
 def get_godot_tools_exe_name():
     if os.name == "posix":
-        return "bin/godot.x11.tools.64.llvm.mono"
+        return "bin/godot.linuxbsd.tools.64.llvm.mono"
     else:
         return "bin\\godot.windows.tools.64.mono.exe"
 
@@ -40,21 +39,21 @@ def get_godot_debug_template_exe_name():
 
 def get_godot_debug_data_name():
     if os.name == "posix":
-        return "bin/data.mono.x11.64.release_debug"
+        return "bin/data.mono.linuxbsd.64.release_debug"
     else:
         return "bin\\data.mono.windows.64.release_debug"
 
 
 def get_godot_release_template_exe_name():
     if os.name == "posix":
-        return "bin/godot.x11.opt.64.llvm.mono"
+        return "bin/godot.linuxbsd.opt.64.llvm.mono"
     else:
         return "bin\\godot.windows.opt.64.mono.exe"
 
 
 def get_godot_release_data_name():
     if os.name == "posix":
-        return "bin/data.mono.x11.64.release"
+        return "bin/data.mono.linuxbsd.64.release"
     else:
         return "bin\\data.mono.windows.64.release"
 

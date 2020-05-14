@@ -57,6 +57,7 @@ public:
 class EditorPluginCSG : public EditorPlugin {
 	GDCLASS(EditorPluginCSG, EditorPlugin);
 
+
 // -- TINYGOOSE change:
 	CSGShape *csg_shape;
 
@@ -64,13 +65,11 @@ class EditorPluginCSG : public EditorPlugin {
 	EditorNode *editor;
 
 	void _bake();
-// -- TINYGOOSE end.
 
 protected:
 	static void _bind_methods();
 
 public:
-// -- TINYGOOSE change:
 	virtual String get_name() const { return "CSGShapes"; }
 	bool has_main_screen() const { return false; }
 	virtual void edit(Object *p_object);

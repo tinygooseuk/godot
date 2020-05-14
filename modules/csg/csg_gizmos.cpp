@@ -470,7 +470,6 @@ void EditorPluginCSG::_bake() {
 }
 
 void EditorPluginCSG::edit(Object *p_object) {
-
 	CSGShape *s = Object::cast_to<CSGShape>(p_object);
 	if (!s) {
 		csg_shape = NULL;
@@ -481,12 +480,10 @@ void EditorPluginCSG::edit(Object *p_object) {
 }
 
 bool EditorPluginCSG::handles(Object *p_object) const {
-
 	return p_object->is_class("CSGShape");
 }
 
 void EditorPluginCSG::make_visible(bool p_visible) {
-
 	if (p_visible) {
 		bake->show();
 	} else {
@@ -496,11 +493,9 @@ void EditorPluginCSG::make_visible(bool p_visible) {
 }
 
 void EditorPluginCSG::_bind_methods() {
-
 	ClassDB::bind_method("_bake", &EditorPluginCSG::_bake);
 }
 // -- TINYGOOSE end.
-
 
 EditorPluginCSG::EditorPluginCSG(EditorNode *p_editor) {
 	Ref<CSGShape3DGizmoPlugin> gizmo_plugin = Ref<CSGShape3DGizmoPlugin>(memnew(CSGShape3DGizmoPlugin));

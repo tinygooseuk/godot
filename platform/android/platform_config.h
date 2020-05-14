@@ -28,8 +28,5 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef _MSC_VER
 #include <alloca.h>
-#endif
-
 #include <malloc.h>
