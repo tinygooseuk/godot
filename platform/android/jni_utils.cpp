@@ -68,7 +68,7 @@ jvalret _variant_to_jvalue(JNIEnv *env, Variant::Type p_type, const Variant *p_a
 				v.val.i = *p_arg;
 			};
 		} break;
-		case Variant::REAL: {
+		case Variant::FLOAT: {
 
 			if (force_jobject) {
 
@@ -92,9 +92,9 @@ jvalret _variant_to_jvalue(JNIEnv *env, Variant::Type p_type, const Variant *p_a
 			v.val.l = jStr;
 			v.obj = jStr;
 		} break;
-		case Variant::POOL_STRING_ARRAY: {
+		case Variant::PACKED_STRING_ARRAY: {
 
-			PoolVector<String> sarray = *p_arg;
+			Vector<String> sarray = *p_arg;
 			jobjectArray arr = env->NewObjectArray(sarray.size(), env->FindClass("java/lang/String"), env->NewStringUTF(""));
 
 			for (int j = 0; j < sarray.size(); j++) {
@@ -130,7 +130,7 @@ jvalret _variant_to_jvalue(JNIEnv *env, Variant::Type p_type, const Variant *p_a
 			env->CallVoidMethodA(jdict, set_keys, &val);
 			env->DeleteLocalRef(jkeys);
 
-			jobjectArray jvalues = env->NewObjectArray(keys.size(), env->FindClass("java/lang/Object"), NULL);
+			jobjectArray jvalues = env->NewObjectArray(keys.size(), env->FindClass("java/lang/Object"), nullptr);
 
 			for (int j = 0; j < keys.size(); j++) {
 				Variant var = dict[keys[j]];
@@ -151,35 +151,39 @@ jvalret _variant_to_jvalue(JNIEnv *env, Variant::Type p_type, const Variant *p_a
 			v.obj = jdict;
 		} break;
 
-		case Variant::POOL_INT_ARRAY: {
+		case Variant::PACKED_INT32_ARRAY: {
 
-			PoolVector<int> array = *p_arg;
+			Vector<int> array = *p_arg;
 			jintArray arr = env->NewIntArray(array.size());
-			PoolVector<int>::Read r = array.read();
-			env->SetIntArrayRegion(arr, 0, array.size(), r.ptr());
+			const int *r = array.ptr();
+			env->SetIntArrayRegion(arr, 0, array.size(), r);
 			v.val.l = arr;
 			v.obj = arr;
 
 		} break;
-		case Variant::POOL_BYTE_ARRAY: {
-			PoolVector<uint8_t> array = *p_arg;
+		case Variant::PACKED_BYTE_ARRAY: {
+			Vector<uint8_t> array = *p_arg;
 			jbyteArray arr = env->NewByteArray(array.size());
-			PoolVector<uint8_t>::Read r = array.read();
-			env->SetByteArrayRegion(arr, 0, array.size(), reinterpret_cast<const signed char *>(r.ptr()));
+			const uint8_t *r = array.ptr();
+			env->SetByteArrayRegion(arr, 0, array.size(), reinterpret_cast<const signed char *>(r));
 			v.val.l = arr;
 			v.obj = arr;
 
 		} break;
-		case Variant::POOL_REAL_ARRAY: {
+		case Variant::PACKED_FLOAT32_ARRAY: {
 
-			PoolVector<float> array = *p_arg;
+			Vector<float> array = *p_arg;
 			jfloatArray arr = env->NewFloatArray(array.size());
-			PoolVector<float>::Read r = array.read();
-			env->SetFloatArrayRegion(arr, 0, array.size(), r.ptr());
+			const float *r = array.ptr();
+			env->SetFloatArrayRegion(arr, 0, array.size(), r);
 			v.val.l = arr;
 			v.obj = arr;
 
 		} break;
+#ifndef _MSC_VER
+#warning This is missing 64 bits arrays, I have no idea how to do it in JNI
+#endif
+
 		default: {
 
 			v.val.i = 0;
@@ -207,7 +211,7 @@ String _get_class_name(JNIEnv *env, jclass cls, bool *array) {
 
 Variant _jobject_to_variant(JNIEnv *env, jobject obj) {
 
-	if (obj == NULL) {
+	if (obj == nullptr) {
 		return Variant();
 	}
 
@@ -224,7 +228,7 @@ Variant _jobject_to_variant(JNIEnv *env, jobject obj) {
 
 		jobjectArray arr = (jobjectArray)obj;
 		int stringCount = env->GetArrayLength(arr);
-		PoolVector<String> sarr;
+		Vector<String> sarr;
 
 		for (int i = 0; i < stringCount; i++) {
 			jstring string = (jstring)env->GetObjectArrayElement(arr, i);
@@ -254,12 +258,11 @@ Variant _jobject_to_variant(JNIEnv *env, jobject obj) {
 
 		jintArray arr = (jintArray)obj;
 		int fCount = env->GetArrayLength(arr);
-		PoolVector<int> sarr;
+		Vector<int> sarr;
 		sarr.resize(fCount);
 
-		PoolVector<int>::Write w = sarr.write();
-		env->GetIntArrayRegion(arr, 0, fCount, w.ptr());
-		w.release();
+		int *w = sarr.ptrw();
+		env->GetIntArrayRegion(arr, 0, fCount, w);
 		return sarr;
 	};
 
@@ -267,12 +270,11 @@ Variant _jobject_to_variant(JNIEnv *env, jobject obj) {
 
 		jbyteArray arr = (jbyteArray)obj;
 		int fCount = env->GetArrayLength(arr);
-		PoolVector<uint8_t> sarr;
+		Vector<uint8_t> sarr;
 		sarr.resize(fCount);
 
-		PoolVector<uint8_t>::Write w = sarr.write();
-		env->GetByteArrayRegion(arr, 0, fCount, reinterpret_cast<signed char *>(w.ptr()));
-		w.release();
+		uint8_t *w = sarr.ptrw();
+		env->GetByteArrayRegion(arr, 0, fCount, reinterpret_cast<signed char *>(w));
 		return sarr;
 	};
 
@@ -288,16 +290,16 @@ Variant _jobject_to_variant(JNIEnv *env, jobject obj) {
 
 		jdoubleArray arr = (jdoubleArray)obj;
 		int fCount = env->GetArrayLength(arr);
-		PoolRealArray sarr;
+		PackedFloat32Array sarr;
 		sarr.resize(fCount);
 
-		PoolRealArray::Write w = sarr.write();
+		real_t *w = sarr.ptrw();
 
 		for (int i = 0; i < fCount; i++) {
 
 			double n;
 			env->GetDoubleArrayRegion(arr, i, 1, &n);
-			w.ptr()[i] = n;
+			w[i] = n;
 		};
 		return sarr;
 	};
@@ -306,16 +308,16 @@ Variant _jobject_to_variant(JNIEnv *env, jobject obj) {
 
 		jfloatArray arr = (jfloatArray)obj;
 		int fCount = env->GetArrayLength(arr);
-		PoolRealArray sarr;
+		PackedFloat32Array sarr;
 		sarr.resize(fCount);
 
-		PoolRealArray::Write w = sarr.write();
+		real_t *w = sarr.ptrw();
 
 		for (int i = 0; i < fCount; i++) {
 
 			float n;
 			env->GetFloatArrayRegion(arr, i, 1, &n);
-			w.ptr()[i] = n;
+			w[i] = n;
 		};
 		return sarr;
 	};
@@ -343,7 +345,7 @@ Variant _jobject_to_variant(JNIEnv *env, jobject obj) {
 		jmethodID get_keys = env->GetMethodID(oclass, "get_keys", "()[Ljava/lang/String;");
 		jobjectArray arr = (jobjectArray)env->CallObjectMethod(obj, get_keys);
 
-		PoolStringArray keys = _jobject_to_variant(env, arr);
+		PackedStringArray keys = _jobject_to_variant(env, arr);
 		env->DeleteLocalRef(arr);
 
 		jmethodID get_values = env->GetMethodID(oclass, "get_values", "()[Ljava/lang/Object;");
@@ -374,15 +376,15 @@ Variant::Type get_jni_type(const String &p_type) {
 		{ "void", Variant::NIL },
 		{ "boolean", Variant::BOOL },
 		{ "int", Variant::INT },
-		{ "float", Variant::REAL },
-		{ "double", Variant::REAL },
+		{ "float", Variant::FLOAT },
+		{ "double", Variant::FLOAT },
 		{ "java.lang.String", Variant::STRING },
-		{ "[I", Variant::POOL_INT_ARRAY },
-		{ "[B", Variant::POOL_BYTE_ARRAY },
-		{ "[F", Variant::POOL_REAL_ARRAY },
-		{ "[Ljava.lang.String;", Variant::POOL_STRING_ARRAY },
+		{ "[I", Variant::PACKED_INT32_ARRAY },
+		{ "[B", Variant::PACKED_BYTE_ARRAY },
+		{ "[F", Variant::PACKED_FLOAT32_ARRAY },
+		{ "[Ljava.lang.String;", Variant::PACKED_STRING_ARRAY },
 		{ "org.godotengine.godot.Dictionary", Variant::DICTIONARY },
-		{ NULL, Variant::NIL }
+		{ nullptr, Variant::NIL }
 	};
 
 	int idx = 0;
@@ -415,7 +417,7 @@ const char *get_jni_sig(const String &p_type) {
 		{ "[B", "[B" },
 		{ "[F", "[F" },
 		{ "[Ljava.lang.String;", "[Ljava/lang/String;" },
-		{ NULL, "V" }
+		{ nullptr, "V" }
 	};
 
 	int idx = 0;

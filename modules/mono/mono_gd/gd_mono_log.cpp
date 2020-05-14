@@ -46,13 +46,13 @@ static CharString get_default_log_level() {
 #endif
 }
 
-GDMonoLog *GDMonoLog::singleton = NULL;
+GDMonoLog *GDMonoLog::singleton = nullptr;
 
 #ifdef GD_MONO_LOG_ENABLED
 
 static int get_log_level_id(const char *p_log_level) {
 
-	const char *valid_log_levels[] = { "error", "critical", "warning", "message", "info", "debug", NULL };
+	const char *valid_log_levels[] = { "error", "critical", "warning", "message", "info", "debug", nullptr };
 
 	int i = 0;
 	while (valid_log_levels[i]) {
@@ -83,7 +83,7 @@ void GDMonoLog::mono_log_callback(const char *log_domain, const char *log_level,
 	}
 
 	if (fatal) {
-		ERR_PRINTS("Mono: FATAL ERROR, ABORTING! Logfile: '" + GDMonoLog::get_singleton()->log_file_path + "'.");
+		ERR_PRINT("Mono: FATAL ERROR, ABORTING! Logfile: '" + GDMonoLog::get_singleton()->log_file_path + "'.");
 		// Make sure to flush before aborting
 		f->flush();
 		f->close();
@@ -139,7 +139,7 @@ void GDMonoLog::initialize() {
 	CharString log_level = OS::get_singleton()->get_environment("GODOT_MONO_LOG_LEVEL").utf8();
 
 	if (log_level.length() != 0 && get_log_level_id(log_level.get_data()) == -1) {
-		ERR_PRINTS(String() + "Mono: Ignoring invalid log level (GODOT_MONO_LOG_LEVEL): '" + log_level.get_data() + "'.");
+		ERR_PRINT(String() + "Mono: Ignoring invalid log level (GODOT_MONO_LOG_LEVEL): '" + log_level.get_data() + "'.");
 		log_level = CharString();
 	}
 
@@ -167,7 +167,7 @@ void GDMonoLog::initialize() {
 
 		log_file = FileAccess::open(log_file_path, FileAccess::WRITE);
 		if (!log_file) {
-			ERR_PRINTS("Mono: Cannot create log file at: " + log_file_path);
+			ERR_PRINT("Mono: Cannot create log file at: " + log_file_path);
 		}
 	}
 
@@ -175,7 +175,7 @@ void GDMonoLog::initialize() {
 	log_level_id = get_log_level_id(log_level.get_data());
 
 	if (log_file) {
-		OS::get_singleton()->print("Mono: Logfile is: %s\n", log_file_path.utf8().get_data());
+		OS::get_singleton()->print("Mono: Log file is: '%s'\n", log_file_path.utf8().get_data());
 		mono_trace_set_log_handler(mono_log_callback, this);
 	} else {
 		OS::get_singleton()->printerr("Mono: No log file, using default log handler\n");
@@ -191,7 +191,7 @@ GDMonoLog::GDMonoLog() {
 
 GDMonoLog::~GDMonoLog() {
 
-	singleton = NULL;
+	singleton = nullptr;
 
 	if (log_file) {
 		log_file->close();
@@ -213,7 +213,7 @@ GDMonoLog::GDMonoLog() {
 
 GDMonoLog::~GDMonoLog() {
 
-	singleton = NULL;
+	singleton = nullptr;
 }
 
 #endif // !defined(JAVASCRIPT_ENABLED)

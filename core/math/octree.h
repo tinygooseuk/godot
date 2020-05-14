@@ -52,7 +52,6 @@ public:
 
 private:
 	enum {
-
 		NEG = 0,
 		POS = 1,
 	};
@@ -106,49 +105,35 @@ private:
 		// cached for FAST plane check
 		AABB aabb;
 
-		uint64_t last_pass;
-		Octant *parent;
-		Octant *children[8];
+		uint64_t last_pass = 0;
+		Octant *parent = nullptr;
+		Octant *children[8] = { nullptr };
 
-		int children_count; // cache for amount of childrens (fast check for removal)
-		int parent_index; // cache for parent index (fast check for removal)
+		int children_count = 0; // cache for amount of childrens (fast check for removal)
+		int parent_index = -1; // cache for parent index (fast check for removal)
 
 		List<Element *, AL> pairable_elements;
 		List<Element *, AL> elements;
 
-		Octant() {
-			children_count = 0;
-			parent_index = -1;
-			last_pass = 0;
-			parent = NULL;
-			for (int i = 0; i < 8; i++)
-				children[i] = NULL;
-		}
-
-		~Octant() {
-
-			/*
-			for (int i=0;i<8;i++)
-				memdelete_notnull(children[i]);
-			*/
-		}
+		Octant() {}
+		~Octant() {}
 	};
 
 	struct PairData;
 
 	struct Element {
 
-		Octree *octree;
+		Octree *octree = nullptr;
 
-		T *userdata;
-		int subindex;
-		bool pairable;
-		uint32_t pairable_mask;
-		uint32_t pairable_type;
+		T *userdata = nullptr;
+		int subindex = 0;
+		bool pairable = false;
+		uint32_t pairable_mask = 0;
+		uint32_t pairable_type = 0;
 
-		uint64_t last_pass;
-		OctreeElementID _id;
-		Octant *common_parent;
+		uint64_t last_pass = 0;
+		OctreeElementID _id = 0;
+		Octant *common_parent = nullptr;
 
 		AABB aabb;
 		AABB container_aabb;
@@ -163,17 +148,7 @@ private:
 
 		List<OctantOwner, AL> octant_owners;
 
-		Element() {
-			last_pass = 0;
-			_id = 0;
-			pairable = false;
-			subindex = 0;
-			userdata = 0;
-			octree = 0;
-			pairable_mask = 0;
-			pairable_type = 0;
-			common_parent = NULL;
-		}
+		Element() {}
 	};
 
 	struct PairData {
@@ -309,19 +284,19 @@ private:
 
 		while (root && root->children_count < 2 && !root->elements.size() && !(use_pairs && root->pairable_elements.size())) {
 
-			Octant *new_root = NULL;
+			Octant *new_root = nullptr;
 			if (root->children_count == 1) {
 
 				for (int i = 0; i < 8; i++) {
 
 					if (root->children[i]) {
 						new_root = root->children[i];
-						root->children[i] = NULL;
+						root->children[i] = nullptr;
 						break;
 					}
 				}
 				ERR_FAIL_COND(!new_root);
-				new_root->parent = NULL;
+				new_root->parent = nullptr;
 				new_root->parent_index = -1;
 			}
 
@@ -333,7 +308,7 @@ private:
 
 	void _insert_element(Element *p_element, Octant *p_octant);
 	void _ensure_valid_root(const AABB &p_aabb);
-	bool _remove_element_from_octant(Element *p_element, Octant *p_octant, Octant *p_limit = NULL);
+	bool _remove_element_from_octant(Element *p_element, Octant *p_octant, Octant *p_limit = nullptr);
 	void _remove_element(Element *p_element);
 	void _pair_element(Element *p_element, Octant *p_octant);
 	void _unpair_element(Element *p_element, Octant *p_octant);
@@ -380,10 +355,10 @@ public:
 	int get_subindex(OctreeElementID p_id) const;
 
 	int cull_convex(const Vector<Plane> &p_convex, T **p_result_array, int p_result_max, uint32_t p_mask = 0xFFFFFFFF);
-	int cull_aabb(const AABB &p_aabb, T **p_result_array, int p_result_max, int *p_subindex_array = NULL, uint32_t p_mask = 0xFFFFFFFF);
-	int cull_segment(const Vector3 &p_from, const Vector3 &p_to, T **p_result_array, int p_result_max, int *p_subindex_array = NULL, uint32_t p_mask = 0xFFFFFFFF);
+	int cull_aabb(const AABB &p_aabb, T **p_result_array, int p_result_max, int *p_subindex_array = nullptr, uint32_t p_mask = 0xFFFFFFFF);
+	int cull_segment(const Vector3 &p_from, const Vector3 &p_to, T **p_result_array, int p_result_max, int *p_subindex_array = nullptr, uint32_t p_mask = 0xFFFFFFFF);
 
-	int cull_point(const Vector3 &p_point, T **p_result_array, int p_result_max, int *p_subindex_array = NULL, uint32_t p_mask = 0xFFFFFFFF);
+	int cull_point(const Vector3 &p_point, T **p_result_array, int p_result_max, int *p_subindex_array = nullptr, uint32_t p_mask = 0xFFFFFFFF);
 
 	void set_pair_callback(PairCallback p_callback, void *p_userdata);
 	void set_unpair_callback(UnpairCallback p_callback, void *p_userdata);
@@ -399,7 +374,7 @@ public:
 template <class T, bool use_pairs, class AL>
 T *Octree<T, use_pairs, AL>::get(OctreeElementID p_id) const {
 	const typename ElementMap::Element *E = element_map.find(p_id);
-	ERR_FAIL_COND_V(!E, NULL);
+	ERR_FAIL_COND_V(!E, nullptr);
 	return E->get().userdata;
 }
 
@@ -445,7 +420,7 @@ void Octree<T, use_pairs, AL>::_insert_element(Element *p_element, Octant *p_oct
 
 		p_element->octant_owners.push_back(owner);
 
-		if (p_element->common_parent == NULL) {
+		if (p_element->common_parent == nullptr) {
 			p_element->common_parent = p_octant;
 			p_element->container_aabb = p_octant->aabb;
 		} else {
@@ -466,7 +441,7 @@ void Octree<T, use_pairs, AL>::_insert_element(Element *p_element, Octant *p_oct
 	} else {
 		/* not big enough, send it to subitems */
 		int splits = 0;
-		bool candidate = p_element->common_parent == NULL;
+		bool candidate = p_element->common_parent == nullptr;
 
 		for (int i = 0; i < 8; i++) {
 
@@ -555,7 +530,7 @@ void Octree<T, use_pairs, AL>::_ensure_valid_root(const AABB &p_aabb) {
 
 		root = memnew_allocator(Octant, AL);
 
-		root->parent = NULL;
+		root->parent = nullptr;
 		root->parent_index = -1;
 		root->aabb = base;
 
@@ -637,11 +612,11 @@ bool Octree<T, use_pairs, AL>::_remove_element_from_octant(Element *p_element, O
 
 			if (p_octant == root) { // won't have a parent, just erase
 
-				root = NULL;
+				root = nullptr;
 			} else {
 				ERR_FAIL_INDEX_V(p_octant->parent_index, 8, octant_removed);
 
-				parent->children[p_octant->parent_index] = NULL;
+				parent->children[p_octant->parent_index] = nullptr;
 				parent->children_count--;
 			}
 
@@ -855,12 +830,12 @@ void Octree<T, use_pairs, AL>::move(OctreeElementID p_id, const AABB &p_aabb) {
 
 		if (old_has_surf) {
 			_remove_element(&e); // removing
-			e.common_parent = NULL;
+			e.common_parent = nullptr;
 			e.aabb = AABB();
 			_optimize();
 		} else {
 			_ensure_valid_root(p_aabb); // inserting
-			e.common_parent = NULL;
+			e.common_parent = nullptr;
 			e.aabb = p_aabb;
 			_insert_element(&e, root);
 			if (use_pairs)
@@ -887,7 +862,7 @@ void Octree<T, use_pairs, AL>::move(OctreeElementID p_id, const AABB &p_aabb) {
 	combined.merge_with(p_aabb);
 	_ensure_valid_root(combined);
 
-	ERR_FAIL_COND(e.octant_owners.front() == NULL);
+	ERR_FAIL_COND(e.octant_owners.front() == nullptr);
 
 	/* FIND COMMON PARENT */
 
@@ -905,7 +880,7 @@ void Octree<T, use_pairs, AL>::move(OctreeElementID p_id, const AABB &p_aabb) {
 
 	//prepare for reinsert
 	e.octant_owners.clear();
-	e.common_parent = NULL;
+	e.common_parent = nullptr;
 	e.aabb = p_aabb;
 
 	_insert_element(&e, common_parent); // reinsert from this point
@@ -974,7 +949,7 @@ void Octree<T, use_pairs, AL>::set_pairable(OctreeElementID p_id, bool p_pairabl
 	e.pairable = p_pairable;
 	e.pairable_type = p_pairable_type;
 	e.pairable_mask = p_pairable_mask;
-	e.common_parent = NULL;
+	e.common_parent = nullptr;
 
 	if (!e.aabb.has_no_surface()) {
 		_ensure_valid_root(e.aabb);
@@ -1372,15 +1347,15 @@ Octree<T, use_pairs, AL>::Octree(real_t p_unit_size) {
 	last_element_id = 1;
 	pass = 1;
 	unit_size = p_unit_size;
-	root = NULL;
+	root = nullptr;
 
 	octant_count = 0;
 	pair_count = 0;
 
-	pair_callback = NULL;
-	unpair_callback = NULL;
-	pair_callback_userdata = NULL;
-	unpair_callback_userdata = NULL;
+	pair_callback = nullptr;
+	unpair_callback = nullptr;
+	pair_callback_userdata = nullptr;
+	unpair_callback_userdata = nullptr;
 }
 
-#endif
+#endif // OCTREE_H

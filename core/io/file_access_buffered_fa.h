@@ -54,8 +54,8 @@ class FileAccessBufferedFA : public FileAccessBuffered {
 			cache.offset = p_offset;
 			cache.buffer.resize(p_size);
 
-			// on PoolVector
-			//PoolVector<uint8_t>::Write write = cache.buffer.write();
+			// on Vector
+			//uint8_t* write = cache.buffer.ptrw();
 			//f.get_buffer(write.ptrw(), p_size);
 
 			// on vector
@@ -132,12 +132,6 @@ public:
 		set_error(OK);
 	};
 
-	/*
-	static void make_default() {
-		FileAccess::create_func = FileAccessBufferedFA<T>::create;
-	};
-	*/
-
 	virtual uint64_t _get_modified_time(const String &p_file) {
 
 		return f._get_modified_time(p_file);
@@ -151,9 +145,7 @@ public:
 		return f._set_unix_permissions(p_file, p_permissions);
 	}
 
-	FileAccessBufferedFA(){
-
-	};
+	FileAccessBufferedFA() {}
 };
 
 #endif // FILE_ACCESS_BUFFERED_FA_H

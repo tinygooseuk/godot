@@ -33,7 +33,6 @@
 
 #include "editor/editor_node.h"
 #include "editor/editor_plugin.h"
-
 #include "scene/2d/tile_map.h"
 #include "scene/gui/check_box.h"
 #include "scene/gui/label.h"
@@ -123,38 +122,30 @@ class TileMapEditor : public VBoxContainer {
 	bool *bucket_cache_visited;
 	Rect2i bucket_cache_rect;
 	int bucket_cache_tile;
-	PoolVector<Vector2> bucket_cache;
+	Vector<Vector2> bucket_cache;
 	List<Point2i> bucket_queue;
 
 	struct CellOp {
-		int idx;
-		bool xf;
-		bool yf;
-		bool tr;
+		int idx = TileMap::INVALID_CELL;
+		bool xf = false;
+		bool yf = false;
+		bool tr = false;
 		Vector2 ac;
 
-		CellOp() :
-				idx(TileMap::INVALID_CELL),
-				xf(false),
-				yf(false),
-				tr(false) {}
+		CellOp() {}
 	};
 
 	Map<Point2i, CellOp> paint_undo;
 
 	struct TileData {
 		Point2i pos;
-		int cell;
-		bool flip_h;
-		bool flip_v;
-		bool transpose;
+		int cell = TileMap::INVALID_CELL;
+		bool flip_h = false;
+		bool flip_v = false;
+		bool transpose = false;
 		Point2i autotile_coord;
 
-		TileData() :
-				cell(TileMap::INVALID_CELL),
-				flip_h(false),
-				flip_v(false),
-				transpose(false) {}
+		TileData() {}
 	};
 
 	List<TileData> copydata;
@@ -164,10 +155,10 @@ class TileMapEditor : public VBoxContainer {
 
 	void _pick_tile(const Point2 &p_pos);
 
-	PoolVector<Vector2> _bucket_fill(const Point2i &p_start, bool erase = false, bool preview = false);
+	Vector<Vector2> _bucket_fill(const Point2i &p_start, bool erase = false, bool preview = false);
 
-	void _fill_points(const PoolVector<Vector2> &p_points, const Dictionary &p_op);
-	void _erase_points(const PoolVector<Vector2> &p_points);
+	void _fill_points(const Vector<Vector2> &p_points, const Dictionary &p_op);
+	void _erase_points(const Vector<Vector2> &p_points);
 
 	void _select(const Point2i &p_from, const Point2i &p_to);
 	void _erase_selection();

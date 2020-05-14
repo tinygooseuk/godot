@@ -252,13 +252,6 @@ String EditorExportPreset::get_script_encryption_key() const {
 	return script_key;
 }
 
-EditorExportPreset::EditorExportPreset() :
-		export_filter(EXPORT_ALL_RESOURCES),
-		export_path(""),
-		runnable(false),
-		script_mode(MODE_SCRIPT_COMPILED) {
-}
-
 ///////////////////////////////////
 
 void EditorExportPlatform::gen_debug_flags(Vector<String> &r_flags, int p_flags) {
@@ -284,7 +277,7 @@ void EditorExportPlatform::gen_debug_flags(Vector<String> &r_flags, int p_flags)
 
 		r_flags.push_back("--remote-debug");
 
-		r_flags.push_back(host + ":" + String::num(remote_port));
+		r_flags.push_back(get_debug_protocol() + host + ":" + String::num(remote_port));
 
 		List<String> breakpoints;
 		ScriptEditor::get_singleton()->get_breakpoints(&breakpoints);
@@ -358,12 +351,12 @@ Error EditorExportPlatform::_save_zip_file(void *p_userdata, const String &p_pat
 
 	zipOpenNewFileInZip(zip,
 			path.utf8().get_data(),
-			NULL,
-			NULL,
+			nullptr,
+			nullptr,
 			0,
-			NULL,
+			nullptr,
 			0,
-			NULL,
+			nullptr,
 			Z_DEFLATED,
 			Z_DEFAULT_COMPRESSION);
 
@@ -590,14 +583,14 @@ Vector<String> EditorExportPlugin::get_ios_project_static_libs() const {
 	return ios_project_static_libs;
 }
 
-void EditorExportPlugin::_export_file_script(const String &p_path, const String &p_type, const PoolVector<String> &p_features) {
+void EditorExportPlugin::_export_file_script(const String &p_path, const String &p_type, const Vector<String> &p_features) {
 
 	if (get_script_instance()) {
 		get_script_instance()->call("_export_file", p_path, p_type, p_features);
 	}
 }
 
-void EditorExportPlugin::_export_begin_script(const PoolVector<String> &p_features, bool p_debug, const String &p_path, int p_flags) {
+void EditorExportPlugin::_export_begin_script(const Vector<String> &p_features, bool p_debug, const String &p_path, int p_flags) {
 
 	if (get_script_instance()) {
 		get_script_instance()->call("_export_begin", p_features, p_debug, p_path, p_flags);
@@ -634,8 +627,8 @@ void EditorExportPlugin::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("add_ios_cpp_code", "code"), &EditorExportPlugin::add_ios_cpp_code);
 	ClassDB::bind_method(D_METHOD("skip"), &EditorExportPlugin::skip);
 
-	BIND_VMETHOD(MethodInfo("_export_file", PropertyInfo(Variant::STRING, "path"), PropertyInfo(Variant::STRING, "type"), PropertyInfo(Variant::POOL_STRING_ARRAY, "features")));
-	BIND_VMETHOD(MethodInfo("_export_begin", PropertyInfo(Variant::POOL_STRING_ARRAY, "features"), PropertyInfo(Variant::BOOL, "is_debug"), PropertyInfo(Variant::STRING, "path"), PropertyInfo(Variant::INT, "flags")));
+	BIND_VMETHOD(MethodInfo("_export_file", PropertyInfo(Variant::STRING, "path"), PropertyInfo(Variant::STRING, "type"), PropertyInfo(Variant::PACKED_STRING_ARRAY, "features")));
+	BIND_VMETHOD(MethodInfo("_export_begin", PropertyInfo(Variant::PACKED_STRING_ARRAY, "features"), PropertyInfo(Variant::BOOL, "is_debug"), PropertyInfo(Variant::STRING, "path"), PropertyInfo(Variant::INT, "flags")));
 	BIND_VMETHOD(MethodInfo("_export_end"));
 }
 
@@ -673,7 +666,7 @@ EditorExportPlatform::FeatureContainers EditorExportPlatform::get_feature_contai
 
 EditorExportPlatform::ExportNotifier::ExportNotifier(EditorExportPlatform &p_platform, const Ref<EditorExportPreset> &p_preset, bool p_debug, const String &p_path, int p_flags) {
 	FeatureContainers features = p_platform.get_feature_containers(p_preset);
-	Vector<Ref<EditorExportPlugin> > export_plugins = EditorExport::get_singleton()->get_export_plugins();
+	Vector<Ref<EditorExportPlugin>> export_plugins = EditorExport::get_singleton()->get_export_plugins();
 	//initial export plugin callback
 	for (int i = 0; i < export_plugins.size(); i++) {
 		if (export_plugins[i]->get_script_instance()) { //script based
@@ -685,7 +678,7 @@ EditorExportPlatform::ExportNotifier::ExportNotifier(EditorExportPlatform &p_pla
 }
 
 EditorExportPlatform::ExportNotifier::~ExportNotifier() {
-	Vector<Ref<EditorExportPlugin> > export_plugins = EditorExport::get_singleton()->get_export_plugins();
+	Vector<Ref<EditorExportPlugin>> export_plugins = EditorExport::get_singleton()->get_export_plugins();
 	for (int i = 0; i < export_plugins.size(); i++) {
 		if (export_plugins[i]->get_script_instance()) {
 			export_plugins.write[i]->_export_end_script();
@@ -721,7 +714,7 @@ Error EditorExportPlatform::export_project_files(const Ref<EditorExportPreset> &
 	_edit_filter_list(paths, p_preset->get_include_filter(), false);
 	_edit_filter_list(paths, p_preset->get_exclude_filter(), true);
 
-	Vector<Ref<EditorExportPlugin> > export_plugins = EditorExport::get_singleton()->get_export_plugins();
+	Vector<Ref<EditorExportPlugin>> export_plugins = EditorExport::get_singleton()->get_export_plugins();
 	for (int i = 0; i < export_plugins.size(); i++) {
 
 		export_plugins.write[i]->set_export_preset(p_preset);
@@ -740,7 +733,7 @@ Error EditorExportPlatform::export_project_files(const Ref<EditorExportPreset> &
 
 	FeatureContainers feature_containers = get_feature_containers(p_preset);
 	Set<String> &features = feature_containers.features;
-	PoolVector<String> &features_pv = feature_containers.features_pv;
+	Vector<String> &features_pv = feature_containers.features_pv;
 
 	//store everything in the export medium
 	int idx = 0;
@@ -757,7 +750,7 @@ Error EditorExportPlatform::export_project_files(const Ref<EditorExportPreset> &
 			config.instance();
 			Error err = config->load(path + ".import");
 			if (err != OK) {
-				ERR_PRINTS("Could not parse: '" + path + "', not exported.");
+				ERR_PRINT("Could not parse: '" + path + "', not exported.");
 				continue;
 			}
 
@@ -871,7 +864,7 @@ Error EditorExportPlatform::export_project_files(const Ref<EditorExportPreset> &
 
 	ProjectSettings::CustomMap custom_map;
 	if (path_remaps.size()) {
-		if (1) { //new remap mode, use always as it's friendlier with multiple .pck exports
+		if (true) { //new remap mode, use always as it's friendlier with multiple .pck exports
 			for (int i = 0; i < path_remaps.size(); i += 2) {
 				String from = path_remaps[i];
 				String to = path_remaps[i + 1];
@@ -1079,7 +1072,7 @@ Error EditorExportPlatform::save_zip(const Ref<EditorExportPreset> &p_preset, co
 
 	FileAccess *src_f;
 	zlib_filefunc_def io = zipio_create_io_from_file(&src_f);
-	zipFile zip = zipOpen2(p_path.utf8().get_data(), APPEND_STATUS_CREATE, NULL, &io);
+	zipFile zip = zipOpen2(p_path.utf8().get_data(), APPEND_STATUS_CREATE, nullptr, &io);
 
 	ZipData zd;
 	zd.ep = &ep;
@@ -1089,7 +1082,7 @@ Error EditorExportPlatform::save_zip(const Ref<EditorExportPreset> &p_preset, co
 	if (err != OK && err != ERR_SKIP)
 		ERR_PRINT("Failed to export project files");
 
-	zipClose(zip, NULL);
+	zipClose(zip, nullptr);
 
 	return OK;
 }
@@ -1127,7 +1120,7 @@ void EditorExportPlatform::gen_export_flags(Vector<String> &r_flags, int p_flags
 
 		r_flags.push_back("--remote-debug");
 
-		r_flags.push_back(host + ":" + String::num(remote_port));
+		r_flags.push_back(get_debug_protocol() + host + ":" + String::num(remote_port));
 
 		List<String> breakpoints;
 		ScriptEditor::get_singleton()->get_breakpoints(&breakpoints);
@@ -1162,7 +1155,7 @@ EditorExportPlatform::EditorExportPlatform() {
 
 ////
 
-EditorExport *EditorExport::singleton = NULL;
+EditorExport *EditorExport::singleton = nullptr;
 
 void EditorExport::_save() {
 
@@ -1222,8 +1215,6 @@ void EditorExport::save_presets() {
 }
 
 void EditorExport::_bind_methods() {
-
-	ClassDB::bind_method("_save", &EditorExport::_save);
 }
 
 void EditorExport::add_export_platform(const Ref<EditorExportPlatform> &p_platform) {
@@ -1254,23 +1245,14 @@ void EditorExport::add_export_preset(const Ref<EditorExportPreset> &p_preset, in
 String EditorExportPlatform::test_etc2() const {
 
 	String driver = ProjectSettings::get_singleton()->get("rendering/quality/driver/driver_name");
-	bool driver_fallback = ProjectSettings::get_singleton()->get("rendering/quality/driver/fallback_to_gles2");
 	bool etc_supported = ProjectSettings::get_singleton()->get("rendering/vram_compression/import_etc");
 	bool etc2_supported = ProjectSettings::get_singleton()->get("rendering/vram_compression/import_etc2");
 
 	if (driver == "GLES2" && !etc_supported) {
 		return TTR("Target platform requires 'ETC' texture compression for GLES2. Enable 'Import Etc' in Project Settings.");
-	} else if (driver == "GLES3") {
-		String err;
-		if (!etc2_supported) {
-			err += TTR("Target platform requires 'ETC2' texture compression for GLES3. Enable 'Import Etc 2' in Project Settings.");
-		}
-		if (driver_fallback && !etc_supported) {
-			if (err != String())
-				err += "\n";
-			err += TTR("Target platform requires 'ETC' texture compression for the driver fallback to GLES2.\nEnable 'Import Etc' in Project Settings, or disable 'Driver Fallback Enabled'.");
-		}
-		return err;
+	} else if (driver == "Vulkan" && !etc2_supported) {
+		// FIXME: Review if this is true for Vulkan.
+		return TTR("Target platform requires 'ETC2' texture compression for Vulkan. Enable 'Import Etc 2' in Project Settings.");
 	}
 	return String();
 }
@@ -1304,7 +1286,7 @@ void EditorExport::remove_export_plugin(const Ref<EditorExportPlugin> &p_plugin)
 	export_plugins.erase(p_plugin);
 }
 
-Vector<Ref<EditorExportPlugin> > EditorExport::get_export_plugins() {
+Vector<Ref<EditorExportPlugin>> EditorExport::get_export_plugins() {
 
 	return export_plugins;
 }
@@ -1434,7 +1416,7 @@ EditorExport::EditorExport() {
 	add_child(save_timer);
 	save_timer->set_wait_time(0.8);
 	save_timer->set_one_shot(true);
-	save_timer->connect("timeout", this, "_save");
+	save_timer->connect("timeout", callable_mp(this, &EditorExport::_save));
 	block_save = false;
 
 	singleton = this;
@@ -1486,7 +1468,7 @@ String EditorExportPlatformPC::get_os_name() const {
 
 	return os_name;
 }
-Ref<Texture> EditorExportPlatformPC::get_logo() const {
+Ref<Texture2D> EditorExportPlatformPC::get_logo() const {
 
 	return logo;
 }
@@ -1638,7 +1620,7 @@ void EditorExportPlatformPC::set_os_name(const String &p_name) {
 	os_name = p_name;
 }
 
-void EditorExportPlatformPC::set_logo(const Ref<Texture> &p_logo) {
+void EditorExportPlatformPC::set_logo(const Ref<Texture2D> &p_logo) {
 	logo = p_logo;
 }
 
@@ -1706,7 +1688,7 @@ void EditorExportPlatformPC::set_fixup_embedded_pck_func(FixUpEmbeddedPckFunc p_
 EditorExportPlatformPC::EditorExportPlatformPC() {
 
 	chmod_flags = -1;
-	fixup_embedded_pck_func = NULL;
+	fixup_embedded_pck_func = nullptr;
 }
 
 ///////////////////////

@@ -141,11 +141,6 @@ godot_int GDAPI godot_color_to_argb32(const godot_color *p_self) {
 	return self->to_argb32();
 }
 
-godot_real GDAPI godot_color_gray(const godot_color *p_self) {
-	const Color *self = (const Color *)p_self;
-	return self->gray();
-}
-
 godot_color GDAPI godot_color_inverted(const godot_color *p_self) {
 	godot_color dest;
 	const Color *self = (const Color *)p_self;
@@ -160,11 +155,11 @@ godot_color GDAPI godot_color_contrasted(const godot_color *p_self) {
 	return dest;
 }
 
-godot_color GDAPI godot_color_linear_interpolate(const godot_color *p_self, const godot_color *p_b, const godot_real p_t) {
+godot_color GDAPI godot_color_lerp(const godot_color *p_self, const godot_color *p_b, const godot_real p_t) {
 	godot_color dest;
 	const Color *self = (const Color *)p_self;
 	const Color *b = (const Color *)p_b;
-	*((Color *)&dest) = self->linear_interpolate(*b, p_t);
+	*((Color *)&dest) = self->lerp(*b, p_t);
 	return dest;
 }
 

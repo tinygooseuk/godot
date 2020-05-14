@@ -10,6 +10,12 @@ precision highp float;
 precision highp int;
 #endif
 
+#ifndef USE_GLES_OVER_GL
+#extension GL_OES_texture_3D : enable
+#else
+#extension GL_EXT_texture_array : enable
+#endif
+
 /* clang-format on */
 #include "stdlib.glsl"
 /* clang-format off */
@@ -672,6 +678,12 @@ VERTEX_SHADER_CODE
 /* clang-format off */
 [fragment]
 
+#ifndef USE_GLES_OVER_GL
+#extension GL_OES_texture_3D : enable
+#else
+#extension GL_EXT_texture_array : enable
+#endif
+
 // texture2DLodEXT and textureCubeLodEXT are fragment shader specific.
 // Do not copy these defines in the vertex section.
 #ifndef USE_GLES_OVER_GL
@@ -1116,7 +1128,8 @@ float SchlickFresnel(float u) {
 }
 
 float GTR1(float NdotH, float a) {
-	if (a >= 1.0) return 1.0 / M_PI;
+	if (a >= 1.0)
+		return 1.0 / M_PI;
 	float a2 = a * a;
 	float t = 1.0 + (a2 - 1.0) * NdotH * NdotH;
 	return (a2 - 1.0) / (M_PI * log(a2) * t);

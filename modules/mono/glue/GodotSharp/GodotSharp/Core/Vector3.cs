@@ -184,13 +184,23 @@ namespace Godot
             return x2 + y2 + z2;
         }
 
-        public Vector3 LinearInterpolate(Vector3 b, real_t t)
+        public Vector3 Lerp(Vector3 to, real_t weight)
         {
             return new Vector3
             (
-                x + t * (b.x - x),
-                y + t * (b.y - y),
-                z + t * (b.z - z)
+                Mathf.Lerp(x, to.x, weight),
+                Mathf.Lerp(y, to.y, weight),
+                Mathf.Lerp(z, to.z, weight)
+            );
+        }
+
+        public Vector3 Lerp(Vector3 to, Vector3 weight)
+        {
+            return new Vector3
+            (
+                Mathf.Lerp(x, to.x, weight.x),
+                Mathf.Lerp(y, to.y, weight.y),
+                Mathf.Lerp(z, to.z, weight.z)
             );
         }
 
@@ -268,21 +278,6 @@ namespace Godot
         public Vector3 Rotated(Vector3 axis, real_t phi)
         {
             return new Basis(axis, phi).Xform(this);
-        }
-
-        [Obsolete("Set is deprecated. Use the Vector3(" + nameof(real_t) + ", " + nameof(real_t) + ", " + nameof(real_t) + ") constructor instead.", error: true)]
-        public void Set(real_t x, real_t y, real_t z)
-        {
-            this.x = x;
-            this.y = y;
-            this.z = z;
-        }
-        [Obsolete("Set is deprecated. Use the Vector3(" + nameof(Vector3) + ") constructor instead.", error: true)]
-        public void Set(Vector3 v)
-        {
-            x = v.x;
-            y = v.y;
-            z = v.z;
         }
 
         public Vector3 Sign()
@@ -415,20 +410,20 @@ namespace Godot
             return left;
         }
 
-        public static Vector3 operator /(Vector3 vec, real_t scale)
+        public static Vector3 operator /(Vector3 vec, real_t divisor)
         {
-            vec.x /= scale;
-            vec.y /= scale;
-            vec.z /= scale;
+            vec.x /= divisor;
+            vec.y /= divisor;
+            vec.z /= divisor;
             return vec;
         }
 
-        public static Vector3 operator /(Vector3 left, Vector3 right)
+        public static Vector3 operator /(Vector3 vec, Vector3 divisorv)
         {
-            left.x /= right.x;
-            left.y /= right.y;
-            left.z /= right.z;
-            return left;
+            vec.x /= divisorv.x;
+            vec.y /= divisorv.y;
+            vec.z /= divisorv.z;
+            return vec;
         }
 
         public static Vector3 operator %(Vector3 vec, real_t divisor)

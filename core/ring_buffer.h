@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef RINGBUFFER_H
-#define RINGBUFFER_H
+#ifndef RING_BUFFER_H
+#define RING_BUFFER_H
 
 #include "core/vector.h"
 
@@ -37,8 +37,8 @@ template <typename T>
 class RingBuffer {
 
 	Vector<T> data;
-	int read_pos;
-	int write_pos;
+	int read_pos = 0;
+	int write_pos = 0;
 	int size_mask;
 
 	inline int inc(int &p_var, int p_size) const {
@@ -214,11 +214,9 @@ public:
 	};
 
 	RingBuffer<T>(int p_power = 0) {
-		read_pos = 0;
-		write_pos = 0;
 		resize(p_power);
 	};
-	~RingBuffer<T>(){};
+	~RingBuffer<T>() {}
 };
 
-#endif
+#endif // RING_BUFFER_H

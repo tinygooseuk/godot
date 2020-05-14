@@ -32,6 +32,7 @@ package org.godotengine.godot;
 
 import android.app.Activity;
 import android.hardware.SensorEvent;
+import android.view.Surface;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -73,11 +74,11 @@ public class GodotLib {
 	public static native void resize(int width, int height);
 
 	/**
-	 * Invoked on the GL thread when the underlying Android surface is created or recreated.
+	 * Invoked on the render thread when the underlying Android surface is created or recreated.
+	 * @param p_surface
 	 * @param p_32_bits
-	 * @see android.opengl.GLSurfaceView.Renderer#onSurfaceCreated(GL10, EGLConfig)
 	 */
-	public static native void newcontext(boolean p_32_bits);
+	public static native void newcontext(Surface p_surface, boolean p_32_bits);
 
 	/**
 	 * Forward {@link Activity#onBackPressed()} event from the main thread to the GL thread.
@@ -137,7 +138,7 @@ public class GodotLib {
 	/**
 	 * Forward regular key events from the main thread to the GL thread.
 	 */
-	public static native void key(int p_scancode, int p_unicode_char, boolean p_pressed);
+	public static native void key(int p_keycode, int p_scancode, int p_unicode_char, boolean p_pressed);
 
 	/**
 	 * Forward game device's key events from the main thread to the GL thread.

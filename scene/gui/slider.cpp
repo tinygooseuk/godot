@@ -33,10 +33,10 @@
 
 Size2 Slider::get_minimum_size() const {
 
-	Ref<StyleBox> style = get_stylebox("slider");
+	Ref<StyleBox> style = get_theme_stylebox("slider");
 	Size2i ss = style->get_minimum_size() + style->get_center_size();
 
-	Ref<Texture> grabber = get_icon("grabber");
+	Ref<Texture2D> grabber = get_theme_icon("grabber");
 	Size2i rs = grabber->get_size();
 
 	if (orientation == HORIZONTAL)
@@ -57,7 +57,7 @@ void Slider::_gui_input(Ref<InputEvent> p_event) {
 		if (mb->get_button_index() == BUTTON_LEFT) {
 
 			if (mb->is_pressed()) {
-				Ref<Texture> grabber = get_icon(mouse_inside || has_focus() ? "grabber_highlight" : "grabber");
+				Ref<Texture2D> grabber = get_theme_icon(mouse_inside || has_focus() ? "grabber_highlight" : "grabber");
 				grab.pos = orientation == VERTICAL ? mb->get_position().y : mb->get_position().x;
 
 				double grab_width = (double)grabber->get_size().width;
@@ -87,7 +87,7 @@ void Slider::_gui_input(Ref<InputEvent> p_event) {
 		if (grab.active) {
 
 			Size2i size = get_size();
-			Ref<Texture> grabber = get_icon("grabber");
+			Ref<Texture2D> grabber = get_theme_icon("grabber");
 			float motion = (orientation == VERTICAL ? mm->get_position().y : mm->get_position().x) - grab.pos;
 			if (orientation == VERTICAL)
 				motion = -motion;
@@ -165,11 +165,11 @@ void Slider::_notification(int p_what) {
 		case NOTIFICATION_DRAW: {
 			RID ci = get_canvas_item();
 			Size2i size = get_size();
-			Ref<StyleBox> style = get_stylebox("slider");
+			Ref<StyleBox> style = get_theme_stylebox("slider");
 			bool highlighted = mouse_inside || has_focus();
-			Ref<StyleBox> grabber_area = get_stylebox(highlighted ? "grabber_area_highlight" : "grabber_area");
-			Ref<Texture> grabber = get_icon(editable ? (highlighted ? "grabber_highlight" : "grabber") : "grabber_disabled");
-			Ref<Texture> tick = get_icon("tick");
+			Ref<StyleBox> grabber_area = get_theme_stylebox(highlighted ? "grabber_area_highlight" : "grabber_area");
+			Ref<Texture2D> grabber = get_theme_icon(editable ? (highlighted ? "grabber_highlight" : "grabber") : "grabber_disabled");
+			Ref<Texture2D> tick = get_theme_icon("tick");
 			double ratio = Math::is_nan(get_as_ratio()) ? 0 : get_as_ratio();
 
 			if (orientation == VERTICAL) {
@@ -182,7 +182,8 @@ void Slider::_notification(int p_what) {
 				if (ticks > 1) {
 					int grabber_offset = (grabber->get_size().height / 2 - tick->get_height() / 2);
 					for (int i = 0; i < ticks; i++) {
-						if (!ticks_on_borders && (i == 0 || i + 1 == ticks)) continue;
+						if (!ticks_on_borders && (i == 0 || i + 1 == ticks))
+							continue;
 						int ofs = (i * areasize / (ticks - 1)) + grabber_offset;
 						tick->draw(ci, Point2i((size.width - widget_width) / 2, ofs));
 					}
@@ -199,7 +200,8 @@ void Slider::_notification(int p_what) {
 				if (ticks > 1) {
 					int grabber_offset = (grabber->get_size().width / 2 - tick->get_width() / 2);
 					for (int i = 0; i < ticks; i++) {
-						if ((!ticks_on_borders) && ((i == 0) || ((i + 1) == ticks))) continue;
+						if ((!ticks_on_borders) && ((i == 0) || ((i + 1) == ticks)))
+							continue;
 						int ofs = (i * areasize / (ticks - 1)) + grabber_offset;
 						tick->draw(ci, Point2i(ofs, (size.height - widget_height) / 2));
 					}

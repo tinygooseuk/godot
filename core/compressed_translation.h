@@ -43,9 +43,9 @@ class PHashTranslation : public Translation {
 	//of catching untranslated strings
 
 	//load/store friendly types
-	PoolVector<int> hash_table;
-	PoolVector<int> bucket_table;
-	PoolVector<uint8_t> strings;
+	Vector<int> hash_table;
+	Vector<int> bucket_table;
+	Vector<uint8_t> strings;
 
 	struct Bucket {
 
@@ -86,7 +86,7 @@ public:
 	virtual StringName get_message(const StringName &p_src_text) const; //overridable for other implementations
 	void generate(const Ref<Translation> &p_from);
 
-	PHashTranslation();
+	PHashTranslation() {}
 };
 
 #endif // COMPRESSED_TRANSLATION_H

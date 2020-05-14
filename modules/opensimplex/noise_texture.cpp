@@ -34,7 +34,7 @@
 
 NoiseTexture::NoiseTexture() {
 	update_queued = false;
-	noise_thread = NULL;
+	noise_thread = nullptr;
 	regen_queued = false;
 	first_time = true;
 
@@ -42,17 +42,16 @@ NoiseTexture::NoiseTexture() {
 	seamless = false;
 	as_normalmap = false;
 	bump_strength = 8.0;
-	flags = FLAGS_DEFAULT;
 
 	noise = Ref<OpenSimplexNoise>();
-
-	texture = VS::get_singleton()->texture_create();
 
 	_queue_update();
 }
 
 NoiseTexture::~NoiseTexture() {
-	VS::get_singleton()->free(texture);
+	if (texture.is_valid()) {
+		RS::get_singleton()->free(texture);
+	}
 	if (noise_thread) {
 		Thread::wait_to_finish(noise_thread);
 		memdelete(noise_thread);
@@ -77,7 +76,6 @@ void NoiseTexture::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_bump_strength"), &NoiseTexture::get_bump_strength);
 
 	ClassDB::bind_method(D_METHOD("_update_texture"), &NoiseTexture::_update_texture);
-	ClassDB::bind_method(D_METHOD("_queue_update"), &NoiseTexture::_queue_update);
 	ClassDB::bind_method(D_METHOD("_generate_texture"), &NoiseTexture::_generate_texture);
 	ClassDB::bind_method(D_METHOD("_thread_done", "image"), &NoiseTexture::_thread_done);
 
@@ -85,7 +83,7 @@ void NoiseTexture::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "height", PROPERTY_HINT_RANGE, "1,2048,1,or_greater"), "set_height", "get_height");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "seamless"), "set_seamless", "get_seamless");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "as_normalmap"), "set_as_normalmap", "is_normalmap");
-	ADD_PROPERTY(PropertyInfo(Variant::REAL, "bump_strength", PROPERTY_HINT_RANGE, "0,32,0.1,or_greater"), "set_bump_strength", "get_bump_strength");
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "bump_strength", PROPERTY_HINT_RANGE, "0,32,0.1,or_greater"), "set_bump_strength", "get_bump_strength");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "noise", PROPERTY_HINT_RESOURCE_TYPE, "OpenSimplexNoise"), "set_noise", "get_noise");
 }
 
@@ -101,8 +99,12 @@ void NoiseTexture::_validate_property(PropertyInfo &property) const {
 void NoiseTexture::_set_texture_data(const Ref<Image> &p_image) {
 	data = p_image;
 	if (data.is_valid()) {
-		VS::get_singleton()->texture_allocate(texture, size.x, size.y, 0, Image::FORMAT_RGBA8, VS::TEXTURE_TYPE_2D, flags);
-		VS::get_singleton()->texture_set_data(texture, p_image);
+		if (texture.is_valid()) {
+			RID new_texture = RS::get_singleton()->texture_2d_create(p_image);
+			RS::get_singleton()->texture_replace(texture, new_texture);
+		} else {
+			texture = RS::get_singleton()->texture_2d_create(p_image);
+		}
 	}
 	emit_changed();
 }
@@ -112,7 +114,7 @@ void NoiseTexture::_thread_done(const Ref<Image> &p_image) {
 	_set_texture_data(p_image);
 	Thread::wait_to_finish(noise_thread);
 	memdelete(noise_thread);
-	noise_thread = NULL;
+	noise_thread = nullptr;
 	if (regen_queued) {
 		noise_thread = Thread::create(_thread_function, this);
 		regen_queued = false;
@@ -186,11 +188,11 @@ void NoiseTexture::set_noise(Ref<OpenSimplexNoise> p_noise) {
 	if (p_noise == noise)
 		return;
 	if (noise.is_valid()) {
-		noise->disconnect(CoreStringNames::get_singleton()->changed, this, "_queue_update");
+		noise->disconnect(CoreStringNames::get_singleton()->changed, callable_mp(this, &NoiseTexture::_queue_update));
 	}
 	noise = p_noise;
 	if (noise.is_valid()) {
-		noise->connect(CoreStringNames::get_singleton()->changed, this, "_queue_update");
+		noise->connect(CoreStringNames::get_singleton()->changed, callable_mp(this, &NoiseTexture::_queue_update));
 	}
 	_queue_update();
 }
@@ -200,19 +202,22 @@ Ref<OpenSimplexNoise> NoiseTexture::get_noise() {
 }
 
 void NoiseTexture::set_width(int p_width) {
-	if (p_width == size.x) return;
+	if (p_width == size.x)
+		return;
 	size.x = p_width;
 	_queue_update();
 }
 
 void NoiseTexture::set_height(int p_height) {
-	if (p_height == size.y) return;
+	if (p_height == size.y)
+		return;
 	size.y = p_height;
 	_queue_update();
 }
 
 void NoiseTexture::set_seamless(bool p_seamless) {
-	if (p_seamless == seamless) return;
+	if (p_seamless == seamless)
+		return;
 	seamless = p_seamless;
 	_queue_update();
 }
@@ -222,7 +227,8 @@ bool NoiseTexture::get_seamless() {
 }
 
 void NoiseTexture::set_as_normalmap(bool p_as_normalmap) {
-	if (p_as_normalmap == as_normalmap) return;
+	if (p_as_normalmap == as_normalmap)
+		return;
 	as_normalmap = p_as_normalmap;
 	_queue_update();
 	_change_notify();
@@ -234,7 +240,8 @@ bool NoiseTexture::is_normalmap() {
 
 void NoiseTexture::set_bump_strength(float p_bump_strength) {
 
-	if (p_bump_strength == bump_strength) return;
+	if (p_bump_strength == bump_strength)
+		return;
 	bump_strength = p_bump_strength;
 	if (as_normalmap)
 		_queue_update();
@@ -255,13 +262,12 @@ int NoiseTexture::get_height() const {
 	return size.y;
 }
 
-void NoiseTexture::set_flags(uint32_t p_flags) {
-	flags = p_flags;
-	VS::get_singleton()->texture_set_flags(texture, flags);
-}
+RID NoiseTexture::get_rid() const {
+	if (!texture.is_valid()) {
+		texture = RS::get_singleton()->texture_2d_placeholder_create();
+	}
 
-uint32_t NoiseTexture::get_flags() const {
-	return flags;
+	return texture;
 }
 
 Ref<Image> NoiseTexture::get_data() const {

@@ -36,10 +36,10 @@
 
 #include "core/os/os.h"
 #include "core/version.h"
+#include "editor/debugger/editor_debugger_node.h"
 #include "editor/editor_node.h"
 #include "editor/editor_scale.h"
 #include "editor/plugins/script_editor_plugin.h"
-#include "editor/script_editor_debugger.h"
 #include "main/main.h"
 
 #include "../csharp_script.h"
@@ -96,7 +96,7 @@ MonoString *godot_icall_GodotSharpDirs_MonoSolutionsDir() {
 #ifdef TOOLS_ENABLED
 	return GDMonoMarshal::mono_string_from_godot(GodotSharpDirs::get_mono_solutions_dir());
 #else
-	return NULL;
+	return nullptr;
 #endif
 }
 
@@ -104,7 +104,7 @@ MonoString *godot_icall_GodotSharpDirs_BuildLogsDirs() {
 #ifdef TOOLS_ENABLED
 	return GDMonoMarshal::mono_string_from_godot(GodotSharpDirs::get_build_logs_dir());
 #else
-	return NULL;
+	return nullptr;
 #endif
 }
 
@@ -112,7 +112,7 @@ MonoString *godot_icall_GodotSharpDirs_ProjectSlnPath() {
 #ifdef TOOLS_ENABLED
 	return GDMonoMarshal::mono_string_from_godot(GodotSharpDirs::get_project_sln_path());
 #else
-	return NULL;
+	return nullptr;
 #endif
 }
 
@@ -120,7 +120,7 @@ MonoString *godot_icall_GodotSharpDirs_ProjectCsProjPath() {
 #ifdef TOOLS_ENABLED
 	return GDMonoMarshal::mono_string_from_godot(GodotSharpDirs::get_project_csproj_path());
 #else
-	return NULL;
+	return nullptr;
 #endif
 }
 
@@ -128,7 +128,7 @@ MonoString *godot_icall_GodotSharpDirs_DataEditorToolsDir() {
 #ifdef TOOLS_ENABLED
 	return GDMonoMarshal::mono_string_from_godot(GodotSharpDirs::get_data_editor_tools_dir());
 #else
-	return NULL;
+	return nullptr;
 #endif
 }
 
@@ -136,7 +136,7 @@ MonoString *godot_icall_GodotSharpDirs_DataEditorPrebuiltApiDir() {
 #ifdef TOOLS_ENABLED
 	return GDMonoMarshal::mono_string_from_godot(GodotSharpDirs::get_data_editor_prebuilt_api_dir());
 #else
-	return NULL;
+	return nullptr;
 #endif
 }
 
@@ -152,7 +152,7 @@ MonoString *godot_icall_GodotSharpDirs_DataMonoBinDir() {
 #ifdef WINDOWS_ENABLED
 	return GDMonoMarshal::mono_string_from_godot(GodotSharpDirs::get_data_mono_bin_dir());
 #else
-	return NULL;
+	return nullptr;
 #endif
 }
 
@@ -203,7 +203,7 @@ uint32_t godot_icall_BindingsGenerator_CsGlueVersion() {
 }
 
 int32_t godot_icall_ScriptClassParser_ParseFile(MonoString *p_filepath, MonoObject *p_classes, MonoString **r_error_str) {
-	*r_error_str = NULL;
+	*r_error_str = nullptr;
 
 	String filepath = GDMonoMarshal::mono_string_to_godot(p_filepath);
 
@@ -306,8 +306,8 @@ void godot_icall_Internal_ReloadAssemblies(MonoBoolean p_soft_reload) {
 #endif
 }
 
-void godot_icall_Internal_ScriptEditorDebuggerReloadScripts() {
-	ScriptEditor::get_singleton()->get_debugger()->reload_scripts();
+void godot_icall_Internal_EditorDebuggerNodeReloadScripts() {
+	EditorDebuggerNode::get_singleton()->reload_scripts();
 }
 
 MonoBoolean godot_icall_Internal_ScriptEditorEdit(MonoObject *p_resource, int32_t p_line, int32_t p_col, MonoBoolean p_grab_focus) {
@@ -336,7 +336,7 @@ MonoString *godot_icall_Internal_MonoWindowsInstallRoot() {
 	String install_root_dir = GDMono::get_singleton()->get_mono_reg_info().install_root_dir;
 	return GDMonoMarshal::mono_string_from_godot(install_root_dir);
 #else
-	return NULL;
+	return nullptr;
 #endif
 }
 
@@ -349,16 +349,16 @@ void godot_icall_Internal_EditorRunStop() {
 }
 
 void godot_icall_Internal_ScriptEditorDebugger_ReloadScripts() {
-	ScriptEditorDebugger *sed = ScriptEditor::get_singleton()->get_debugger();
-	if (sed) {
-		sed->reload_scripts();
+	EditorDebuggerNode *ed = EditorDebuggerNode::get_singleton();
+	if (ed) {
+		ed->reload_scripts();
 	}
 }
 
 MonoArray *godot_icall_Internal_CodeCompletionRequest(int32_t p_kind, MonoString *p_script_file) {
 	String script_file = GDMonoMarshal::mono_string_to_godot(p_script_file);
-	PoolStringArray suggestions = gdmono::get_code_completion((gdmono::CompletionKind)p_kind, script_file);
-	return GDMonoMarshal::PoolStringArray_to_mono_array(suggestions);
+	PackedStringArray suggestions = gdmono::get_code_completion((gdmono::CompletionKind)p_kind, script_file);
+	return GDMonoMarshal::PackedStringArray_to_mono_array(suggestions);
 }
 
 float godot_icall_Globals_EditorScale() {
@@ -453,7 +453,7 @@ void register_editor_internal_calls() {
 	mono_add_internal_call("GodotTools.Internals.Internal::internal_GetEditorApiHash", (void *)godot_icall_Internal_GetEditorApiHash);
 	mono_add_internal_call("GodotTools.Internals.Internal::internal_IsAssembliesReloadingNeeded", (void *)godot_icall_Internal_IsAssembliesReloadingNeeded);
 	mono_add_internal_call("GodotTools.Internals.Internal::internal_ReloadAssemblies", (void *)godot_icall_Internal_ReloadAssemblies);
-	mono_add_internal_call("GodotTools.Internals.Internal::internal_ScriptEditorDebuggerReloadScripts", (void *)godot_icall_Internal_ScriptEditorDebuggerReloadScripts);
+	mono_add_internal_call("GodotTools.Internals.Internal::internal_EditorDebuggerNodeReloadScripts", (void *)godot_icall_Internal_EditorDebuggerNodeReloadScripts);
 	mono_add_internal_call("GodotTools.Internals.Internal::internal_ScriptEditorEdit", (void *)godot_icall_Internal_ScriptEditorEdit);
 	mono_add_internal_call("GodotTools.Internals.Internal::internal_EditorNodeShowScriptScreen", (void *)godot_icall_Internal_EditorNodeShowScriptScreen);
 	mono_add_internal_call("GodotTools.Internals.Internal::internal_GetScriptsMetadataOrNothing", (void *)godot_icall_Internal_GetScriptsMetadataOrNothing);

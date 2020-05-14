@@ -63,7 +63,7 @@ void PCKPacker::_bind_methods() {
 
 Error PCKPacker::pck_start(const String &p_file, int p_alignment) {
 
-	if (file != NULL) {
+	if (file != nullptr) {
 		memdelete(file);
 	}
 
@@ -180,14 +180,9 @@ Error PCKPacker::flush(bool p_verbose) {
 	return OK;
 };
 
-PCKPacker::PCKPacker() {
-
-	file = NULL;
-};
-
 PCKPacker::~PCKPacker() {
-	if (file != NULL) {
+	if (file != nullptr) {
 		memdelete(file);
 	};
-	file = NULL;
+	file = nullptr;
 };

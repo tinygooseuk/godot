@@ -28,14 +28,14 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef COWDATA_H_
-#define COWDATA_H_
-
-#include <string.h>
+#ifndef COWDATA_H
+#define COWDATA_H
 
 #include "core/error_macros.h"
 #include "core/os/memory.h"
 #include "core/safe_refcount.h"
+
+#include <string.h>
 
 template <class T>
 class Vector;
@@ -54,14 +54,14 @@ class CowData {
 	friend class VMap;
 
 private:
-	mutable T *_ptr;
+	mutable T *_ptr = nullptr;
 
 	// internal helpers
 
 	_FORCE_INLINE_ uint32_t *_get_refcount() const {
 
 		if (!_ptr)
-			return NULL;
+			return nullptr;
 
 		return reinterpret_cast<uint32_t *>(_ptr) - 2;
 	}
@@ -69,7 +69,7 @@ private:
 	_FORCE_INLINE_ uint32_t *_get_size() const {
 
 		if (!_ptr)
-			return NULL;
+			return nullptr;
 
 		return reinterpret_cast<uint32_t *>(_ptr) - 1;
 	}
@@ -77,29 +77,30 @@ private:
 	_FORCE_INLINE_ T *_get_data() const {
 
 		if (!_ptr)
-			return NULL;
+			return nullptr;
 		return reinterpret_cast<T *>(_ptr);
 	}
 
 	_FORCE_INLINE_ size_t _get_alloc_size(size_t p_elements) const {
-		//return nearest_power_of_2_templated(p_elements*sizeof(T)+sizeof(SafeRefCount)+sizeof(int));
 		return next_power_of_2(p_elements * sizeof(T));
 	}
 
 	_FORCE_INLINE_ bool _get_alloc_size_checked(size_t p_elements, size_t *out) const {
-#if defined(_add_overflow) && defined(_mul_overflow)
+#if defined(__GNUC__)
 		size_t o;
 		size_t p;
-		if (_mul_overflow(p_elements, sizeof(T), &o)) {
+		if (__builtin_mul_overflow(p_elements, sizeof(T), &o)) {
 			*out = 0;
 			return false;
 		}
 		*out = next_power_of_2(o);
-		if (_add_overflow(o, static_cast<size_t>(32), &p)) return false; //no longer allocated here
+		if (__builtin_add_overflow(o, static_cast<size_t>(32), &p)) {
+			return false; // No longer allocated here.
+		}
 		return true;
 #else
 		// Speed is more important than correctness here, do the operations unchecked
-		// and hope the best
+		// and hope for the best.
 		*out = _get_alloc_size(p_elements);
 		return true;
 #endif
@@ -131,7 +132,7 @@ public:
 	}
 
 	_FORCE_INLINE_ void clear() { resize(0); }
-	_FORCE_INLINE_ bool empty() const { return _ptr == 0; }
+	_FORCE_INLINE_ bool empty() const { return _ptr == nullptr; }
 
 	_FORCE_INLINE_ void set(int p_index, const T &p_elem) {
 
@@ -182,7 +183,7 @@ public:
 
 	int find(const T &p_val, int p_from = 0) const;
 
-	_FORCE_INLINE_ CowData();
+	_FORCE_INLINE_ CowData() {}
 	_FORCE_INLINE_ ~CowData();
 	_FORCE_INLINE_ CowData(CowData<T> &p_from) { _ref(p_from); };
 };
@@ -260,7 +261,7 @@ Error CowData<T>::resize(int p_size) {
 	if (p_size == 0) {
 		// wants to clean up
 		_unref(_ptr);
-		_ptr = NULL;
+		_ptr = nullptr;
 		return OK;
 	}
 
@@ -355,7 +356,7 @@ void CowData<T>::_ref(const CowData &p_from) {
 		return; // self assign, do nothing.
 
 	_unref(_ptr);
-	_ptr = NULL;
+	_ptr = nullptr;
 
 	if (!p_from._ptr)
 		return; //nothing to do
@@ -366,15 +367,9 @@ void CowData<T>::_ref(const CowData &p_from) {
 }
 
 template <class T>
-CowData<T>::CowData() {
-
-	_ptr = NULL;
-}
-
-template <class T>
 CowData<T>::~CowData() {
 
 	_unref(_ptr);
 }
 
-#endif /* COW_H_ */
+#endif // COWDATA_H

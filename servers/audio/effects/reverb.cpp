@@ -31,7 +31,9 @@
 // Author: Juan Linietsky <reduzio@gmail.com>, (C) 2006
 
 #include "reverb.h"
+
 #include "core/math/math_funcs.h"
+
 #include <math.h>
 
 const float Reverb::comb_tunings[MAX_COMBS] = {
@@ -314,7 +316,7 @@ void Reverb::clear_buffers() {
 		if (comb[i].buffer)
 			memdelete_arr(comb[i].buffer);
 
-		comb[i].buffer = 0;
+		comb[i].buffer = nullptr;
 	}
 
 	for (int i = 0; i < MAX_ALLPASS; i++) {
@@ -322,7 +324,7 @@ void Reverb::clear_buffers() {
 		if (allpass[i].buffer)
 			memdelete_arr(allpass[i].buffer);
 
-		allpass[i].buffer = 0;
+		allpass[i].buffer = nullptr;
 	}
 }
 
@@ -338,11 +340,8 @@ Reverb::Reverb() {
 	params.predelay = 150;
 	params.predelay_fb = 0.4;
 	params.hpf = 0;
-	hpf_h1 = 0;
-	hpf_h2 = 0;
 
 	input_buffer = memnew_arr(float, INPUT_BUFFER_MAX_SIZE);
-	echo_buffer = 0;
 
 	configure_buffers();
 	update_parameters();

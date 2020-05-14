@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -39,6 +39,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Surface;
 import android.view.View;
 
 import java.lang.reflect.Method;
@@ -98,7 +99,7 @@ public abstract class GodotPlugin {
 	 * This method is invoked on the render thread.
 	 */
 	public final void onRegisterPluginWithGodotNative() {
-		nativeRegisterSingleton(getPluginName(), this);
+		nativeRegisterSingleton(getPluginName());
 
 		Class clazz = getClass();
 		Method[] methods = clazz.getDeclaredMethods();
@@ -209,6 +210,22 @@ public abstract class GodotPlugin {
 	public void onGLSurfaceCreated(GL10 gl, EGLConfig config) {}
 
 	/**
+	 * Invoked once per frame on the Vulkan thread after the frame is drawn.
+	 */
+	public void onVkDrawFrame() {}
+
+	/**
+	 * Called on the Vulkan thread after the surface is created and whenever the surface size
+	 * changes.
+	 */
+	public void onVkSurfaceChanged(Surface surface, int width, int height) {}
+
+	/**
+	 * Called on the Vulkan thread when the surface is created or recreated.
+	 */
+	public void onVkSurfaceCreated(Surface surface) {}
+
+	/**
 	 * Returns the name of the plugin.
 	 * <p>
 	 * This value must match the one listed in the plugin '<meta-data>' manifest entry.
@@ -309,7 +326,7 @@ public abstract class GodotPlugin {
 	 * Used to setup a {@link GodotPlugin} instance.
 	 * @param p_name Name of the instance.
 	 */
-	public static native void nativeRegisterSingleton(String p_name, Object object);
+	private native void nativeRegisterSingleton(String p_name);
 
 	/**
 	 * Used to complete registration of the {@link GodotPlugin} instance's methods.
@@ -318,7 +335,7 @@ public abstract class GodotPlugin {
 	 * @param p_ret Return type of the registered method
 	 * @param p_params Method parameters types
 	 */
-	public static native void nativeRegisterMethod(String p_sname, String p_name, String p_ret, String[] p_params);
+	private native void nativeRegisterMethod(String p_sname, String p_name, String p_ret, String[] p_params);
 
 	/**
 	 * Used to register gdnative libraries bundled by the plugin.

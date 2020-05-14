@@ -31,18 +31,18 @@
 #ifndef METHOD_BIND_H
 #define METHOD_BIND_H
 
-#include "core/list.h"
-#include "core/method_ptrcall.h"
-#include "core/object.h"
-#include "core/variant.h"
-
-#include <stdio.h>
-
 #ifdef DEBUG_ENABLED
 #define DEBUG_METHODS_ENABLED
 #endif
 
+#include "core/list.h"
+#include "core/method_ptrcall.h"
+#include "core/object.h"
 #include "core/type_info.h"
+#include "core/typedefs.h"
+#include "core/variant.h"
+
+#include <stdio.h>
 
 enum MethodFlags {
 
@@ -155,7 +155,7 @@ struct VariantObjectClassChecker<Control *> {
 		Variant::Type argtype = get_argument_type(m_arg - 1);                       \
 		if (!Variant::can_convert_strict(p_args[m_arg - 1]->get_type(), argtype) || \
 				!VariantObjectClassChecker<P##m_arg>::check(*p_args[m_arg - 1])) {  \
-			r_error.error = Variant::CallError::CALL_ERROR_INVALID_ARGUMENT;        \
+			r_error.error = Callable::CallError::CALL_ERROR_INVALID_ARGUMENT;       \
 			r_error.argument = m_arg - 1;                                           \
 			r_error.expected = argtype;                                             \
 			return Variant();                                                       \
@@ -165,7 +165,8 @@ struct VariantObjectClassChecker<Control *> {
 #define CHECK_NOARG(m_arg)                             \
 	{                                                  \
 		if (p_arg##m_arg.get_type() != Variant::NIL) { \
-			if (r_argerror) *r_argerror = (m_arg - 1); \
+			if (r_argerror)                            \
+				*r_argerror = (m_arg - 1);             \
 			return CALL_ERROR_EXTRA_ARGUMENT;          \
 		}                                              \
 	}
@@ -207,18 +208,18 @@ struct PtrToArg<wchar_t> {
 class MethodBind {
 
 	int method_id;
-	uint32_t hint_flags;
+	uint32_t hint_flags = METHOD_FLAGS_DEFAULT;
 	StringName name;
 	Vector<Variant> default_arguments;
-	int default_argument_count;
-	int argument_count;
+	int default_argument_count = 0;
+	int argument_count = 0;
 
-	bool _const;
-	bool _returns;
+	bool _const = false;
+	bool _returns = false;
 
 protected:
 #ifdef DEBUG_METHODS_ENABLED
-	Variant::Type *argument_types;
+	Variant::Type *argument_types = nullptr;
 	Vector<StringName> arg_names;
 #endif
 	void _set_const(bool p_const);
@@ -278,7 +279,7 @@ public:
 
 	_FORCE_INLINE_ int get_argument_count() const { return argument_count; };
 
-	virtual Variant call(Object *p_object, const Variant **p_args, int p_arg_count, Variant::CallError &r_error) = 0;
+	virtual Variant call(Object *p_object, const Variant **p_args, int p_arg_count, Callable::CallError &r_error) = 0;
 
 #ifdef PTRCALL_ENABLED
 	virtual void ptrcall(Object *p_object, const void **p_args, void *r_ret) = 0;
@@ -300,15 +301,14 @@ public:
 template <class T>
 class MethodBindVarArg : public MethodBind {
 public:
-	typedef Variant (T::*NativeCall)(const Variant **, int, Variant::CallError &);
+	typedef Variant (T::*NativeCall)(const Variant **, int, Callable::CallError &);
 
 protected:
-	NativeCall call_method;
+	NativeCall call_method = nullptr;
 #ifdef DEBUG_METHODS_ENABLED
-
 	MethodInfo arguments;
-
 #endif
+
 public:
 #ifdef DEBUG_METHODS_ENABLED
 
@@ -338,7 +338,7 @@ public:
 	}
 
 #endif
-	virtual Variant call(Object *p_object, const Variant **p_args, int p_arg_count, Variant::CallError &r_error) {
+	virtual Variant call(Object *p_object, const Variant **p_args, int p_arg_count, Callable::CallError &r_error) {
 
 		T *instance = static_cast<T *>(p_object);
 		return (instance->*call_method)(p_args, p_arg_count, r_error);
@@ -383,13 +383,12 @@ public:
 	virtual bool is_vararg() const { return true; }
 
 	MethodBindVarArg() {
-		call_method = NULL;
 		_set_returns(true);
 	}
 };
 
 template <class T>
-MethodBind *create_vararg_method_bind(Variant (T::*p_method)(const Variant **, int, Variant::CallError &), const MethodInfo &p_info, bool p_return_nil_is_variant) {
+MethodBind *create_vararg_method_bind(Variant (T::*p_method)(const Variant **, int, Callable::CallError &), const MethodInfo &p_info, bool p_return_nil_is_variant) {
 
 	MethodBindVarArg<T> *a = memnew((MethodBindVarArg<T>));
 	a->set_method(p_method);
@@ -406,4 +405,4 @@ class __UnexistingClass;
 
 #include "method_bind.gen.inc"
 
-#endif
+#endif // METHOD_BIND_H

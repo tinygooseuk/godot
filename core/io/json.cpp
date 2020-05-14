@@ -67,13 +67,19 @@ String JSON::_print_var(const Variant &p_var, const String &p_indent, int p_cur_
 
 	switch (p_var.get_type()) {
 
-		case Variant::NIL: return "null";
-		case Variant::BOOL: return p_var.operator bool() ? "true" : "false";
-		case Variant::INT: return itos(p_var);
-		case Variant::REAL: return rtos(p_var);
-		case Variant::POOL_INT_ARRAY:
-		case Variant::POOL_REAL_ARRAY:
-		case Variant::POOL_STRING_ARRAY:
+		case Variant::NIL:
+			return "null";
+		case Variant::BOOL:
+			return p_var.operator bool() ? "true" : "false";
+		case Variant::INT:
+			return itos(p_var);
+		case Variant::FLOAT:
+			return rtos(p_var);
+		case Variant::PACKED_INT32_ARRAY:
+		case Variant::PACKED_INT64_ARRAY:
+		case Variant::PACKED_FLOAT32_ARRAY:
+		case Variant::PACKED_FLOAT64_ARRAY:
+		case Variant::PACKED_STRING_ARRAY:
 		case Variant::ARRAY: {
 
 			String s = "[";
@@ -114,7 +120,8 @@ String JSON::_print_var(const Variant &p_var, const String &p_indent, int p_cur_
 			s += end_statement + _make_indent(p_indent, p_cur_indent) + "}";
 			return s;
 		};
-		default: return "\"" + String(p_var).json_escape() + "\"";
+		default:
+			return "\"" + String(p_var).json_escape() + "\"";
 	}
 }
 
@@ -197,14 +204,23 @@ Error JSON::_get_token(const CharType *p_str, int &index, int p_len, Token &r_to
 
 						switch (next) {
 
-							case 'b': res = 8; break;
-							case 't': res = 9; break;
-							case 'n': res = 10; break;
-							case 'f': res = 12; break;
-							case 'r': res = 13; break;
+							case 'b':
+								res = 8;
+								break;
+							case 't':
+								res = 9;
+								break;
+							case 'n':
+								res = 10;
+								break;
+							case 'f':
+								res = 12;
+								break;
+							case 'r':
+								res = 13;
+								break;
 							case 'u': {
-								//hexnumbarh - oct is deprecated
-
+								// hex number
 								for (int j = 0; j < 4; j++) {
 									CharType c = p_str[index + j + 1];
 									if (c == 0) {
@@ -226,7 +242,7 @@ Error JSON::_get_token(const CharType *p_str, int &index, int p_len, Token &r_to
 										v = c - 'A';
 										v += 10;
 									} else {
-										ERR_PRINT("BUG");
+										ERR_PRINT("Bug parsing hex constant.");
 										v = 0;
 									}
 
@@ -236,13 +252,8 @@ Error JSON::_get_token(const CharType *p_str, int &index, int p_len, Token &r_to
 								index += 4; //will add at the end anyway
 
 							} break;
-							//case '\"': res='\"'; break;
-							//case '\\': res='\\'; break;
-							//case '/': res='/'; break;
 							default: {
 								res = next;
-								//r_err_str="Invalid escape sequence";
-								//return ERR_PARSE_ERROR;
 							} break;
 						}
 

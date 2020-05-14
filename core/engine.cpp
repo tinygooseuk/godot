@@ -114,7 +114,7 @@ Dictionary Engine::get_version_info() const {
 
 static Array array_from_info(const char *const *info_list) {
 	Array arr;
-	for (int i = 0; info_list[i] != NULL; i++) {
+	for (int i = 0; info_list[i] != nullptr; i++) {
 		arr.push_back(info_list[i]);
 	}
 	return arr;
@@ -193,7 +193,7 @@ void Engine::add_singleton(const Singleton &p_singleton) {
 Object *Engine::get_singleton_object(const String &p_name) const {
 
 	const Map<StringName, Object *>::Element *E = singleton_ptrs.find(p_name);
-	ERR_FAIL_COND_V_MSG(!E, NULL, "Failed to retrieve non-existent singleton '" + p_name + "'.");
+	ERR_FAIL_COND_V_MSG(!E, nullptr, "Failed to retrieve non-existent singleton '" + p_name + "'.");
 	return E->get();
 };
 
@@ -208,28 +208,16 @@ void Engine::get_singletons(List<Singleton> *p_singletons) {
 		p_singletons->push_back(E->get());
 }
 
-Engine *Engine::singleton = NULL;
+Engine *Engine::singleton = nullptr;
 
 Engine *Engine::get_singleton() {
 	return singleton;
 }
 
-Engine::Engine() {
+bool Engine::is_abort_on_gpu_errors_enabled() const {
+	return abort_on_gpu_errors;
+}
 
+Engine::Engine() {
 	singleton = this;
-	frames_drawn = 0;
-	ips = 60;
-	physics_jitter_fix = 0.5;
-	_physics_interpolation_fraction = 0.0f;
-	_frame_delay = 0;
-	_fps = 1;
-	_target_fps = 0;
-	_time_scale = 1.0;
-	_pixel_snap = false;
-	_physics_frames = 0;
-	_idle_frames = 0;
-	_in_physics = false;
-	_frame_ticks = 0;
-	_frame_step = 0;
-	editor_hint = false;
 }

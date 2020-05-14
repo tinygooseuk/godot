@@ -31,11 +31,10 @@
 #ifndef CRYPTO_H
 #define CRYPTO_H
 
-#include "core/reference.h"
-#include "core/resource.h"
-
 #include "core/io/resource_loader.h"
 #include "core/io/resource_saver.h"
+#include "core/reference.h"
+#include "core/resource.h"
 
 class CryptoKey : public Resource {
 	GDCLASS(CryptoKey, Resource);
@@ -76,16 +75,16 @@ public:
 	static Crypto *create();
 	static void load_default_certificates(String p_path);
 
-	virtual PoolByteArray generate_random_bytes(int p_bytes);
+	virtual PackedByteArray generate_random_bytes(int p_bytes);
 	virtual Ref<CryptoKey> generate_rsa(int p_bytes);
 	virtual Ref<X509Certificate> generate_self_signed_certificate(Ref<CryptoKey> p_key, String p_issuer_name, String p_not_before, String p_not_after);
 
-	Crypto();
+	Crypto() {}
 };
 
 class ResourceFormatLoaderCrypto : public ResourceFormatLoader {
 public:
-	virtual RES load(const String &p_path, const String &p_original_path = "", Error *r_error = NULL);
+	virtual RES load(const String &p_path, const String &p_original_path = "", Error *r_error = nullptr, bool p_use_sub_threads = false, float *r_progress = nullptr, bool p_no_cache = false);
 	virtual void get_recognized_extensions(List<String> *p_extensions) const;
 	virtual bool handles_type(const String &p_type) const;
 	virtual String get_resource_type(const String &p_path) const;

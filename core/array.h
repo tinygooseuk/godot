@@ -46,6 +46,10 @@ class Array {
 
 	inline int _clamp_slice_index(int p_index) const;
 
+protected:
+	Array(const Array &p_base, uint32_t p_type, const StringName &p_class_name, const Variant &p_script);
+	void _assign(const Array &p_array);
+
 public:
 	Variant &operator[](int p_idx);
 	const Variant &operator[](int p_idx) const;
@@ -100,6 +104,7 @@ public:
 
 	const void *id() const;
 
+	void set_typed(uint32_t p_type, const StringName &p_class_name, const Variant &p_script);
 	Array(const Array &p_from);
 	Array();
 	~Array();

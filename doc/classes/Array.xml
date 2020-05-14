@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<class name="Array" version="3.2">
+<class name="Array" version="4.0">
 	<brief_description>
 		Generic array datatype.
 	</brief_description>
@@ -28,67 +28,87 @@
 		<method name="Array">
 			<return type="Array">
 			</return>
-			<argument index="0" name="from" type="PoolColorArray">
+			<argument index="0" name="from" type="PackedColorArray">
 			</argument>
 			<description>
-				Constructs an array from a [PoolColorArray].
+				Constructs an array from a [PackedColorArray].
 			</description>
 		</method>
 		<method name="Array">
 			<return type="Array">
 			</return>
-			<argument index="0" name="from" type="PoolVector3Array">
+			<argument index="0" name="from" type="PackedVector3Array">
 			</argument>
 			<description>
-				Constructs an array from a [PoolVector3Array].
+				Constructs an array from a [PackedVector3Array].
 			</description>
 		</method>
 		<method name="Array">
 			<return type="Array">
 			</return>
-			<argument index="0" name="from" type="PoolVector2Array">
+			<argument index="0" name="from" type="PackedVector2Array">
 			</argument>
 			<description>
-				Constructs an array from a [PoolVector2Array].
+				Constructs an array from a [PackedVector2Array].
 			</description>
 		</method>
 		<method name="Array">
 			<return type="Array">
 			</return>
-			<argument index="0" name="from" type="PoolStringArray">
+			<argument index="0" name="from" type="PackedStringArray">
 			</argument>
 			<description>
-				Constructs an array from a [PoolStringArray].
+				Constructs an array from a [PackedStringArray].
 			</description>
 		</method>
 		<method name="Array">
 			<return type="Array">
 			</return>
-			<argument index="0" name="from" type="PoolRealArray">
+			<argument index="0" name="from" type="PackedFloat64Array">
 			</argument>
 			<description>
-				Constructs an array from a [PoolRealArray].
+				Constructs an array from a [PackedFloat64Array].
 			</description>
 		</method>
 		<method name="Array">
 			<return type="Array">
 			</return>
-			<argument index="0" name="from" type="PoolIntArray">
+			<argument index="0" name="from" type="PackedFloat32Array">
 			</argument>
 			<description>
-				Constructs an array from a [PoolIntArray].
+				Constructs an array from a [PackedFloat32Array].
 			</description>
 		</method>
 		<method name="Array">
 			<return type="Array">
 			</return>
-			<argument index="0" name="from" type="PoolByteArray">
+			<argument index="0" name="from" type="PackedInt64Array">
 			</argument>
 			<description>
-				Constructs an array from a [PoolByteArray].
+				Constructs an array from a [PackedInt64Array].
+			</description>
+		</method>
+		<method name="Array">
+			<return type="Array">
+			</return>
+			<argument index="0" name="from" type="PackedInt32Array">
+			</argument>
+			<description>
+				Constructs an array from a [PackedInt32Array].
+			</description>
+		</method>
+		<method name="Array">
+			<return type="Array">
+			</return>
+			<argument index="0" name="from" type="PackedByteArray">
+			</argument>
+			<description>
+				Constructs an array from a [PackedByteArray].
 			</description>
 		</method>
 		<method name="append">
+			<return type="void">
+			</return>
 			<argument index="0" name="value" type="Variant">
 			</argument>
 			<description>
@@ -131,6 +151,8 @@
 			</description>
 		</method>
 		<method name="clear">
+			<return type="void">
+			</return>
 			<description>
 				Clears the array. This is equivalent to using [method resize] with a size of [code]0[/code].
 			</description>
@@ -162,6 +184,8 @@
 			</description>
 		</method>
 		<method name="erase">
+			<return type="void">
+			</return>
 			<argument index="0" name="value" type="Variant">
 			</argument>
 			<description>
@@ -218,6 +242,8 @@
 			</description>
 		</method>
 		<method name="insert">
+			<return type="void">
+			</return>
 			<argument index="0" name="position" type="int">
 			</argument>
 			<argument index="1" name="value" type="Variant">
@@ -227,6 +253,8 @@
 			</description>
 		</method>
 		<method name="invert">
+			<return type="void">
+			</return>
 			<description>
 				Reverses the order of the elements in the array.
 			</description>
@@ -260,6 +288,8 @@
 			</description>
 		</method>
 		<method name="push_back">
+			<return type="void">
+			</return>
 			<argument index="0" name="value" type="Variant">
 			</argument>
 			<description>
@@ -267,6 +297,8 @@
 			</description>
 		</method>
 		<method name="push_front">
+			<return type="void">
+			</return>
 			<argument index="0" name="value" type="Variant">
 			</argument>
 			<description>
@@ -274,6 +306,8 @@
 			</description>
 		</method>
 		<method name="remove">
+			<return type="void">
+			</return>
 			<argument index="0" name="position" type="int">
 			</argument>
 			<description>
@@ -281,6 +315,8 @@
 			</description>
 		</method>
 		<method name="resize">
+			<return type="void">
+			</return>
 			<argument index="0" name="size" type="int">
 			</argument>
 			<description>
@@ -299,6 +335,8 @@
 			</description>
 		</method>
 		<method name="shuffle">
+			<return type="void">
+			</return>
 			<description>
 				Shuffles the array such that the items will have a random order. This method uses the global random number generator common to methods such as [method @GDScript.randi]. Call [method @GDScript.randomize] to ensure that a new seed will be used each time if you want non-reproducible shuffling.
 			</description>
@@ -326,6 +364,8 @@
 			</description>
 		</method>
 		<method name="sort">
+			<return type="void">
+			</return>
 			<description>
 				Sorts the array.
 				[b]Note:[/b] Strings are sorted in alphabetical order (as opposed to natural order). This may lead to unexpected behavior when sorting an array of strings ending with a sequence of numbers. Consider the following example:
@@ -337,6 +377,8 @@
 			</description>
 		</method>
 		<method name="sort_custom">
+			<return type="void">
+			</return>
 			<argument index="0" name="obj" type="Object">
 			</argument>
 			<argument index="1" name="func" type="String">

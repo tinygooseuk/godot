@@ -72,8 +72,8 @@ public:
 	AABB merge(const AABB &p_with) const;
 	void merge_with(const AABB &p_aabb); ///merge with another AABB
 	AABB intersection(const AABB &p_aabb) const; ///get box where two intersect, empty if no intersection occurs
-	bool intersects_segment(const Vector3 &p_from, const Vector3 &p_to, Vector3 *r_clip = NULL, Vector3 *r_normal = NULL) const;
-	bool intersects_ray(const Vector3 &p_from, const Vector3 &p_dir, Vector3 *r_clip = NULL, Vector3 *r_normal = NULL) const;
+	bool intersects_segment(const Vector3 &p_from, const Vector3 &p_to, Vector3 *r_clip = nullptr, Vector3 *r_normal = nullptr) const;
+	bool intersects_ray(const Vector3 &p_from, const Vector3 &p_dir, Vector3 *r_clip = nullptr, Vector3 *r_normal = nullptr) const;
 	_FORCE_INLINE_ bool smits_intersect_ray(const Vector3 &p_from, const Vector3 &p_dir, real_t t0, real_t t1) const;
 
 	_FORCE_INLINE_ bool intersects_convex_shape(const Plane *p_planes, int p_plane_count, const Vector3 *p_points, int p_point_count) const;
@@ -177,14 +177,22 @@ Vector3 AABB::get_support(const Vector3 &p_normal) const {
 Vector3 AABB::get_endpoint(int p_point) const {
 
 	switch (p_point) {
-		case 0: return Vector3(position.x, position.y, position.z);
-		case 1: return Vector3(position.x, position.y, position.z + size.z);
-		case 2: return Vector3(position.x, position.y + size.y, position.z);
-		case 3: return Vector3(position.x, position.y + size.y, position.z + size.z);
-		case 4: return Vector3(position.x + size.x, position.y, position.z);
-		case 5: return Vector3(position.x + size.x, position.y, position.z + size.z);
-		case 6: return Vector3(position.x + size.x, position.y + size.y, position.z);
-		case 7: return Vector3(position.x + size.x, position.y + size.y, position.z + size.z);
+		case 0:
+			return Vector3(position.x, position.y, position.z);
+		case 1:
+			return Vector3(position.x, position.y, position.z + size.z);
+		case 2:
+			return Vector3(position.x, position.y + size.y, position.z);
+		case 3:
+			return Vector3(position.x, position.y + size.y, position.z + size.z);
+		case 4:
+			return Vector3(position.x + size.x, position.y, position.z);
+		case 5:
+			return Vector3(position.x + size.x, position.y, position.z + size.z);
+		case 6:
+			return Vector3(position.x + size.x, position.y + size.y, position.z);
+		case 7:
+			return Vector3(position.x + size.x, position.y + size.y, position.z + size.z);
 	};
 
 	ERR_FAIL_V(Vector3());

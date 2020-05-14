@@ -52,9 +52,17 @@
 #define _COMMA_11 ,
 #define _COMMA_12 ,
 #define _COMMA_13 ,
+#define _COMMA_14 ,
+#define _COMMA_15 ,
 
 // 1-based comma separated list of ITEMs
 #define COMMA_SEP_LIST(ITEM, LENGTH) _COMMA_SEP_LIST_##LENGTH(ITEM)
+#define _COMMA_SEP_LIST_15(ITEM) \
+	_COMMA_SEP_LIST_14(ITEM)     \
+	, ITEM(15)
+#define _COMMA_SEP_LIST_14(ITEM) \
+	_COMMA_SEP_LIST_13(ITEM)     \
+	, ITEM(14)
 #define _COMMA_SEP_LIST_13(ITEM) \
 	_COMMA_SEP_LIST_12(ITEM)     \
 	, ITEM(13)
@@ -98,6 +106,12 @@
 
 // 1-based semicolon separated list of ITEMs
 #define SEMIC_SEP_LIST(ITEM, LENGTH) _SEMIC_SEP_LIST_##LENGTH(ITEM)
+#define _SEMIC_SEP_LIST_15(ITEM) \
+	_SEMIC_SEP_LIST_14(ITEM);    \
+	ITEM(15)
+#define _SEMIC_SEP_LIST_14(ITEM) \
+	_SEMIC_SEP_LIST_13(ITEM);    \
+	ITEM(14)
 #define _SEMIC_SEP_LIST_13(ITEM) \
 	_SEMIC_SEP_LIST_12(ITEM);    \
 	ITEM(13)
@@ -141,6 +155,12 @@
 
 // 1-based space separated list of ITEMs
 #define SPACE_SEP_LIST(ITEM, LENGTH) _SPACE_SEP_LIST_##LENGTH(ITEM)
+#define _SPACE_SEP_LIST_15(ITEM) \
+	_SPACE_SEP_LIST_14(ITEM)     \
+	ITEM(15)
+#define _SPACE_SEP_LIST_14(ITEM) \
+	_SPACE_SEP_LIST_13(ITEM)     \
+	ITEM(14)
 #define _SPACE_SEP_LIST_13(ITEM) \
 	_SPACE_SEP_LIST_12(ITEM)     \
 	ITEM(13)
@@ -233,7 +253,8 @@
 		cmd->method = p_method;                                              \
 		SEMIC_SEP_LIST(CMD_ASSIGN_PARAM, N);                                 \
 		unlock();                                                            \
-		if (sync) sync->post();                                              \
+		if (sync)                                                            \
+			sync->post();                                                    \
 	}
 
 #define CMD_RET_TYPE(N) CommandRet##N<T, M, COMMA_SEP_LIST(TYPE_ARG, N) COMMA(N) R>
@@ -249,8 +270,9 @@
 		cmd->ret = r_ret;                                                                      \
 		cmd->sync_sem = ss;                                                                    \
 		unlock();                                                                              \
-		if (sync) sync->post();                                                                \
-		ss->sem->wait();                                                                       \
+		if (sync)                                                                              \
+			sync->post();                                                                      \
+		ss->sem.wait();                                                                        \
 		ss->in_use = false;                                                                    \
 	}
 
@@ -266,26 +288,27 @@
 		SEMIC_SEP_LIST(CMD_ASSIGN_PARAM, N);                                          \
 		cmd->sync_sem = ss;                                                           \
 		unlock();                                                                     \
-		if (sync) sync->post();                                                       \
-		ss->sem->wait();                                                              \
+		if (sync)                                                                     \
+			sync->post();                                                             \
+		ss->sem.wait();                                                               \
 		ss->in_use = false;                                                           \
 	}
 
-#define MAX_CMD_PARAMS 13
+#define MAX_CMD_PARAMS 15
 
 class CommandQueueMT {
 
 	struct SyncSemaphore {
 
-		Semaphore *sem;
-		bool in_use;
+		Semaphore sem;
+		bool in_use = false;
 	};
 
 	struct CommandBase {
 
 		virtual void call() = 0;
-		virtual void post(){};
-		virtual ~CommandBase(){};
+		virtual void post() {}
+		virtual ~CommandBase() {}
 	};
 
 	struct SyncCommand : public CommandBase {
@@ -293,20 +316,20 @@ class CommandQueueMT {
 		SyncSemaphore *sync_sem;
 
 		virtual void post() {
-			sync_sem->sem->post();
+			sync_sem->sem.post();
 		}
 	};
 
 	DECL_CMD(0)
-	SPACE_SEP_LIST(DECL_CMD, 13)
+	SPACE_SEP_LIST(DECL_CMD, 15)
 
 	/* comands that return */
 	DECL_CMD_RET(0)
-	SPACE_SEP_LIST(DECL_CMD_RET, 13)
+	SPACE_SEP_LIST(DECL_CMD_RET, 15)
 
 	/* commands that don't return but sync */
 	DECL_CMD_SYNC(0)
-	SPACE_SEP_LIST(DECL_CMD_SYNC, 13)
+	SPACE_SEP_LIST(DECL_CMD_SYNC, 15)
 
 	/***** BASE *******/
 
@@ -316,13 +339,13 @@ class CommandQueueMT {
 		SYNC_SEMAPHORES = 8
 	};
 
-	uint8_t *command_mem;
-	uint32_t read_ptr;
-	uint32_t write_ptr;
-	uint32_t dealloc_ptr;
+	uint8_t *command_mem = (uint8_t *)memalloc(COMMAND_MEM_SIZE);
+	uint32_t read_ptr = 0;
+	uint32_t write_ptr = 0;
+	uint32_t dealloc_ptr = 0;
 	SyncSemaphore sync_sems[SYNC_SEMAPHORES];
-	Mutex *mutex;
-	Semaphore *sync;
+	Mutex mutex;
+	Semaphore *sync = nullptr;
 
 	template <class T>
 	T *allocate() {
@@ -340,7 +363,7 @@ class CommandQueueMT {
 				if (dealloc_one()) {
 					goto tryagain;
 				}
-				return NULL;
+				return nullptr;
 			}
 		} else {
 			// ahead of dealloc_ptr, check that there is room
@@ -354,11 +377,11 @@ class CommandQueueMT {
 					if (dealloc_one()) {
 						goto tryagain;
 					}
-					return NULL;
+					return nullptr;
 				}
 
 				// if this happens, it's a bug
-				ERR_FAIL_COND_V((COMMAND_MEM_SIZE - write_ptr) < 8, NULL);
+				ERR_FAIL_COND_V((COMMAND_MEM_SIZE - write_ptr) < 8, nullptr);
 				// zero means, wrap to beginning
 
 				uint32_t *p = (uint32_t *)&command_mem[write_ptr];
@@ -386,7 +409,7 @@ class CommandQueueMT {
 		lock();
 		T *ret;
 
-		while ((ret = allocate<T>()) == NULL) {
+		while ((ret = allocate<T>()) == nullptr) {
 
 			unlock();
 			// sleep a little until fetch happened and some room is made
@@ -398,12 +421,14 @@ class CommandQueueMT {
 	}
 
 	bool flush_one(bool p_lock = true) {
-		if (p_lock) lock();
+		if (p_lock)
+			lock();
 	tryagain:
 
 		// tried to read an empty queue
 		if (read_ptr == write_ptr) {
-			if (p_lock) unlock();
+			if (p_lock)
+				unlock();
 			return false;
 		}
 
@@ -422,15 +447,18 @@ class CommandQueueMT {
 
 		read_ptr += size;
 
-		if (p_lock) unlock();
+		if (p_lock)
+			unlock();
 		cmd->call();
-		if (p_lock) lock();
+		if (p_lock)
+			lock();
 
 		cmd->post();
 		cmd->~CommandBase();
 		*(uint32_t *)&command_mem[size_ptr] &= ~1;
 
-		if (p_lock) unlock();
+		if (p_lock)
+			unlock();
 		return true;
 	}
 
@@ -443,15 +471,15 @@ class CommandQueueMT {
 public:
 	/* NORMAL PUSH COMMANDS */
 	DECL_PUSH(0)
-	SPACE_SEP_LIST(DECL_PUSH, 13)
+	SPACE_SEP_LIST(DECL_PUSH, 15)
 
 	/* PUSH AND RET COMMANDS */
 	DECL_PUSH_AND_RET(0)
-	SPACE_SEP_LIST(DECL_PUSH_AND_RET, 13)
+	SPACE_SEP_LIST(DECL_PUSH_AND_RET, 15)
 
 	/* PUSH AND RET SYNC COMMANDS*/
 	DECL_PUSH_AND_SYNC(0)
-	SPACE_SEP_LIST(DECL_PUSH_AND_SYNC, 13)
+	SPACE_SEP_LIST(DECL_PUSH_AND_SYNC, 15)
 
 	void wait_and_flush_one() {
 		ERR_FAIL_COND(!sync);
@@ -488,4 +516,4 @@ public:
 #undef CMD_SYNC_TYPE
 #undef DECL_CMD_SYNC
 
-#endif
+#endif // COMMAND_QUEUE_MT_H

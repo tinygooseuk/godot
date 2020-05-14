@@ -34,11 +34,12 @@
 /**
  * @class Vector
  * @author Juan Linietsky
- * Vector container. Regular Vector Container. Use with care and for smaller arrays when possible. Use PoolVector for large arrays.
+ * Vector container. Regular Vector Container. Use with care and for smaller arrays when possible. Use Vector for large arrays.
 */
 
 #include "core/cowdata.h"
 #include "core/error_macros.h"
+#include "core/os/copymem.h"
 #include "core/os/memory.h"
 #include "core/sort_array.h"
 
@@ -64,12 +65,14 @@ private:
 
 public:
 	bool push_back(T p_elem);
+	_FORCE_INLINE_ bool append(const T &p_elem) { return push_back(p_elem); } //alias
 
 	void remove(int p_index) { _cowdata.remove(p_index); }
 	void erase(const T &p_val) {
 		int idx = find(p_val);
-		if (idx >= 0) remove(idx);
-	};
+		if (idx >= 0)
+			remove(idx);
+	}
 	void invert();
 
 	_FORCE_INLINE_ T *ptrw() { return _cowdata.ptrw(); }
@@ -102,7 +105,7 @@ public:
 
 	void sort() {
 
-		sort_custom<_DefaultComparator<T> >();
+		sort_custom<_DefaultComparator<T>>();
 	}
 
 	void ordered_insert(const T &p_val) {
@@ -116,12 +119,44 @@ public:
 		insert(i, p_val);
 	}
 
-	_FORCE_INLINE_ Vector() {}
-	_FORCE_INLINE_ Vector(const Vector &p_from) { _cowdata._ref(p_from._cowdata); }
 	inline Vector &operator=(const Vector &p_from) {
 		_cowdata._ref(p_from._cowdata);
 		return *this;
 	}
+
+	Vector<uint8_t> to_byte_array() const {
+		Vector<uint8_t> ret;
+		ret.resize(size() * sizeof(T));
+		copymem(ret.ptrw(), ptr(), sizeof(T) * size());
+		return ret;
+	}
+
+	Vector<T> subarray(int p_from, int p_to) const {
+
+		if (p_from < 0) {
+			p_from = size() + p_from;
+		}
+		if (p_to < 0) {
+			p_to = size() + p_to;
+		}
+
+		ERR_FAIL_INDEX_V(p_from, size(), Vector<T>());
+		ERR_FAIL_INDEX_V(p_to, size(), Vector<T>());
+
+		Vector<T> slice;
+		int span = 1 + p_to - p_from;
+		slice.resize(span);
+		const T *r = ptr();
+		T *w = slice.ptrw();
+		for (int i = 0; i < span; ++i) {
+			w[i] = r[p_from + i];
+		}
+
+		return slice;
+	}
+
+	_FORCE_INLINE_ Vector() {}
+	_FORCE_INLINE_ Vector(const Vector &p_from) { _cowdata._ref(p_from._cowdata); }
 
 	_FORCE_INLINE_ ~Vector() {}
 };
@@ -156,4 +191,4 @@ bool Vector<T>::push_back(T p_elem) {
 	return false;
 }
 
-#endif
+#endif // VECTOR_H

@@ -66,7 +66,7 @@ void AStar::add_point(int p_id, const Vector3 &p_pos, real_t p_weight_scale) {
 		pt->id = p_id;
 		pt->pos = p_pos;
 		pt->weight_scale = p_weight_scale;
-		pt->prev_point = NULL;
+		pt->prev_point = nullptr;
 		pt->open_pass = 0;
 		pt->closed_pass = 0;
 		pt->enabled = true;
@@ -164,10 +164,11 @@ void AStar::connect_points(int p_id, int p_with_id, bool bidirectional) {
 	}
 
 	Segment s(p_id, p_with_id);
-	if (bidirectional) s.direction = Segment::BIDIRECTIONAL;
+	if (bidirectional)
+		s.direction = Segment::BIDIRECTIONAL;
 
 	Set<Segment>::Element *element = segments.find(s);
-	if (element != NULL) {
+	if (element != nullptr) {
 		s.direction |= element->get().direction;
 		if (s.direction == Segment::BIDIRECTIONAL) {
 			// Both are neighbours of each other now
@@ -194,7 +195,7 @@ void AStar::disconnect_points(int p_id, int p_with_id, bool bidirectional) {
 	int remove_direction = bidirectional ? (int)Segment::BIDIRECTIONAL : s.direction;
 
 	Set<Segment>::Element *element = segments.find(s);
-	if (element != NULL) {
+	if (element != nullptr) {
 		// s is the new segment
 		// Erase the directions to be removed
 		s.direction = (element->get().direction & ~remove_direction);
@@ -235,13 +236,13 @@ Array AStar::get_points() {
 	return point_list;
 }
 
-PoolVector<int> AStar::get_point_connections(int p_id) {
+Vector<int> AStar::get_point_connections(int p_id) {
 
 	Point *p;
 	bool p_exists = points.lookup(p_id, p);
-	ERR_FAIL_COND_V(!p_exists, PoolVector<int>());
+	ERR_FAIL_COND_V(!p_exists, Vector<int>());
 
-	PoolVector<int> point_list;
+	Vector<int> point_list;
 
 	for (OAHashMap<int, Point *>::Iterator it = p->neighbours.iter(); it.valid; it = p->neighbours.next_iter(it)) {
 		point_list.push_back((*it.key));
@@ -255,7 +256,7 @@ bool AStar::are_points_connected(int p_id, int p_with_id, bool bidirectional) co
 	Segment s(p_id, p_with_id);
 	const Set<Segment>::Element *element = segments.find(s);
 
-	return element != NULL &&
+	return element != nullptr &&
 		   (bidirectional || (element->get().direction & s.direction) == s.direction);
 }
 
@@ -290,7 +291,8 @@ int AStar::get_closest_point(const Vector3 &p_point, bool p_include_disabled) co
 
 	for (OAHashMap<int, Point *>::Iterator it = points.iter(); it.valid; it = points.next_iter(it)) {
 
-		if (!p_include_disabled && !(*it.value)->enabled) continue; // Disabled points should not be considered.
+		if (!p_include_disabled && !(*it.value)->enabled)
+			continue; // Disabled points should not be considered.
 
 		real_t d = p_point.distance_squared_to((*it.value)->pos);
 		if (closest_id < 0 || d < closest_dist) {
@@ -340,7 +342,8 @@ bool AStar::_solve(Point *begin_point, Point *end_point) {
 
 	pass++;
 
-	if (!end_point->enabled) return false;
+	if (!end_point->enabled)
+		return false;
 
 	bool found_route = false;
 
@@ -431,18 +434,18 @@ real_t AStar::_compute_cost(int p_from_id, int p_to_id) {
 	return from_point->pos.distance_to(to_point->pos);
 }
 
-PoolVector<Vector3> AStar::get_point_path(int p_from_id, int p_to_id) {
+Vector<Vector3> AStar::get_point_path(int p_from_id, int p_to_id) {
 
 	Point *a;
 	bool from_exists = points.lookup(p_from_id, a);
-	ERR_FAIL_COND_V(!from_exists, PoolVector<Vector3>());
+	ERR_FAIL_COND_V(!from_exists, Vector<Vector3>());
 
 	Point *b;
 	bool to_exists = points.lookup(p_to_id, b);
-	ERR_FAIL_COND_V(!to_exists, PoolVector<Vector3>());
+	ERR_FAIL_COND_V(!to_exists, Vector<Vector3>());
 
 	if (a == b) {
-		PoolVector<Vector3> ret;
+		Vector<Vector3> ret;
 		ret.push_back(a->pos);
 		return ret;
 	}
@@ -451,7 +454,8 @@ PoolVector<Vector3> AStar::get_point_path(int p_from_id, int p_to_id) {
 	Point *end_point = b;
 
 	bool found_route = _solve(begin_point, end_point);
-	if (!found_route) return PoolVector<Vector3>();
+	if (!found_route)
+		return Vector<Vector3>();
 
 	Point *p = end_point;
 	int pc = 1; // Begin point
@@ -460,11 +464,11 @@ PoolVector<Vector3> AStar::get_point_path(int p_from_id, int p_to_id) {
 		p = p->prev_point;
 	}
 
-	PoolVector<Vector3> path;
+	Vector<Vector3> path;
 	path.resize(pc);
 
 	{
-		PoolVector<Vector3>::Write w = path.write();
+		Vector3 *w = path.ptrw();
 
 		Point *p2 = end_point;
 		int idx = pc - 1;
@@ -479,18 +483,18 @@ PoolVector<Vector3> AStar::get_point_path(int p_from_id, int p_to_id) {
 	return path;
 }
 
-PoolVector<int> AStar::get_id_path(int p_from_id, int p_to_id) {
+Vector<int> AStar::get_id_path(int p_from_id, int p_to_id) {
 
 	Point *a;
 	bool from_exists = points.lookup(p_from_id, a);
-	ERR_FAIL_COND_V(!from_exists, PoolVector<int>());
+	ERR_FAIL_COND_V(!from_exists, Vector<int>());
 
 	Point *b;
 	bool to_exists = points.lookup(p_to_id, b);
-	ERR_FAIL_COND_V(!to_exists, PoolVector<int>());
+	ERR_FAIL_COND_V(!to_exists, Vector<int>());
 
 	if (a == b) {
-		PoolVector<int> ret;
+		Vector<int> ret;
 		ret.push_back(a->id);
 		return ret;
 	}
@@ -499,7 +503,8 @@ PoolVector<int> AStar::get_id_path(int p_from_id, int p_to_id) {
 	Point *end_point = b;
 
 	bool found_route = _solve(begin_point, end_point);
-	if (!found_route) return PoolVector<int>();
+	if (!found_route)
+		return Vector<int>();
 
 	Point *p = end_point;
 	int pc = 1; // Begin point
@@ -508,11 +513,11 @@ PoolVector<int> AStar::get_id_path(int p_from_id, int p_to_id) {
 		p = p->prev_point;
 	}
 
-	PoolVector<int> path;
+	Vector<int> path;
 	path.resize(pc);
 
 	{
-		PoolVector<int>::Write w = path.write();
+		int *w = path.ptrw();
 
 		p = end_point;
 		int idx = pc - 1;
@@ -576,13 +581,8 @@ void AStar::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_point_path", "from_id", "to_id"), &AStar::get_point_path);
 	ClassDB::bind_method(D_METHOD("get_id_path", "from_id", "to_id"), &AStar::get_id_path);
 
-	BIND_VMETHOD(MethodInfo(Variant::REAL, "_estimate_cost", PropertyInfo(Variant::INT, "from_id"), PropertyInfo(Variant::INT, "to_id")));
-	BIND_VMETHOD(MethodInfo(Variant::REAL, "_compute_cost", PropertyInfo(Variant::INT, "from_id"), PropertyInfo(Variant::INT, "to_id")));
-}
-
-AStar::AStar() {
-	last_free_id = 0;
-	pass = 1;
+	BIND_VMETHOD(MethodInfo(Variant::FLOAT, "_estimate_cost", PropertyInfo(Variant::INT, "from_id"), PropertyInfo(Variant::INT, "to_id")));
+	BIND_VMETHOD(MethodInfo(Variant::FLOAT, "_compute_cost", PropertyInfo(Variant::INT, "from_id"), PropertyInfo(Variant::INT, "to_id")));
 }
 
 AStar::~AStar() {
@@ -624,7 +624,7 @@ bool AStar2D::has_point(int p_id) const {
 	return astar.has_point(p_id);
 }
 
-PoolVector<int> AStar2D::get_point_connections(int p_id) {
+Vector<int> AStar2D::get_point_connections(int p_id) {
 	return astar.get_point_connections(p_id);
 }
 
@@ -709,18 +709,18 @@ real_t AStar2D::_compute_cost(int p_from_id, int p_to_id) {
 	return from_point->pos.distance_to(to_point->pos);
 }
 
-PoolVector<Vector2> AStar2D::get_point_path(int p_from_id, int p_to_id) {
+Vector<Vector2> AStar2D::get_point_path(int p_from_id, int p_to_id) {
 
 	AStar::Point *a;
 	bool from_exists = astar.points.lookup(p_from_id, a);
-	ERR_FAIL_COND_V(!from_exists, PoolVector<Vector2>());
+	ERR_FAIL_COND_V(!from_exists, Vector<Vector2>());
 
 	AStar::Point *b;
 	bool to_exists = astar.points.lookup(p_to_id, b);
-	ERR_FAIL_COND_V(!to_exists, PoolVector<Vector2>());
+	ERR_FAIL_COND_V(!to_exists, Vector<Vector2>());
 
 	if (a == b) {
-		PoolVector<Vector2> ret;
+		Vector<Vector2> ret;
 		ret.push_back(Vector2(a->pos.x, a->pos.y));
 		return ret;
 	}
@@ -729,7 +729,8 @@ PoolVector<Vector2> AStar2D::get_point_path(int p_from_id, int p_to_id) {
 	AStar::Point *end_point = b;
 
 	bool found_route = _solve(begin_point, end_point);
-	if (!found_route) return PoolVector<Vector2>();
+	if (!found_route)
+		return Vector<Vector2>();
 
 	AStar::Point *p = end_point;
 	int pc = 1; // Begin point
@@ -738,11 +739,11 @@ PoolVector<Vector2> AStar2D::get_point_path(int p_from_id, int p_to_id) {
 		p = p->prev_point;
 	}
 
-	PoolVector<Vector2> path;
+	Vector<Vector2> path;
 	path.resize(pc);
 
 	{
-		PoolVector<Vector2>::Write w = path.write();
+		Vector2 *w = path.ptrw();
 
 		AStar::Point *p2 = end_point;
 		int idx = pc - 1;
@@ -757,18 +758,18 @@ PoolVector<Vector2> AStar2D::get_point_path(int p_from_id, int p_to_id) {
 	return path;
 }
 
-PoolVector<int> AStar2D::get_id_path(int p_from_id, int p_to_id) {
+Vector<int> AStar2D::get_id_path(int p_from_id, int p_to_id) {
 
 	AStar::Point *a;
 	bool from_exists = astar.points.lookup(p_from_id, a);
-	ERR_FAIL_COND_V(!from_exists, PoolVector<int>());
+	ERR_FAIL_COND_V(!from_exists, Vector<int>());
 
 	AStar::Point *b;
 	bool to_exists = astar.points.lookup(p_to_id, b);
-	ERR_FAIL_COND_V(!to_exists, PoolVector<int>());
+	ERR_FAIL_COND_V(!to_exists, Vector<int>());
 
 	if (a == b) {
-		PoolVector<int> ret;
+		Vector<int> ret;
 		ret.push_back(a->id);
 		return ret;
 	}
@@ -777,7 +778,8 @@ PoolVector<int> AStar2D::get_id_path(int p_from_id, int p_to_id) {
 	AStar::Point *end_point = b;
 
 	bool found_route = _solve(begin_point, end_point);
-	if (!found_route) return PoolVector<int>();
+	if (!found_route)
+		return Vector<int>();
 
 	AStar::Point *p = end_point;
 	int pc = 1; // Begin point
@@ -786,11 +788,11 @@ PoolVector<int> AStar2D::get_id_path(int p_from_id, int p_to_id) {
 		p = p->prev_point;
 	}
 
-	PoolVector<int> path;
+	Vector<int> path;
 	path.resize(pc);
 
 	{
-		PoolVector<int>::Write w = path.write();
+		int *w = path.ptrw();
 
 		p = end_point;
 		int idx = pc - 1;
@@ -809,7 +811,8 @@ bool AStar2D::_solve(AStar::Point *begin_point, AStar::Point *end_point) {
 
 	astar.pass++;
 
-	if (!end_point->enabled) return false;
+	if (!end_point->enabled)
+		return false;
 
 	bool found_route = false;
 
@@ -899,12 +902,6 @@ void AStar2D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_point_path", "from_id", "to_id"), &AStar2D::get_point_path);
 	ClassDB::bind_method(D_METHOD("get_id_path", "from_id", "to_id"), &AStar2D::get_id_path);
 
-	BIND_VMETHOD(MethodInfo(Variant::REAL, "_estimate_cost", PropertyInfo(Variant::INT, "from_id"), PropertyInfo(Variant::INT, "to_id")));
-	BIND_VMETHOD(MethodInfo(Variant::REAL, "_compute_cost", PropertyInfo(Variant::INT, "from_id"), PropertyInfo(Variant::INT, "to_id")));
-}
-
-AStar2D::AStar2D() {
-}
-
-AStar2D::~AStar2D() {
+	BIND_VMETHOD(MethodInfo(Variant::FLOAT, "_estimate_cost", PropertyInfo(Variant::INT, "from_id"), PropertyInfo(Variant::INT, "to_id")));
+	BIND_VMETHOD(MethodInfo(Variant::FLOAT, "_compute_cost", PropertyInfo(Variant::INT, "from_id"), PropertyInfo(Variant::INT, "to_id")));
 }

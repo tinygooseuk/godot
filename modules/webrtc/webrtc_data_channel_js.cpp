@@ -312,14 +312,14 @@ WebRTCDataChannelJS::WebRTCDataChannelJS(int js_id) {
 				return;
 			}
 			var len = buffer.length*buffer.BYTES_PER_ELEMENT;
-			var out = Module._malloc(len);
-			Module.HEAPU8.set(buffer, out);
+			var out = _malloc(len);
+			HEAPU8.set(buffer, out);
 			ccall("_emrtc_on_ch_message",
 				"void",
 				["number", "number", "number", "number"],
 				[c_ptr, out, len, is_string]
 			);
-			Module._free(out);
+			_free(out);
 		}
 
 	}, this, js_id);
@@ -334,7 +334,7 @@ WebRTCDataChannelJS::WebRTCDataChannelJS(int js_id) {
 		stringToUTF8(str, ptr, len+1);
 		return ptr;
 	}, js_id);
-	if(str != NULL) {
+	if(str != nullptr) {
 		_label.parse_utf8(str);
 		EM_ASM({ _free($0) }, str);
 	}
@@ -347,7 +347,7 @@ WebRTCDataChannelJS::WebRTCDataChannelJS(int js_id) {
 		stringToUTF8(str, ptr, len+1);
 		return ptr;
 	}, js_id);
-	if(str != NULL) {
+	if(str != nullptr) {
 		_protocol.parse_utf8(str);
 		EM_ASM({ _free($0) }, str);
 	}

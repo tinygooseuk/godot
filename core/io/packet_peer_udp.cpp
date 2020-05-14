@@ -289,7 +289,7 @@ Error PacketPeerUDP::_poll() {
 
 		if (rb.space_left() < read + 24) {
 #ifdef TOOLS_ENABLED
-			WARN_PRINTS("Buffer full, dropping packets!");
+			WARN_PRINT("Buffer full, dropping packets!");
 #endif
 			continue;
 		}
@@ -343,12 +343,6 @@ void PacketPeerUDP::_bind_methods() {
 }
 
 PacketPeerUDP::PacketPeerUDP() :
-		packet_port(0),
-		queue_count(0),
-		peer_port(0),
-		connected(false),
-		blocking(true),
-		broadcast(false),
 		_sock(Ref<NetSocket>(NetSocket::create())) {
 	rb.resize(16);
 }

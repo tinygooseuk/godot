@@ -31,11 +31,11 @@
 #include "visibility_notifier_2d.h"
 
 #include "core/engine.h"
-#include "particles_2d.h"
-#include "scene/2d/animated_sprite.h"
+#include "gpu_particles_2d.h"
+#include "scene/2d/animated_sprite_2d.h"
 #include "scene/2d/physics_body_2d.h"
 #include "scene/animation/animation_player.h"
-#include "scene/main/viewport.h"
+#include "scene/main/window.h"
 #include "scene/scene_string_names.h"
 
 #ifdef TOOLS_ENABLED
@@ -205,14 +205,14 @@ void VisibilityEnabler2D::_find_nodes(Node *p_node) {
 	}
 
 	{
-		AnimatedSprite *as = Object::cast_to<AnimatedSprite>(p_node);
+		AnimatedSprite2D *as = Object::cast_to<AnimatedSprite2D>(p_node);
 		if (as) {
 			add = true;
 		}
 	}
 
 	{
-		Particles2D *ps = Object::cast_to<Particles2D>(p_node);
+		GPUParticles2D *ps = Object::cast_to<GPUParticles2D>(p_node);
 		if (ps) {
 			add = true;
 		}
@@ -220,7 +220,7 @@ void VisibilityEnabler2D::_find_nodes(Node *p_node) {
 
 	if (add) {
 
-		p_node->connect(SceneStringNames::get_singleton()->tree_exiting, this, "_node_removed", varray(p_node), CONNECT_ONESHOT);
+		p_node->connect(SceneStringNames::get_singleton()->tree_exiting, callable_mp(this, &VisibilityEnabler2D::_node_removed), varray(p_node), CONNECT_ONESHOT);
 		nodes[p_node] = meta;
 		_change_node_state(p_node, false);
 	}
@@ -255,11 +255,11 @@ void VisibilityEnabler2D::_notification(int p_what) {
 
 		if (enabler[ENABLER_PARENT_PHYSICS_PROCESS] && get_parent()) {
 			get_parent()->connect(SceneStringNames::get_singleton()->ready,
-					get_parent(), "set_physics_process", varray(false), CONNECT_ONESHOT);
+					callable_mp(get_parent(), &Node::set_physics_process), varray(false), CONNECT_ONESHOT);
 		}
 		if (enabler[ENABLER_PARENT_PROCESS] && get_parent()) {
 			get_parent()->connect(SceneStringNames::get_singleton()->ready,
-					get_parent(), "set_process", varray(false), CONNECT_ONESHOT);
+					callable_mp(get_parent(), &Node::set_process), varray(false), CONNECT_ONESHOT);
 		}
 	}
 
@@ -272,7 +272,7 @@ void VisibilityEnabler2D::_notification(int p_what) {
 
 			if (!visible)
 				_change_node_state(E->key(), true);
-			E->key()->disconnect(SceneStringNames::get_singleton()->tree_exiting, this, "_node_removed");
+			E->key()->disconnect(SceneStringNames::get_singleton()->tree_exiting, callable_mp(this, &VisibilityEnabler2D::_node_removed));
 		}
 
 		nodes.clear();
@@ -301,7 +301,7 @@ void VisibilityEnabler2D::_change_node_state(Node *p_node, bool p_enabled) {
 	}
 
 	if (enabler[ENABLER_PAUSE_ANIMATED_SPRITES]) {
-		AnimatedSprite *as = Object::cast_to<AnimatedSprite>(p_node);
+		AnimatedSprite2D *as = Object::cast_to<AnimatedSprite2D>(p_node);
 
 		if (as) {
 
@@ -313,7 +313,7 @@ void VisibilityEnabler2D::_change_node_state(Node *p_node, bool p_enabled) {
 	}
 
 	if (enabler[ENABLER_PAUSE_PARTICLES]) {
-		Particles2D *ps = Object::cast_to<Particles2D>(p_node);
+		GPUParticles2D *ps = Object::cast_to<GPUParticles2D>(p_node);
 
 		if (ps) {
 

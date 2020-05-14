@@ -35,9 +35,13 @@
 #include "editor_icons.gen.h"
 #include "editor_scale.h"
 #include "editor_settings.h"
-#include "modules/svg/image_loader_svg.h"
 
-static Ref<StyleBoxTexture> make_stylebox(Ref<Texture> p_texture, float p_left, float p_top, float p_right, float p_botton, float p_margin_left = -1, float p_margin_top = -1, float p_margin_right = -1, float p_margin_botton = -1, bool p_draw_center = true) {
+#include "modules/modules_enabled.gen.h"
+#ifdef MODULE_SVG_ENABLED
+#include "modules/svg/image_loader_svg.h"
+#endif
+
+static Ref<StyleBoxTexture> make_stylebox(Ref<Texture2D> p_texture, float p_left, float p_top, float p_right, float p_botton, float p_margin_left = -1, float p_margin_top = -1, float p_margin_right = -1, float p_margin_botton = -1, bool p_draw_center = true) {
 	Ref<StyleBoxTexture> style(memnew(StyleBoxTexture));
 	style->set_texture(p_texture);
 	style->set_margin_size(MARGIN_LEFT, p_left * EDSCALE);
@@ -86,19 +90,13 @@ Ref<ImageTexture> editor_generate_icon(int p_index, bool p_convert_color, float 
 	Ref<ImageTexture> icon = memnew(ImageTexture);
 	Ref<Image> img = memnew(Image);
 
-	// dumb gizmo check
-	bool is_gizmo = String(editor_icons_names[p_index]).begins_with("Gizmo");
-
 	// Upsample icon generation only if the editor scale isn't an integer multiplier.
 	// Generating upsampled icons is slower, and the benefit is hardly visible
 	// with integer editor scales.
 	const bool upsample = !Math::is_equal_approx(Math::round(p_scale), p_scale);
 	ImageLoaderSVG::create_image_from_string(img, editor_icons_sources[p_index], p_scale, upsample, p_convert_color);
 
-	if ((p_scale - (float)((int)p_scale)) > 0.0 || is_gizmo || p_force_filter)
-		icon->create_from_image(img); // in this case filter really helps
-	else
-		icon->create_from_image(img, 0);
+	icon->create_from_image(img); // in this case filter really helps
 
 	return icon;
 }
@@ -109,7 +107,7 @@ Ref<ImageTexture> editor_generate_icon(int p_index, bool p_convert_color, float 
 
 void editor_register_and_generate_icons(Ref<Theme> p_theme, bool p_dark_theme = true, int p_thumb_size = 32, bool p_only_thumbs = false) {
 
-#ifdef SVG_ENABLED
+#ifdef MODULE_SVG_ENABLED
 	// The default icon theme is designed to be used for a dark theme.
 	// This dictionary stores color codes to convert to other colors
 	// for better readability on a light theme.
@@ -189,8 +187,7 @@ void editor_register_and_generate_icons(Ref<Theme> p_theme, bool p_dark_theme = 
 		exceptions.insert("EditorHandle");
 		exceptions.insert("Editor3DHandle");
 		exceptions.insert("Godot");
-		exceptions.insert("PanoramaSky");
-		exceptions.insert("ProceduralSky");
+		exceptions.insert("Sky");
 		exceptions.insert("EditorControlAnchor");
 		exceptions.insert("DefaultProjectIcon");
 		exceptions.insert("GuiCloseCustomizable");
@@ -251,7 +248,7 @@ void editor_register_and_generate_icons(Ref<Theme> p_theme, bool p_dark_theme = 
 		}
 	}
 
-	ImageLoaderSVG::set_convert_colors(NULL);
+	ImageLoaderSVG::set_convert_colors(nullptr);
 #else
 	WARN_PRINT("SVG support disabled, editor icons won't be rendered.");
 #endif
@@ -340,24 +337,24 @@ Ref<Theme> create_editor_theme(const Ref<Theme> p_theme) {
 	//Colors
 	bool dark_theme = EditorSettings::get_singleton()->is_dark_theme();
 
-	const Color dark_color_1 = base_color.linear_interpolate(Color(0, 0, 0, 1), contrast);
-	const Color dark_color_2 = base_color.linear_interpolate(Color(0, 0, 0, 1), contrast * 1.5);
-	const Color dark_color_3 = base_color.linear_interpolate(Color(0, 0, 0, 1), contrast * 2);
+	const Color dark_color_1 = base_color.lerp(Color(0, 0, 0, 1), contrast);
+	const Color dark_color_2 = base_color.lerp(Color(0, 0, 0, 1), contrast * 1.5);
+	const Color dark_color_3 = base_color.lerp(Color(0, 0, 0, 1), contrast * 2);
 
 	const Color background_color = dark_color_2;
 
 	// white (dark theme) or black (light theme), will be used to generate the rest of the colors
 	const Color mono_color = dark_theme ? Color(1, 1, 1) : Color(0, 0, 0);
 
-	const Color contrast_color_1 = base_color.linear_interpolate(mono_color, MAX(contrast, default_contrast));
-	const Color contrast_color_2 = base_color.linear_interpolate(mono_color, MAX(contrast * 1.5, default_contrast * 1.5));
+	const Color contrast_color_1 = base_color.lerp(mono_color, MAX(contrast, default_contrast));
+	const Color contrast_color_2 = base_color.lerp(mono_color, MAX(contrast * 1.5, default_contrast * 1.5));
 
-	const Color font_color = mono_color.linear_interpolate(base_color, 0.25);
-	const Color font_color_hl = mono_color.linear_interpolate(base_color, 0.15);
+	const Color font_color = mono_color.lerp(base_color, 0.25);
+	const Color font_color_hl = mono_color.lerp(base_color, 0.15);
 	const Color font_color_disabled = Color(mono_color.r, mono_color.g, mono_color.b, 0.3);
 	const Color font_color_selection = accent_color * Color(1, 1, 1, 0.4);
-	const Color color_disabled = mono_color.inverted().linear_interpolate(base_color, 0.7);
-	const Color color_disabled_bg = mono_color.inverted().linear_interpolate(base_color, 0.9);
+	const Color color_disabled = mono_color.inverted().lerp(base_color, 0.7);
+	const Color color_disabled_bg = mono_color.inverted().lerp(base_color, 0.9);
 
 	Color icon_color_hover = Color(1, 1, 1) * (dark_theme ? 1.15 : 1.45);
 	icon_color_hover.a = 1.0;
@@ -394,13 +391,13 @@ Ref<Theme> create_editor_theme(const Ref<Theme> p_theme) {
 	Color success_color = Color(0.45, 0.95, 0.5);
 	Color warning_color = Color(1, 0.87, 0.4);
 	Color error_color = Color(1, 0.47, 0.42);
-	Color property_color = font_color.linear_interpolate(Color(0.5, 0.5, 0.5), 0.5);
+	Color property_color = font_color.lerp(Color(0.5, 0.5, 0.5), 0.5);
 
 	if (!dark_theme) {
 		// Darken some colors to be readable on a light background
-		success_color = success_color.linear_interpolate(mono_color, 0.35);
-		warning_color = warning_color.linear_interpolate(mono_color, 0.35);
-		error_color = error_color.linear_interpolate(mono_color, 0.25);
+		success_color = success_color.lerp(mono_color, 0.35);
+		warning_color = warning_color.lerp(mono_color, 0.35);
+		error_color = error_color.lerp(mono_color, 0.25);
 	}
 
 	theme->set_color("success_color", "Editor", success_color);
@@ -408,6 +405,11 @@ Ref<Theme> create_editor_theme(const Ref<Theme> p_theme) {
 	theme->set_color("error_color", "Editor", error_color);
 	theme->set_color("property_color", "Editor", property_color);
 
+	if (!dark_theme) {
+		theme->set_color("vulkan_color", "Editor", Color::hex(0xad1128ff));
+	} else {
+		theme->set_color("vulkan_color", "Editor", Color(1.0, 0.0, 0.0));
+	}
 	const int thumb_size = EDITOR_GET("filesystem/file_dialog/thumbnail_size");
 	theme->set_constant("scale", "Editor", EDSCALE);
 	theme->set_constant("thumb_size", "Editor", thumb_size);
@@ -416,7 +418,7 @@ Ref<Theme> create_editor_theme(const Ref<Theme> p_theme) {
 	//Register icons + font
 
 	// the resolution and the icon color (dark_theme bool) has not changed, so we do not regenerate the icons
-	if (p_theme != NULL && fabs(p_theme->get_constant("scale", "Editor") - EDSCALE) < 0.00001 && (bool)p_theme->get_constant("dark_theme", "Editor") == dark_theme) {
+	if (p_theme != nullptr && fabs(p_theme->get_constant("scale", "Editor") - EDSCALE) < 0.00001 && (bool)p_theme->get_constant("dark_theme", "Editor") == dark_theme) {
 		// register already generated icons
 		for (int i = 0; i < editor_icons_count; i++) {
 			theme->set_icon(editor_icons_names[i], "EditorIcons", p_theme->get_icon(editor_icons_names[i], "EditorIcons"));
@@ -425,14 +427,14 @@ Ref<Theme> create_editor_theme(const Ref<Theme> p_theme) {
 		editor_register_and_generate_icons(theme, dark_theme, thumb_size);
 	}
 	// thumbnail size has changed, so we regenerate the medium sizes
-	if (p_theme != NULL && fabs((double)p_theme->get_constant("thumb_size", "Editor") - thumb_size) > 0.00001) {
+	if (p_theme != nullptr && fabs((double)p_theme->get_constant("thumb_size", "Editor") - thumb_size) > 0.00001) {
 		editor_register_and_generate_icons(p_theme, dark_theme, thumb_size, true);
 	}
 
 	editor_register_fonts(theme);
 
 	// Highlighted tabs and border width
-	Color tab_color = highlight_tabs ? base_color.linear_interpolate(font_color, contrast) : base_color;
+	Color tab_color = highlight_tabs ? base_color.lerp(font_color, contrast) : base_color;
 	const int border_width = CLAMP(border_size, 0, 3) * EDSCALE;
 
 	const int default_margin_size = 4;
@@ -684,7 +686,7 @@ Ref<Theme> create_editor_theme(const Ref<Theme> p_theme) {
 	theme->set_icon("visibility_xray", "PopupMenu", theme->get_icon("GuiVisibilityXray", "EditorIcons"));
 	theme->set_constant("vseparation", "PopupMenu", (extra_spacing + default_margin_size + 1) * EDSCALE);
 
-	Ref<StyleBoxFlat> sub_inspector_bg = make_flat_stylebox(dark_color_1.linear_interpolate(accent_color, 0.08), 2, 0, 2, 2);
+	Ref<StyleBoxFlat> sub_inspector_bg = make_flat_stylebox(dark_color_1.lerp(accent_color, 0.08), 2, 0, 2, 2);
 	sub_inspector_bg->set_border_width(MARGIN_LEFT, 2);
 	sub_inspector_bg->set_border_width(MARGIN_RIGHT, 2);
 	sub_inspector_bg->set_border_width(MARGIN_BOTTOM, 2);
@@ -761,9 +763,9 @@ Ref<Theme> create_editor_theme(const Ref<Theme> p_theme) {
 	theme->set_stylebox("title_button_hover", "Tree", style_tree_title);
 	theme->set_stylebox("title_button_pressed", "Tree", style_tree_title);
 
-	Color prop_category_color = dark_color_1.linear_interpolate(mono_color, 0.12);
-	Color prop_section_color = dark_color_1.linear_interpolate(mono_color, 0.09);
-	Color prop_subsection_color = dark_color_1.linear_interpolate(mono_color, 0.06);
+	Color prop_category_color = dark_color_1.lerp(mono_color, 0.12);
+	Color prop_section_color = dark_color_1.lerp(mono_color, 0.09);
+	Color prop_subsection_color = dark_color_1.lerp(mono_color, 0.06);
 	theme->set_color("prop_category", "Editor", prop_category_color);
 	theme->set_color("prop_section", "Editor", prop_section_color);
 	theme->set_color("prop_subsection", "Editor", prop_subsection_color);
@@ -849,8 +851,6 @@ Ref<Theme> create_editor_theme(const Ref<Theme> p_theme) {
 	Ref<StyleBoxFlat> style_panel_debugger = style_content_panel->duplicate();
 	style_panel_debugger->set_border_width(MARGIN_BOTTOM, 0);
 	theme->set_stylebox("DebuggerPanel", "EditorStyles", style_panel_debugger);
-	theme->set_stylebox("DebuggerTabFG", "EditorStyles", style_tab_selected);
-	theme->set_stylebox("DebuggerTabBG", "EditorStyles", style_tab_unselected);
 
 	Ref<StyleBoxFlat> style_panel_invisible_top = style_content_panel->duplicate();
 	int stylebox_offset = theme->get_font("tab_fg", "TabContainer")->get_height() + theme->get_stylebox("tab_fg", "TabContainer")->get_minimum_size().height + theme->get_stylebox("panel", "TabContainer")->get_default_margin(MARGIN_TOP);
@@ -910,14 +910,17 @@ Ref<Theme> create_editor_theme(const Ref<Theme> p_theme) {
 	style_window->set_border_color(tab_color);
 	style_window->set_border_width(MARGIN_TOP, 24 * EDSCALE);
 	style_window->set_expand_margin_size(MARGIN_TOP, 24 * EDSCALE);
-	theme->set_stylebox("panel", "WindowDialog", style_window);
-	theme->set_color("title_color", "WindowDialog", font_color);
-	theme->set_icon("close", "WindowDialog", theme->get_icon("GuiClose", "EditorIcons"));
-	theme->set_icon("close_highlight", "WindowDialog", theme->get_icon("GuiClose", "EditorIcons"));
-	theme->set_constant("close_h_ofs", "WindowDialog", 22 * EDSCALE);
-	theme->set_constant("close_v_ofs", "WindowDialog", 20 * EDSCALE);
-	theme->set_constant("title_height", "WindowDialog", 24 * EDSCALE);
-	theme->set_font("title_font", "WindowDialog", theme->get_font("title", "EditorFonts"));
+
+	theme->set_stylebox("panel", "Window", style_default);
+	theme->set_stylebox("panel_window", "Window", style_window);
+	theme->set_color("title_color", "Window", font_color);
+	theme->set_icon("close", "Window", theme->get_icon("GuiClose", "EditorIcons"));
+	theme->set_icon("close_highlight", "Window", theme->get_icon("GuiClose", "EditorIcons"));
+	theme->set_constant("close_h_ofs", "Window", 22 * EDSCALE);
+	theme->set_constant("close_v_ofs", "Window", 20 * EDSCALE);
+	theme->set_constant("title_height", "Window", 24 * EDSCALE);
+	theme->set_constant("resize_margin", "Window", 4 * EDSCALE);
+	theme->set_font("title_font", "Window", theme->get_font("title", "EditorFonts"));
 
 	// complex window, for now only Editor settings and Project settings
 	Ref<StyleBoxFlat> style_complex_window = style_window->duplicate();
@@ -928,7 +931,7 @@ Ref<Theme> create_editor_theme(const Ref<Theme> p_theme) {
 	theme->set_stylebox("panel", "EditorAbout", style_complex_window);
 
 	// HScrollBar
-	Ref<Texture> empty_icon = memnew(ImageTexture);
+	Ref<Texture2D> empty_icon = memnew(ImageTexture);
 
 	theme->set_stylebox("scroll", "HScrollBar", make_stylebox(theme->get_icon("GuiScrollBg", "EditorIcons"), 5, 5, 5, 5, 0, 0, 0, 0));
 	theme->set_stylebox("scroll_focus", "HScrollBar", make_stylebox(theme->get_icon("GuiScrollBg", "EditorIcons"), 5, 5, 5, 5, 0, 0, 0, 0));
@@ -980,6 +983,7 @@ Ref<Theme> create_editor_theme(const Ref<Theme> p_theme) {
 
 	// Panel
 	theme->set_stylebox("panel", "Panel", make_flat_stylebox(dark_color_1, 6, 4, 6, 4));
+	theme->set_stylebox("panel_fg", "Panel", style_default);
 
 	// Label
 	theme->set_stylebox("normal", "Label", style_empty);
@@ -1120,7 +1124,7 @@ Ref<Theme> create_editor_theme(const Ref<Theme> p_theme) {
 	theme->set_icon("toggle_hidden", "FileDialog", theme->get_icon("GuiVisibilityVisible", "EditorIcons"));
 	// Use a different color for folder icons to make them easier to distinguish from files.
 	// On a light theme, the icon will be dark, so we need to lighten it before blending it with the accent color.
-	theme->set_color("folder_icon_modulate", "FileDialog", (dark_theme ? Color(1, 1, 1) : Color(4.25, 4.25, 4.25)).linear_interpolate(accent_color, 0.7));
+	theme->set_color("folder_icon_modulate", "FileDialog", (dark_theme ? Color(1, 1, 1) : Color(4.25, 4.25, 4.25)).lerp(accent_color, 0.7));
 	theme->set_color("files_disabled", "FileDialog", font_color_disabled);
 
 	// color picker
@@ -1154,13 +1158,13 @@ Ref<Theme> create_editor_theme(const Ref<Theme> p_theme) {
 	// editor main color
 	const Color main_color = dark_theme ? Color(0.34, 0.7, 1.0) : Color(0.02, 0.5, 1.0);
 
-	const Color symbol_color = Color(0.34, 0.57, 1.0).linear_interpolate(mono_color, dark_theme ? 0.5 : 0.3);
+	const Color symbol_color = Color(0.34, 0.57, 1.0).lerp(mono_color, dark_theme ? 0.5 : 0.3);
 	const Color keyword_color = Color(1.0, 0.44, 0.52);
 	const Color basetype_color = dark_theme ? Color(0.26, 1.0, 0.76) : Color(0.0, 0.76, 0.38);
-	const Color type_color = basetype_color.linear_interpolate(mono_color, dark_theme ? 0.4 : 0.3);
-	const Color usertype_color = basetype_color.linear_interpolate(mono_color, dark_theme ? 0.7 : 0.5);
+	const Color type_color = basetype_color.lerp(mono_color, dark_theme ? 0.4 : 0.3);
+	const Color usertype_color = basetype_color.lerp(mono_color, dark_theme ? 0.7 : 0.5);
 	const Color comment_color = dim_color;
-	const Color string_color = (dark_theme ? Color(1.0, 0.85, 0.26) : Color(1.0, 0.82, 0.09)).linear_interpolate(mono_color, dark_theme ? 0.5 : 0.3);
+	const Color string_color = (dark_theme ? Color(1.0, 0.85, 0.26) : Color(1.0, 0.82, 0.09)).lerp(mono_color, dark_theme ? 0.5 : 0.3);
 
 	const Color te_background_color = dark_theme ? background_color : base_color;
 	const Color completion_background_color = dark_theme ? base_color : background_color;
@@ -1179,9 +1183,9 @@ Ref<Theme> create_editor_theme(const Ref<Theme> p_theme) {
 	const Color current_line_color = alpha1;
 	const Color line_length_guideline_color = dark_theme ? base_color : background_color;
 	const Color word_highlighted_color = alpha1;
-	const Color number_color = basetype_color.linear_interpolate(mono_color, dark_theme ? 0.5 : 0.3);
+	const Color number_color = basetype_color.lerp(mono_color, dark_theme ? 0.5 : 0.3);
 	const Color function_color = main_color;
-	const Color member_variable_color = main_color.linear_interpolate(mono_color, 0.6);
+	const Color member_variable_color = main_color.lerp(mono_color, 0.6);
 	const Color mark_color = Color(error_color.r, error_color.g, error_color.b, 0.3);
 	const Color bookmark_color = Color(0.08, 0.49, 0.98);
 	const Color breakpoint_color = error_color;

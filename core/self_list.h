@@ -39,8 +39,8 @@ class SelfList {
 public:
 	class List {
 
-		SelfList<T> *_first;
-		SelfList<T> *_last;
+		SelfList<T> *_first = nullptr;
+		SelfList<T> *_last = nullptr;
 
 	public:
 		void add(SelfList<T> *p_elem) {
@@ -49,7 +49,7 @@ public:
 
 			p_elem->_root = this;
 			p_elem->_next = _first;
-			p_elem->_prev = NULL;
+			p_elem->_prev = nullptr;
 
 			if (_first) {
 				_first->_prev = p_elem;
@@ -66,7 +66,7 @@ public:
 			ERR_FAIL_COND(p_elem->_root);
 
 			p_elem->_root = this;
-			p_elem->_next = NULL;
+			p_elem->_next = nullptr;
 			p_elem->_prev = _last;
 
 			if (_last) {
@@ -98,30 +98,29 @@ public:
 				_last = p_elem->_prev;
 			}
 
-			p_elem->_next = NULL;
-			p_elem->_prev = NULL;
-			p_elem->_root = NULL;
+			p_elem->_next = nullptr;
+			p_elem->_prev = nullptr;
+			p_elem->_root = nullptr;
 		}
 
 		_FORCE_INLINE_ SelfList<T> *first() { return _first; }
 		_FORCE_INLINE_ const SelfList<T> *first() const { return _first; }
-		_FORCE_INLINE_ List() {
-			_first = NULL;
-			_last = NULL;
-		}
-		_FORCE_INLINE_ ~List() { ERR_FAIL_COND(_first != NULL); }
+
+		_FORCE_INLINE_ List() {}
+		_FORCE_INLINE_ ~List() { ERR_FAIL_COND(_first != nullptr); }
 	};
 
 private:
-	List *_root;
+	List *_root = nullptr;
 	T *_self;
-	SelfList<T> *_next;
-	SelfList<T> *_prev;
+	SelfList<T> *_next = nullptr;
+	SelfList<T> *_prev = nullptr;
 
 public:
 	_FORCE_INLINE_ bool in_list() const { return _root; }
 	_FORCE_INLINE_ void remove_from_list() {
-		if (_root) _root->remove(this);
+		if (_root)
+			_root->remove(this);
 	}
 	_FORCE_INLINE_ SelfList<T> *next() { return _next; }
 	_FORCE_INLINE_ SelfList<T> *prev() { return _prev; }
@@ -130,15 +129,10 @@ public:
 	_FORCE_INLINE_ T *self() const { return _self; }
 
 	_FORCE_INLINE_ SelfList(T *p_self) {
-
 		_self = p_self;
-		_next = NULL;
-		_prev = NULL;
-		_root = NULL;
 	}
 
 	_FORCE_INLINE_ ~SelfList() {
-
 		if (_root)
 			_root->remove(this);
 	}

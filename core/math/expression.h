@@ -63,7 +63,6 @@ public:
 		MATH_ISNAN,
 		MATH_ISINF,
 		MATH_EASE,
-		MATH_DECIMALS,
 		MATH_STEP_DECIMALS,
 		MATH_STEPIFY,
 		MATH_LERP,
@@ -112,7 +111,7 @@ public:
 
 	static int get_func_argument_count(BuiltinFunc p_func);
 	static String get_func_name(BuiltinFunc p_func);
-	static void exec_func(BuiltinFunc p_func, const Variant **p_inputs, Variant *r_return, Variant::CallError &r_error, String &r_error_str);
+	static void exec_func(BuiltinFunc p_func, const Variant **p_inputs, Variant *r_return, Callable::CallError &r_error, String &r_error_str);
 	static BuiltinFunc find_function(const String &p_string);
 
 private:
@@ -120,22 +119,20 @@ private:
 
 	struct Input {
 
-		Variant::Type type;
+		Variant::Type type = Variant::NIL;
 		String name;
 
-		Input() :
-				type(Variant::NIL) {
-		}
+		Input() {}
 	};
 
 	Vector<Input> inputs;
-	Variant::Type output_type;
+	Variant::Type output_type = Variant::NIL;
 
 	String expression;
 
-	bool sequenced;
-	int str_ofs;
-	bool expression_dirty;
+	bool sequenced = false;
+	int str_ofs = 0;
+	bool expression_dirty = false;
 
 	bool _compile_expression();
 
@@ -198,7 +195,7 @@ private:
 	Error _get_token(Token &r_token);
 
 	String error_str;
-	bool error_set;
+	bool error_set = true;
 
 	struct ENode {
 
@@ -216,11 +213,11 @@ private:
 			TYPE_CALL
 		};
 
-		ENode *next;
+		ENode *next = nullptr;
 
 		Type type;
 
-		ENode() { next = NULL; }
+		ENode() {}
 		virtual ~ENode() {
 			if (next) {
 				memdelete(next);
@@ -340,12 +337,12 @@ private:
 		return node;
 	}
 
-	ENode *root;
-	ENode *nodes;
+	ENode *root = nullptr;
+	ENode *nodes = nullptr;
 
 	Vector<String> input_names;
 
-	bool execution_error;
+	bool execution_error = false;
 	bool _execute(const Array &p_inputs, Object *p_instance, Expression::ENode *p_node, Variant &r_ret, String &r_error_str);
 
 protected:
@@ -353,11 +350,11 @@ protected:
 
 public:
 	Error parse(const String &p_expression, const Vector<String> &p_input_names = Vector<String>());
-	Variant execute(Array p_inputs, Object *p_base = NULL, bool p_show_error = true);
+	Variant execute(Array p_inputs, Object *p_base = nullptr, bool p_show_error = true);
 	bool has_execute_failed() const;
 	String get_error_text() const;
 
-	Expression();
+	Expression() {}
 	~Expression();
 };
 

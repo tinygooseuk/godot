@@ -34,11 +34,11 @@
 #include "core/os/keyboard.h"
 #include "core/variant_parser.h"
 
-PoolStringArray ConfigFile::_get_sections() const {
+PackedStringArray ConfigFile::_get_sections() const {
 
 	List<String> s;
 	get_sections(&s);
-	PoolStringArray arr;
+	PackedStringArray arr;
 	arr.resize(s.size());
 	int idx = 0;
 	for (const List<String>::Element *E = s.front(); E; E = E->next()) {
@@ -49,11 +49,11 @@ PoolStringArray ConfigFile::_get_sections() const {
 	return arr;
 }
 
-PoolStringArray ConfigFile::_get_section_keys(const String &p_section) const {
+PackedStringArray ConfigFile::_get_section_keys(const String &p_section) const {
 
 	List<String> s;
 	get_section_keys(p_section, &s);
-	PoolStringArray arr;
+	PackedStringArray arr;
 	arr.resize(s.size());
 	int idx = 0;
 	for (const List<String>::Element *E = s.front(); E; E = E->next()) {
@@ -90,6 +90,7 @@ Variant ConfigFile::get_value(const String &p_section, const String &p_key, Vari
 				vformat("Couldn't find the given section \"%s\" and key \"%s\", and no default was given.", p_section, p_key));
 		return p_default;
 	}
+
 	return values[p_section][p_key];
 }
 
@@ -106,7 +107,7 @@ bool ConfigFile::has_section_key(const String &p_section, const String &p_key) c
 
 void ConfigFile::get_sections(List<String> *r_sections) const {
 
-	for (OrderedHashMap<String, OrderedHashMap<String, Variant> >::ConstElement E = values.front(); E; E = E.next()) {
+	for (OrderedHashMap<String, OrderedHashMap<String, Variant>>::ConstElement E = values.front(); E; E = E.next()) {
 		r_sections->push_back(E.key());
 	}
 }
@@ -186,7 +187,7 @@ Error ConfigFile::save_encrypted_pass(const String &p_path, const String &p_pass
 
 Error ConfigFile::_internal_save(FileAccess *file) {
 
-	for (OrderedHashMap<String, OrderedHashMap<String, Variant> >::Element E = values.front(); E; E = E.next()) {
+	for (OrderedHashMap<String, OrderedHashMap<String, Variant>>::Element E = values.front(); E; E = E.next()) {
 
 		if (E != values.front())
 			file->store_string("\n");
@@ -289,7 +290,7 @@ Error ConfigFile::_parse(const String &p_path, VariantParser::Stream *p_stream) 
 		next_tag.fields.clear();
 		next_tag.name = String();
 
-		Error err = VariantParser::parse_tag_assign_eof(p_stream, lines, error_text, next_tag, assign, value, NULL, true);
+		Error err = VariantParser::parse_tag_assign_eof(p_stream, lines, error_text, next_tag, assign, value, nullptr, true);
 		if (err == ERR_FILE_EOF) {
 			return OK;
 		} else if (err != OK) {

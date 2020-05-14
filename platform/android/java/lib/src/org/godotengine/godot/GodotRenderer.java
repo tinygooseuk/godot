@@ -34,6 +34,7 @@ import org.godotengine.godot.plugin.GodotPlugin;
 import org.godotengine.godot.plugin.GodotPluginRegistry;
 import org.godotengine.godot.utils.GLUtils;
 
+import android.content.Context;
 import android.opengl.GLSurfaceView;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -58,9 +59,6 @@ class GodotRenderer implements GLSurfaceView.Renderer {
 		}
 
 		GodotLib.step();
-		for (int i = 0; i < Godot.singleton_count; i++) {
-			Godot.singletons[i].onGLDrawFrame(gl);
-		}
 		for (GodotPlugin plugin : pluginRegistry.getAllPlugins()) {
 			plugin.onGLDrawFrame(gl);
 		}
@@ -68,16 +66,13 @@ class GodotRenderer implements GLSurfaceView.Renderer {
 
 	public void onSurfaceChanged(GL10 gl, int width, int height) {
 		GodotLib.resize(width, height);
-		for (int i = 0; i < Godot.singleton_count; i++) {
-			Godot.singletons[i].onGLSurfaceChanged(gl, width, height);
-		}
 		for (GodotPlugin plugin : pluginRegistry.getAllPlugins()) {
 			plugin.onGLSurfaceChanged(gl, width, height);
 		}
 	}
 
 	public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-		GodotLib.newcontext(GLUtils.use_32);
+		GodotLib.newcontext(null, GLUtils.use_32);
 		for (GodotPlugin plugin : pluginRegistry.getAllPlugins()) {
 			plugin.onGLSurfaceCreated(gl, config);
 		}

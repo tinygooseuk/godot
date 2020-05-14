@@ -44,11 +44,11 @@ struct Vector2 {
 	};
 
 	union {
-		real_t x;
+		real_t x = 0;
 		real_t width;
 	};
 	union {
-		real_t y;
+		real_t y = 0;
 		real_t height;
 	};
 
@@ -82,8 +82,7 @@ struct Vector2 {
 
 	Vector2 clamped(real_t p_len) const;
 
-	_FORCE_INLINE_ static Vector2 linear_interpolate(const Vector2 &p_a, const Vector2 &p_b, real_t p_t);
-	_FORCE_INLINE_ Vector2 linear_interpolate(const Vector2 &p_b, real_t p_t) const;
+	_FORCE_INLINE_ Vector2 lerp(const Vector2 &p_b, real_t p_t) const;
 	_FORCE_INLINE_ Vector2 slerp(const Vector2 &p_b, real_t p_t) const;
 	Vector2 cubic_interpolate(const Vector2 &p_b, const Vector2 &p_pre_a, const Vector2 &p_post_b, real_t p_t) const;
 	Vector2 move_toward(const Vector2 &p_to, const real_t p_delta) const;
@@ -123,12 +122,6 @@ struct Vector2 {
 
 	real_t angle() const;
 
-	void set_rotation(real_t p_radians) {
-
-		x = Math::cos(p_radians);
-		y = Math::sin(p_radians);
-	}
-
 	_FORCE_INLINE_ Vector2 abs() const {
 
 		return Vector2(Math::abs(x), Math::abs(y));
@@ -149,11 +142,11 @@ struct Vector2 {
 
 	operator String() const { return String::num(x) + ", " + String::num(y); }
 
+	_FORCE_INLINE_ Vector2() {}
 	_FORCE_INLINE_ Vector2(real_t p_x, real_t p_y) {
 		x = p_x;
 		y = p_y;
 	}
-	_FORCE_INLINE_ Vector2() { x = y = 0; }
 };
 
 _FORCE_INLINE_ Vector2 Vector2::plane_project(real_t p_d, const Vector2 &p_vec) const {
@@ -230,7 +223,7 @@ _FORCE_INLINE_ bool Vector2::operator!=(const Vector2 &p_vec2) const {
 	return x != p_vec2.x || y != p_vec2.y;
 }
 
-Vector2 Vector2::linear_interpolate(const Vector2 &p_b, real_t p_t) const {
+Vector2 Vector2::lerp(const Vector2 &p_b, real_t p_t) const {
 
 	Vector2 res = *this;
 
@@ -254,16 +247,6 @@ Vector2 Vector2::direction_to(const Vector2 &p_b) const {
 	return ret;
 }
 
-Vector2 Vector2::linear_interpolate(const Vector2 &p_a, const Vector2 &p_b, real_t p_t) {
-
-	Vector2 res = p_a;
-
-	res.x += (p_t * (p_b.x - p_a.x));
-	res.y += (p_t * (p_b.y - p_a.y));
-
-	return res;
-}
-
 typedef Vector2 Size2;
 typedef Vector2 Point2;
 
@@ -277,11 +260,11 @@ struct Vector2i {
 	};
 
 	union {
-		int x;
+		int x = 0;
 		int width;
 	};
 	union {
-		int y;
+		int y = 0;
 		int height;
 	};
 
@@ -311,14 +294,21 @@ struct Vector2i {
 	bool operator<(const Vector2i &p_vec2) const { return (x == p_vec2.x) ? (y < p_vec2.y) : (x < p_vec2.x); }
 	bool operator>(const Vector2i &p_vec2) const { return (x == p_vec2.x) ? (y > p_vec2.y) : (x > p_vec2.x); }
 
+	bool operator<=(const Vector2i &p_vec2) const { return x == p_vec2.x ? (y <= p_vec2.y) : (x < p_vec2.x); }
+	bool operator>=(const Vector2i &p_vec2) const { return x == p_vec2.x ? (y >= p_vec2.y) : (x > p_vec2.x); }
+
 	bool operator==(const Vector2i &p_vec2) const;
 	bool operator!=(const Vector2i &p_vec2) const;
 
-	real_t get_aspect() const { return width / (real_t)height; }
+	real_t aspect() const { return width / (real_t)height; }
+	Vector2i sign() const { return Vector2i(SGN(x), SGN(y)); }
+	Vector2i abs() const { return Vector2i(ABS(x), ABS(y)); }
 
 	operator String() const { return String::num(x) + ", " + String::num(y); }
 
 	operator Vector2() const { return Vector2(x, y); }
+
+	inline Vector2i() {}
 	inline Vector2i(const Vector2 &p_vec2) {
 		x = (int)p_vec2.x;
 		y = (int)p_vec2.y;
@@ -326,10 +316,6 @@ struct Vector2i {
 	inline Vector2i(int p_x, int p_y) {
 		x = p_x;
 		y = p_y;
-	}
-	inline Vector2i() {
-		x = 0;
-		y = 0;
 	}
 };
 

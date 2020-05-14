@@ -253,7 +253,7 @@ void WSLClient::poll() {
 					}
 					_connection = ssl;
 				} else {
-					ssl = static_cast<Ref<StreamPeerSSL> >(_connection);
+					ssl = static_cast<Ref<StreamPeerSSL>>(_connection);
 					ERR_FAIL_COND(ssl.is_null()); // Bug?
 					ssl->poll();
 				}
@@ -279,7 +279,7 @@ void WSLClient::poll() {
 
 Ref<WebSocketPeer> WSLClient::get_peer(int p_peer_id) const {
 
-	ERR_FAIL_COND_V(p_peer_id != 1, NULL);
+	ERR_FAIL_COND_V(p_peer_id != 1, nullptr);
 
 	return _peer;
 }
@@ -298,7 +298,7 @@ NetworkedMultiplayerPeer::ConnectionStatus WSLClient::get_connection_status() co
 void WSLClient::disconnect_from_host(int p_code, String p_reason) {
 
 	_peer->close(p_code, p_reason);
-	_connection = Ref<StreamPeer>(NULL);
+	_connection = Ref<StreamPeer>(nullptr);
 	_tcp = Ref<StreamPeerTCP>(memnew(StreamPeerTCP));
 
 	_key = "";
@@ -336,10 +336,10 @@ Error WSLClient::set_buffers(int p_in_buffer, int p_in_packets, int p_out_buffer
 }
 
 WSLClient::WSLClient() {
-	_in_buf_size = nearest_shift((int)GLOBAL_GET(WSC_IN_BUF) - 1) + 10;
-	_in_pkt_size = nearest_shift((int)GLOBAL_GET(WSC_IN_PKT) - 1);
-	_out_buf_size = nearest_shift((int)GLOBAL_GET(WSC_OUT_BUF) - 1) + 10;
-	_out_pkt_size = nearest_shift((int)GLOBAL_GET(WSC_OUT_PKT) - 1);
+	_in_buf_size = DEF_BUF_SHIFT;
+	_in_pkt_size = DEF_PKT_SHIFT;
+	_out_buf_size = DEF_BUF_SHIFT;
+	_out_pkt_size = DEF_PKT_SHIFT;
 
 	_peer.instance();
 	_tcp.instance();

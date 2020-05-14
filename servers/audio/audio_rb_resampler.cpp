@@ -119,10 +119,18 @@ bool AudioRBResampler::mix(AudioFrame *p_dest, int p_frames) {
 	{
 		int src_read = 0;
 		switch (channels) {
-			case 1: src_read = _resample<1>(p_dest, target_todo, increment); break;
-			case 2: src_read = _resample<2>(p_dest, target_todo, increment); break;
-			case 4: src_read = _resample<4>(p_dest, target_todo, increment); break;
-			case 6: src_read = _resample<6>(p_dest, target_todo, increment); break;
+			case 1:
+				src_read = _resample<1>(p_dest, target_todo, increment);
+				break;
+			case 2:
+				src_read = _resample<2>(p_dest, target_todo, increment);
+				break;
+			case 4:
+				src_read = _resample<4>(p_dest, target_todo, increment);
+				break;
+			case 6:
+				src_read = _resample<6>(p_dest, target_todo, increment);
+				break;
 		}
 
 		if (src_read > read_space)
@@ -203,18 +211,18 @@ void AudioRBResampler::clear() {
 	//should be stopped at this point but just in case
 	memdelete_arr(rb);
 	memdelete_arr(read_buf);
-	rb = NULL;
+	rb = nullptr;
 	offset = 0;
 	rb_read_pos = 0;
 	rb_write_pos = 0;
-	read_buf = NULL;
+	read_buf = nullptr;
 }
 
 AudioRBResampler::AudioRBResampler() {
 
-	rb = NULL;
+	rb = nullptr;
 	offset = 0;
-	read_buf = NULL;
+	read_buf = nullptr;
 	rb_read_pos = 0;
 	rb_write_pos = 0;
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<class name="AStar2D" inherits="Reference" version="3.2">
+<class name="AStar2D" inherits="Reference" version="4.0">
 	<brief_description>
 		AStar class representation that uses 2D vectors as edges.
 	</brief_description>
@@ -135,7 +135,7 @@
 			</description>
 		</method>
 		<method name="get_id_path">
-			<return type="PoolIntArray">
+			<return type="PackedInt32Array">
 			</return>
 			<argument index="0" name="from_id" type="int">
 			</argument>
@@ -168,7 +168,7 @@
 			</description>
 		</method>
 		<method name="get_point_connections">
-			<return type="PoolIntArray">
+			<return type="PackedInt32Array">
 			</return>
 			<argument index="0" name="id" type="int">
 			</argument>
@@ -196,7 +196,7 @@
 			</description>
 		</method>
 		<method name="get_point_path">
-			<return type="PoolVector2Array">
+			<return type="PackedVector2Array">
 			</return>
 			<argument index="0" name="from_id" type="int">
 			</argument>

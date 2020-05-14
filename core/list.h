@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef GLOBALS_LIST_H
-#define GLOBALS_LIST_H
+#ifndef LIST_H
+#define LIST_H
 
 #include "core/error_macros.h"
 #include "core/os/memory.h"
@@ -54,9 +54,9 @@ public:
 		friend class List<T, A>;
 
 		T value;
-		Element *next_ptr;
-		Element *prev_ptr;
-		_Data *data;
+		Element *next_ptr = nullptr;
+		Element *prev_ptr = nullptr;
+		_Data *data = nullptr;
 
 	public:
 		/**
@@ -139,11 +139,7 @@ public:
 			data->erase(this);
 		}
 
-		_FORCE_INLINE_ Element() {
-			next_ptr = 0;
-			prev_ptr = 0;
-			data = NULL;
-		};
+		_FORCE_INLINE_ Element() {}
 	};
 
 private:
@@ -178,7 +174,7 @@ private:
 		}
 	};
 
-	_Data *_data;
+	_Data *_data = nullptr;
 
 public:
 	/**
@@ -186,14 +182,14 @@ public:
 	*/
 	_FORCE_INLINE_ const Element *front() const {
 
-		return _data ? _data->first : 0;
+		return _data ? _data->first : nullptr;
 	};
 
 	/**
 	* return an iterator to the beginning of the list.
 	*/
 	_FORCE_INLINE_ Element *front() {
-		return _data ? _data->first : 0;
+		return _data ? _data->first : nullptr;
 	};
 
 	/**
@@ -201,7 +197,7 @@ public:
 	*/
 	_FORCE_INLINE_ const Element *back() const {
 
-		return _data ? _data->last : 0;
+		return _data ? _data->last : nullptr;
 	};
 
 	/**
@@ -209,7 +205,7 @@ public:
 	*/
 	_FORCE_INLINE_ Element *back() {
 
-		return _data ? _data->last : 0;
+		return _data ? _data->last : nullptr;
 	};
 
 	/**
@@ -220,8 +216,8 @@ public:
 		if (!_data) {
 
 			_data = memnew_allocator(_Data, A);
-			_data->first = NULL;
-			_data->last = NULL;
+			_data->first = nullptr;
+			_data->last = nullptr;
 			_data->size_cache = 0;
 		}
 
@@ -229,7 +225,7 @@ public:
 		n->value = (T &)value;
 
 		n->prev_ptr = _data->last;
-		n->next_ptr = 0;
+		n->next_ptr = nullptr;
 		n->data = _data;
 
 		if (_data->last) {
@@ -261,14 +257,14 @@ public:
 		if (!_data) {
 
 			_data = memnew_allocator(_Data, A);
-			_data->first = NULL;
-			_data->last = NULL;
+			_data->first = nullptr;
+			_data->last = nullptr;
 			_data->size_cache = 0;
 		}
 
 		Element *n = memnew_allocator(Element, A);
 		n->value = (T &)value;
-		n->prev_ptr = 0;
+		n->prev_ptr = nullptr;
 		n->next_ptr = _data->first;
 		n->data = _data;
 
@@ -353,11 +349,12 @@ public:
 
 		Element *it = front();
 		while (it) {
-			if (it->value == p_val) return it;
+			if (it->value == p_val)
+				return it;
 			it = it->next();
 		};
 
-		return NULL;
+		return nullptr;
 	};
 
 	/**
@@ -370,7 +367,7 @@ public:
 
 			if (_data->size_cache == 0) {
 				memdelete_allocator<_Data, A>(_data);
-				_data = NULL;
+				_data = nullptr;
 			}
 
 			return ret;
@@ -456,17 +453,12 @@ public:
 
 		Element *I = front();
 		int c = 0;
-		while (I) {
-
-			if (c == p_index) {
-
-				return I->get();
-			}
+		while (c < p_index) {
 			I = I->next();
 			c++;
 		}
 
-		CRASH_NOW(); // bug!!
+		return I->get();
 	}
 
 	const T &operator[](int p_index) const {
@@ -475,17 +467,12 @@ public:
 
 		const Element *I = front();
 		int c = 0;
-		while (I) {
-
-			if (c == p_index) {
-
-				return I->get();
-			}
+		while (c < p_index) {
 			I = I->next();
 			c++;
 		}
 
-		CRASH_NOW(); // bug!!
+		return I->get();
 	}
 
 	void move_to_back(Element *p_I) {
@@ -508,7 +495,7 @@ public:
 
 		_data->last->next_ptr = p_I;
 		p_I->prev_ptr = _data->last;
-		p_I->next_ptr = NULL;
+		p_I->next_ptr = nullptr;
 		_data->last = p_I;
 	}
 
@@ -545,7 +532,7 @@ public:
 
 		_data->first->prev_ptr = p_I;
 		p_I->next_ptr = _data->first;
-		p_I->prev_ptr = NULL;
+		p_I->prev_ptr = nullptr;
 		_data->first = p_I;
 	}
 
@@ -586,7 +573,7 @@ public:
 
 	void sort() {
 
-		sort_custom<Comparator<T> >();
+		sort_custom<Comparator<T>>();
 	}
 
 	template <class C>
@@ -605,7 +592,7 @@ public:
 
 			if (from != current) {
 
-				current->prev_ptr = NULL;
+				current->prev_ptr = nullptr;
 				current->next_ptr = from;
 
 				Element *find = from;
@@ -628,8 +615,8 @@ public:
 					to = current;
 			} else {
 
-				current->prev_ptr = NULL;
-				current->next_ptr = NULL;
+				current->prev_ptr = nullptr;
+				current->next_ptr = nullptr;
 			}
 
 			current = next;
@@ -667,16 +654,16 @@ public:
 			idx++;
 		}
 
-		SortArray<Element *, AuxiliaryComparator<C> > sort;
+		SortArray<Element *, AuxiliaryComparator<C>> sort;
 		sort.sort(aux_buffer, s);
 
 		_data->first = aux_buffer[0];
-		aux_buffer[0]->prev_ptr = NULL;
+		aux_buffer[0]->prev_ptr = nullptr;
 		aux_buffer[0]->next_ptr = aux_buffer[1];
 
 		_data->last = aux_buffer[s - 1];
 		aux_buffer[s - 1]->prev_ptr = aux_buffer[s - 2];
-		aux_buffer[s - 1]->next_ptr = NULL;
+		aux_buffer[s - 1]->next_ptr = nullptr;
 
 		for (int i = 1; i < s - 1; i++) {
 
@@ -696,7 +683,6 @@ public:
 	 */
 	List(const List &p_list) {
 
-		_data = NULL;
 		const Element *it = p_list.front();
 		while (it) {
 
@@ -705,9 +691,8 @@ public:
 		}
 	}
 
-	List() {
-		_data = NULL;
-	};
+	List() {}
+
 	~List() {
 		clear();
 		if (_data) {
@@ -718,4 +703,4 @@ public:
 	};
 };
 
-#endif
+#endif // LIST_H

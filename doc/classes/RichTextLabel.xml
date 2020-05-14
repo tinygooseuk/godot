@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<class name="RichTextLabel" inherits="Control" version="3.2">
+<class name="RichTextLabel" inherits="Control" version="4.0">
 	<brief_description>
 		Label that displays rich text.
 	</brief_description>
@@ -14,7 +14,7 @@
 		<method name="add_image">
 			<return type="void">
 			</return>
-			<argument index="0" name="image" type="Texture">
+			<argument index="0" name="image" type="Texture2D">
 			</argument>
 			<argument index="1" name="width" type="int" default="0">
 			</argument>
@@ -113,7 +113,7 @@
 		<method name="parse_expressions_for_values">
 			<return type="Dictionary">
 			</return>
-			<argument index="0" name="expressions" type="PoolStringArray">
+			<argument index="0" name="expressions" type="PackedStringArray">
 			</argument>
 			<description>
 				Parses BBCode parameter [code]expressions[/code] into a dictionary.

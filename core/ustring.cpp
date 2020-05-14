@@ -28,10 +28,6 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifdef _MSC_VER
-#define _CRT_SECURE_NO_WARNINGS // to disable build-time warning which suggested to use strcpy_s instead strcpy
-#endif
-
 #include "ustring.h"
 
 #include "core/color.h"
@@ -49,6 +45,10 @@
 #ifndef NO_USE_STDLIB
 #include <stdio.h>
 #include <stdlib.h>
+#endif
+
+#ifdef _MSC_VER
+#define _CRT_SECURE_NO_WARNINGS // to disable build-time warning which suggested to use strcpy_s instead strcpy
 #endif
 
 #if defined(MINGW_ENABLED) || defined(_MSC_VER)
@@ -146,9 +146,11 @@ void CharString::copy_from(const char *p_cstr) {
 		return;
 	}
 
-	resize(len + 1); // include terminating null char
+	Error err = resize(++len); // include terminating null char
 
-	strcpy(ptrw(), p_cstr);
+	ERR_FAIL_COND_MSG(err != OK, "Failed to copy C-string.");
+
+	memcpy(ptrw(), p_cstr, len);
 }
 
 void String::copy_from(const char *p_cstr) {
@@ -203,7 +205,7 @@ void String::copy_from(const CharType *p_cstr, const int p_clip_to) {
 }
 
 // assumes the following have already been validated:
-// p_char != NULL
+// p_char != nullptr
 // p_length > 0
 // p_length <= p_char strlen
 void String::copy_from_unchecked(const CharType *p_char, const int p_length) {
@@ -546,8 +548,8 @@ signed char String::naturalnocasecmp_to(const String &p_str) const {
 					return -1;
 
 				/* Compare the numbers */
-				this_int = to_int(this_str);
-				that_int = to_int(that_str);
+				this_int = to_int(this_str, -1, true);
+				that_int = to_int(that_str, -1, true);
 
 				if (this_int < that_int)
 					return -1;
@@ -644,6 +646,17 @@ String String::camelcase_to_underscore(bool lowercase) const {
 	return lowercase ? new_string.to_lower() : new_string;
 }
 
+String String::get_with_code_lines() const {
+	const Vector<String> lines = split("\n");
+	String ret;
+	for (int i = 0; i < lines.size(); i++) {
+		if (i > 0) {
+			ret += "\n";
+		}
+		ret += vformat("%4d | %s", i + 1, lines[i]);
+	}
+	return ret;
+}
 int String::get_slice_count(String p_splitter) const {
 
 	if (empty())
@@ -1389,7 +1402,7 @@ String String::utf8(const char *p_utf8, int p_len) {
 
 bool String::parse_utf8(const char *p_utf8, int p_len) {
 
-#define _UNICERROR(m_err) print_line("Unicode error: " + String(m_err));
+#define _UNICERROR(m_err) print_line("Unicode parsing error: " + String(m_err) + ". Is the string valid UTF-8?");
 
 	if (!p_utf8)
 		return true;
@@ -1627,7 +1640,7 @@ CharString String::utf8() const {
 /*
 String::String(CharType p_char) {
 
-	shared=NULL;
+	shared=nullptr;
 	copy_from(p_char);
 }
 */
@@ -1869,7 +1882,8 @@ bool String::is_numeric() const {
 	};
 
 	int s = 0;
-	if (operator[](0) == '-') ++s;
+	if (operator[](0) == '-')
+		++s;
 	bool dot = false;
 	for (int i = s; i < length(); i++) {
 
@@ -1900,7 +1914,7 @@ static double built_in_strtod(const C *string, /* A decimal ASCII floating-point
 				 * necessary unless F is present. The "E" may
 				 * actually be an "e". E and X may both be
 				 * omitted (but not just one). */
-		C **endPtr = NULL) /* If non-NULL, store terminating Cacter's
+		C **endPtr = nullptr) /* If non-nullptr, store terminating Cacter's
 				 * address here. */
 {
 
@@ -2088,7 +2102,7 @@ static double built_in_strtod(const C *string, /* A decimal ASCII floating-point
 	}
 
 done:
-	if (endPtr != NULL) {
+	if (endPtr != nullptr) {
 		*endPtr = (C *)p;
 	}
 
@@ -2124,7 +2138,7 @@ double String::to_double(const CharType *p_str, const CharType **r_end) {
 	return built_in_strtod<CharType>(p_str, (CharType **)r_end);
 }
 
-int64_t String::to_int(const CharType *p_str, int p_len) {
+int64_t String::to_int(const CharType *p_str, int p_len, bool p_clamp) {
 
 	if (p_len == 0 || !p_str[0])
 		return 0;
@@ -2156,6 +2170,7 @@ int64_t String::to_int(const CharType *p_str, int p_len) {
 				} else {
 					break;
 				}
+				[[fallthrough]];
 			}
 			case READING_INT: {
 
@@ -2167,7 +2182,15 @@ int64_t String::to_int(const CharType *p_str, int p_len) {
 						while (*str && str != limit) {
 							number += *(str++);
 						}
-						ERR_FAIL_V_MSG(sign == 1 ? INT64_MAX : INT64_MIN, "Cannot represent " + number + " as integer, provided value is " + (sign == 1 ? "too big." : "too small."));
+						if (p_clamp) {
+							if (sign == 1) {
+								return INT64_MAX;
+							} else {
+								return INT64_MIN;
+							}
+						} else {
+							ERR_FAIL_V_MSG(sign == 1 ? INT64_MAX : INT64_MIN, "Cannot represent " + number + " as integer, provided value is " + (sign == 1 ? "too big." : "too small."));
+						}
 					}
 					integer *= 10;
 					integer += c - '0';
@@ -2188,7 +2211,7 @@ double String::to_double() const {
 		return 0;
 #ifndef NO_USE_STDLIB
 	return built_in_strtod<CharType>(c_str());
-//return wcstod(c_str(),NULL); DOES NOT WORK ON ANDROID :(
+//return wcstod(c_str(),nullptr ); DOES NOT WORK ON ANDROID :(
 #else
 	return built_in_strtod<CharType>(c_str());
 #endif
@@ -3435,7 +3458,7 @@ String String::http_unescape() const {
 				CharType ord2 = ord_at(i + 2);
 				if ((ord2 >= '0' && ord2 <= '9') || (ord2 >= 'A' && ord2 <= 'Z')) {
 					char bytes[3] = { (char)ord1, (char)ord2, 0 };
-					res += (char)strtol(bytes, NULL, 16);
+					res += (char)strtol(bytes, nullptr, 16);
 					i += 2;
 				}
 			} else {
@@ -3619,7 +3642,7 @@ String String::xml_unescape() const {
 
 	String str;
 	int l = length();
-	int len = _xml_unescape(c_str(), l, NULL);
+	int len = _xml_unescape(c_str(), l, nullptr);
 	if (len == 0)
 		return String();
 	str.resize(len + 1);
@@ -4168,9 +4191,14 @@ String String::sprintf(const Array &values, bool *error) const {
 					int base = 16;
 					bool capitalize = false;
 					switch (c) {
-						case 'd': base = 10; break;
-						case 'o': base = 8; break;
-						case 'x': break;
+						case 'd':
+							base = 10;
+							break;
+						case 'o':
+							base = 8;
+							break;
+						case 'x':
+							break;
 						case 'X':
 							base = 16;
 							capitalize = true;
@@ -4398,7 +4426,6 @@ String String::unquote() const {
 
 #ifdef TOOLS_ENABLED
 String TTR(const String &p_text) {
-
 	if (TranslationServer::get_singleton()) {
 		return TranslationServer::get_singleton()->tool_translate(p_text);
 	}
@@ -4406,10 +4433,18 @@ String TTR(const String &p_text) {
 	return p_text;
 }
 
+String DTR(const String &p_text) {
+	if (TranslationServer::get_singleton()) {
+		// Comes straight from the XML, so remove indentation and any trailing whitespace.
+		const String text = p_text.dedent().strip_edges();
+		return TranslationServer::get_singleton()->doc_translate(text);
+	}
+
+	return p_text;
+}
 #endif
 
 String RTR(const String &p_text) {
-
 	if (TranslationServer::get_singleton()) {
 		String rtr = TranslationServer::get_singleton()->tool_translate(p_text);
 		if (rtr == String() || rtr == p_text) {

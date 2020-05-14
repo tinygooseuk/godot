@@ -121,7 +121,8 @@ static inline int encode_cstring(const char *p_string, uint8_t *p_data) {
 		len++;
 	};
 
-	if (p_data) *p_data = 0;
+	if (p_data)
+		*p_data = 0;
 	return len + 1;
 }
 
@@ -196,10 +197,10 @@ public:
 	void set_object_id(ObjectID p_id);
 	ObjectID get_object_id() const;
 
-	EncodedObjectAsID();
+	EncodedObjectAsID() {}
 };
 
-Error decode_variant(Variant &r_variant, const uint8_t *p_buffer, int p_len, int *r_len = NULL, bool p_allow_objects = false);
+Error decode_variant(Variant &r_variant, const uint8_t *p_buffer, int p_len, int *r_len = nullptr, bool p_allow_objects = false);
 Error encode_variant(const Variant &p_variant, uint8_t *r_buffer, int &r_len, bool p_full_objects = false);
 
-#endif
+#endif // MARSHALLS_H

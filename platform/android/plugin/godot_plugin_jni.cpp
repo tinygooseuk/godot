@@ -41,7 +41,7 @@ static HashMap<String, JNISingleton *> jni_singletons;
 
 extern "C" {
 
-JNIEXPORT void JNICALL Java_org_godotengine_godot_plugin_GodotPlugin_nativeRegisterSingleton(JNIEnv *env, jclass clazz, jstring name, jobject obj) {
+JNIEXPORT void JNICALL Java_org_godotengine_godot_plugin_GodotPlugin_nativeRegisterSingleton(JNIEnv *env, jobject obj, jstring name) {
 
 	String singname = jstring_to_string(name, env);
 	JNISingleton *s = (JNISingleton *)ClassDB::instance("JNISingleton");
@@ -52,7 +52,7 @@ JNIEXPORT void JNICALL Java_org_godotengine_godot_plugin_GodotPlugin_nativeRegis
 	ProjectSettings::get_singleton()->set(singname, s);
 }
 
-JNIEXPORT void JNICALL Java_org_godotengine_godot_plugin_GodotPlugin_nativeRegisterMethod(JNIEnv *env, jclass clazz, jstring sname, jstring name, jstring ret, jobjectArray args) {
+JNIEXPORT void JNICALL Java_org_godotengine_godot_plugin_GodotPlugin_nativeRegisterMethod(JNIEnv *env, jobject obj, jstring sname, jstring name, jstring ret, jobjectArray args) {
 
 	String singname = jstring_to_string(sname, env);
 

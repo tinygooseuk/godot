@@ -48,9 +48,9 @@ enum Type {
 };
 
 struct Version {
-	uint64_t godot_api_hash;
-	uint32_t bindings_version;
-	uint32_t cs_glue_version;
+	uint64_t godot_api_hash = 0;
+	uint32_t bindings_version = 0;
+	uint32_t cs_glue_version = 0;
 
 	bool operator==(const Version &p_other) const {
 		return godot_api_hash == p_other.godot_api_hash &&
@@ -58,11 +58,7 @@ struct Version {
 			   cs_glue_version == p_other.cs_glue_version;
 	}
 
-	Version() :
-			godot_api_hash(0),
-			bindings_version(0),
-			cs_glue_version(0) {
-	}
+	Version() {}
 
 	Version(uint64_t p_godot_api_hash,
 			uint32_t p_bindings_version,
@@ -87,13 +83,10 @@ public:
 	};
 
 	struct LoadedApiAssembly {
-		GDMonoAssembly *assembly;
-		bool out_of_sync;
+		GDMonoAssembly *assembly = nullptr;
+		bool out_of_sync = false;
 
-		LoadedApiAssembly() :
-				assembly(NULL),
-				out_of_sync(false) {
-		}
+		LoadedApiAssembly() {}
 	};
 
 private:
@@ -105,7 +98,7 @@ private:
 	MonoDomain *root_domain;
 	MonoDomain *scripts_domain;
 
-	HashMap<uint32_t, HashMap<String, GDMonoAssembly *> > assemblies;
+	HashMap<uint32_t, HashMap<String, GDMonoAssembly *>> assemblies;
 
 	GDMonoAssembly *corlib_assembly;
 	GDMonoAssembly *project_assembly;
@@ -200,12 +193,12 @@ public:
 
 #ifdef TOOLS_ENABLED
 	bool copy_prebuilt_api_assembly(ApiAssemblyInfo::Type p_api_type, const String &p_config);
-	String update_api_assemblies_from_prebuilt(const String &p_config, const bool *p_core_api_out_of_sync = NULL, const bool *p_editor_api_out_of_sync = NULL);
+	String update_api_assemblies_from_prebuilt(const String &p_config, const bool *p_core_api_out_of_sync = nullptr, const bool *p_editor_api_out_of_sync = nullptr);
 #endif
 
 	static GDMono *get_singleton() { return singleton; }
 
-	GD_NORETURN static void unhandled_exception_hook(MonoObject *p_exc, void *p_user_data);
+	[[noreturn]] static void unhandled_exception_hook(MonoObject *p_exc, void *p_user_data);
 
 	UnhandledExceptionPolicy get_unhandled_exception_policy() const { return unhandled_exception_policy; }
 
@@ -241,6 +234,7 @@ public:
 
 	bool load_assembly(const String &p_name, GDMonoAssembly **r_assembly, bool p_refonly = false);
 	bool load_assembly(const String &p_name, MonoAssemblyName *p_aname, GDMonoAssembly **r_assembly, bool p_refonly = false);
+	bool load_assembly(const String &p_name, MonoAssemblyName *p_aname, GDMonoAssembly **r_assembly, bool p_refonly, const Vector<String> &p_search_dirs);
 	bool load_assembly_from(const String &p_name, const String &p_path, GDMonoAssembly **r_assembly, bool p_refonly = false);
 
 	Error finalize_and_unload_domain(MonoDomain *p_domain);
@@ -265,7 +259,7 @@ public:
 			this->prev_domain = prev_domain;
 			mono_domain_set(p_domain, false);
 		} else {
-			this->prev_domain = NULL;
+			this->prev_domain = nullptr;
 		}
 	}
 

@@ -44,7 +44,7 @@ _FORCE_INLINE_ String quoted(const String &p_str) {
 	return "\"" + p_str + "\"";
 }
 
-void _add_nodes_suggestions(const Node *p_base, const Node *p_node, PoolStringArray &r_suggestions) {
+void _add_nodes_suggestions(const Node *p_base, const Node *p_node, PackedStringArray &r_suggestions) {
 	if (p_node != p_base && !p_node->get_owner())
 		return;
 
@@ -75,7 +75,7 @@ Node *_find_node_for_script(Node *p_base, Node *p_current, const Ref<Script> &p_
 	return nullptr;
 }
 
-void _get_directory_contents(EditorFileSystemDirectory *p_dir, PoolStringArray &r_suggestions) {
+void _get_directory_contents(EditorFileSystemDirectory *p_dir, PackedStringArray &r_suggestions) {
 	for (int i = 0; i < p_dir->get_file_count(); i++) {
 		r_suggestions.push_back(quoted(p_dir->get_file_path(i)));
 	}
@@ -96,8 +96,8 @@ Node *_try_find_owner_node_in_tree(const Ref<Script> p_script) {
 	return base;
 }
 
-PoolStringArray get_code_completion(CompletionKind p_kind, const String &p_script_file) {
-	PoolStringArray suggestions;
+PackedStringArray get_code_completion(CompletionKind p_kind, const String &p_script_file) {
+	PackedStringArray suggestions;
 
 	switch (p_kind) {
 		case CompletionKind::INPUT_ACTIONS: {

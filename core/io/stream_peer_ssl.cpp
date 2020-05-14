@@ -32,13 +32,13 @@
 
 #include "core/engine.h"
 
-StreamPeerSSL *(*StreamPeerSSL::_create)() = NULL;
+StreamPeerSSL *(*StreamPeerSSL::_create)() = nullptr;
 
 StreamPeerSSL *StreamPeerSSL::create() {
 
 	if (_create)
 		return _create();
-	return NULL;
+	return nullptr;
 }
 
 bool StreamPeerSSL::available = false;
@@ -72,8 +72,4 @@ void StreamPeerSSL::_bind_methods() {
 	BIND_ENUM_CONSTANT(STATUS_CONNECTED);
 	BIND_ENUM_CONSTANT(STATUS_ERROR);
 	BIND_ENUM_CONSTANT(STATUS_ERROR_HOSTNAME_MISMATCH);
-}
-
-StreamPeerSSL::StreamPeerSSL() {
-	blocking_handshake = true;
 }

@@ -74,7 +74,7 @@ namespace GodotTools
                     {
                         Guid = guid,
                         PathRelativeToSolution = name + ".csproj",
-                        Configs = new List<string> { "Debug", "ExportDebug", "ExportRelease" }
+                        Configs = new List<string> {"Debug", "ExportDebug", "ExportRelease"}
                     };
 
                     solution.AddNewProject(name, projectInfo);
@@ -131,19 +131,12 @@ namespace GodotTools
         {
             bool showOnStart = (bool)editorSettings.GetSetting("mono/editor/show_info_on_start");
             aboutDialogCheckBox.Pressed = showOnStart;
-            aboutDialog.PopupCenteredMinsize();
+            aboutDialog.PopupCentered();
         }
 
-        private void _ToggleAboutDialogOnStart(bool enabled)
+        private void _MenuOptionPressed(int id)
         {
-            bool showOnStart = (bool)editorSettings.GetSetting("mono/editor/show_info_on_start");
-            if (showOnStart != enabled)
-                editorSettings.SetSetting("mono/editor/show_info_on_start", enabled);
-        }
-
-        private void _MenuOptionPressed(MenuOptions id)
-        {
-            switch (id)
+            switch ((MenuOptions)id)
             {
                 case MenuOptions.CreateSln:
                     CreateProjectSolution();
@@ -167,34 +160,6 @@ namespace GodotTools
             Instance.BottomPanel.BuildProjectPressed();
         }
 
-        private void _FileSystemDockFileMoved(string file, string newFile)
-        {
-            if (Path.GetExtension(file) == Internal.CSharpLanguageExtension)
-            {
-                ProjectUtils.RenameItemInProjectChecked(GodotSharpDirs.ProjectCsProjPath, "Compile",
-                    ProjectSettings.GlobalizePath(file), ProjectSettings.GlobalizePath(newFile));
-            }
-        }
-
-        private void _FileSystemDockFileRemoved(string file)
-        {
-            if (Path.GetExtension(file) == Internal.CSharpLanguageExtension)
-                ProjectUtils.RemoveItemFromProjectChecked(GodotSharpDirs.ProjectCsProjPath, "Compile",
-                    ProjectSettings.GlobalizePath(file));
-        }
-
-        private void _FileSystemDockFolderMoved(string oldFolder, string newFolder)
-        {
-            ProjectUtils.RenameItemsToNewFolderInProjectChecked(GodotSharpDirs.ProjectCsProjPath, "Compile",
-                ProjectSettings.GlobalizePath(oldFolder), ProjectSettings.GlobalizePath(newFolder));
-        }
-
-        private void _FileSystemDockFolderRemoved(string oldFolder)
-        {
-            ProjectUtils.RemoveItemsInFolderFromProjectChecked(GodotSharpDirs.ProjectCsProjPath, "Compile",
-                ProjectSettings.GlobalizePath(oldFolder));
-        }
-
         public override void _Notification(int what)
         {
             base._Notification(what);
@@ -204,18 +169,41 @@ namespace GodotTools
                 bool showInfoDialog = (bool)editorSettings.GetSetting("mono/editor/show_info_on_start");
                 if (showInfoDialog)
                 {
-                    aboutDialog.PopupExclusive = true;
+                    aboutDialog.Exclusive = true;
                     _ShowAboutDialog();
                     // Once shown a first time, it can be seen again via the Mono menu - it doesn't have to be exclusive from that time on.
-                    aboutDialog.PopupExclusive = false;
+                    aboutDialog.Exclusive = false;
                 }
 
                 var fileSystemDock = GetEditorInterface().GetFileSystemDock();
 
-                fileSystemDock.Connect("files_moved", this, nameof(_FileSystemDockFileMoved));
-                fileSystemDock.Connect("file_removed", this, nameof(_FileSystemDockFileRemoved));
-                fileSystemDock.Connect("folder_moved", this, nameof(_FileSystemDockFolderMoved));
-                fileSystemDock.Connect("folder_removed", this, nameof(_FileSystemDockFolderRemoved));
+                fileSystemDock.FilesMoved += (file, newFile) =>
+                {
+                    if (Path.GetExtension(file) == Internal.CSharpLanguageExtension)
+                    {
+                        ProjectUtils.RenameItemInProjectChecked(GodotSharpDirs.ProjectCsProjPath, "Compile",
+                            ProjectSettings.GlobalizePath(file), ProjectSettings.GlobalizePath(newFile));
+                    }
+                };
+
+                fileSystemDock.FileRemoved += file =>
+                {
+                    if (Path.GetExtension(file) == Internal.CSharpLanguageExtension)
+                        ProjectUtils.RemoveItemFromProjectChecked(GodotSharpDirs.ProjectCsProjPath, "Compile",
+                            ProjectSettings.GlobalizePath(file));
+                };
+
+                fileSystemDock.FolderMoved += (oldFolder, newFolder) =>
+                {
+                    ProjectUtils.RenameItemsToNewFolderInProjectChecked(GodotSharpDirs.ProjectCsProjPath, "Compile",
+                        ProjectSettings.GlobalizePath(oldFolder), ProjectSettings.GlobalizePath(newFolder));
+                };
+
+                fileSystemDock.FolderRemoved += oldFolder =>
+                {
+                    ProjectUtils.RemoveItemsInFolderFromProjectChecked(GodotSharpDirs.ProjectCsProjPath, "Compile",
+                        ProjectSettings.GlobalizePath(oldFolder));
+                };
             }
         }
 
@@ -227,9 +215,9 @@ namespace GodotTools
 
         public void ShowErrorDialog(string message, string title = "Error")
         {
-            errorDialog.WindowTitle = title;
+            errorDialog.Title = title;
             errorDialog.DialogText = message;
-            errorDialog.PopupCenteredMinsize();
+            errorDialog.PopupCentered();
         }
 
         private static string _vsCodePath = string.Empty;
@@ -274,10 +262,9 @@ namespace GodotTools
 
                     break;
                 }
-
                 case ExternalEditorId.VsCode:
                 {
-                    if (_vsCodePath.Empty() || !File.Exists(_vsCodePath))
+                    if (string.IsNullOrEmpty(_vsCodePath) || !File.Exists(_vsCodePath))
                     {
                         // Try to search it again if it wasn't found last time or if it was removed from its location
                         _vsCodePath = VsCodeNames.SelectFirstNotNull(OS.PathWhich, orElse: string.Empty);
@@ -329,7 +316,7 @@ namespace GodotTools
 
                     if (OS.IsOSX)
                     {
-                        if (!osxAppBundleInstalled && _vsCodePath.Empty())
+                        if (!osxAppBundleInstalled && string.IsNullOrEmpty(_vsCodePath))
                         {
                             GD.PushError("Cannot find code editor: VSCode");
                             return Error.FileNotFound;
@@ -339,7 +326,7 @@ namespace GodotTools
                     }
                     else
                     {
-                        if (_vsCodePath.Empty())
+                        if (string.IsNullOrEmpty(_vsCodePath))
                         {
                             GD.PushError("Cannot find code editor: VSCode");
                             return Error.FileNotFound;
@@ -359,7 +346,6 @@ namespace GodotTools
 
                     break;
                 }
-
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -402,7 +388,6 @@ namespace GodotTools
 
             menuPopup = new PopupMenu();
             menuPopup.Hide();
-            menuPopup.SetAsToplevel(true);
 
             AddToolSubmenuItem("Mono", menuPopup);
 
@@ -411,7 +396,7 @@ namespace GodotTools
                 menuPopup.AddItem("About C# support".TTR(), (int)MenuOptions.AboutCSharp);
                 aboutDialog = new AcceptDialog();
                 editorBaseControl.AddChild(aboutDialog);
-                aboutDialog.WindowTitle = "Important: C# support is not feature-complete";
+                aboutDialog.Title = "Important: C# support is not feature-complete";
 
                 // We don't use DialogText as the default AcceptDialog Label doesn't play well with the TextureRect and CheckBox
                 // we'll add. Instead we add containers and a new autowrapped Label inside.
@@ -425,7 +410,7 @@ namespace GodotTools
                 aboutVBox.AddChild(aboutHBox);
 
                 var aboutIcon = new TextureRect();
-                aboutIcon.Texture = aboutIcon.GetIcon("NodeWarning", "EditorIcons");
+                aboutIcon.Texture = aboutIcon.GetThemeIcon("NodeWarning", "EditorIcons");
                 aboutHBox.AddChild(aboutIcon);
 
                 var aboutLabel = new Label();
@@ -447,7 +432,12 @@ namespace GodotTools
 
                 // CheckBox in main container
                 aboutDialogCheckBox = new CheckBox {Text = "Show this warning when starting the editor"};
-                aboutDialogCheckBox.Connect("toggled", this, nameof(_ToggleAboutDialogOnStart));
+                aboutDialogCheckBox.Toggled += enabled =>
+                {
+                    bool showOnStart = (bool)editorSettings.GetSetting("mono/editor/show_info_on_start");
+                    if (showOnStart != enabled)
+                        editorSettings.SetSetting("mono/editor/show_info_on_start", enabled);
+                };
                 aboutVBox.AddChild(aboutDialogCheckBox);
             }
 
@@ -493,7 +483,7 @@ namespace GodotTools
                 menuPopup.AddItem("Create C# solution".TTR(), (int)MenuOptions.CreateSln);
             }
 
-            menuPopup.Connect("id_pressed", this, nameof(_MenuOptionPressed));
+            menuPopup.IdPressed += _MenuOptionPressed;
 
             var buildButton = new ToolButton
             {
@@ -501,7 +491,7 @@ namespace GodotTools
                 HintTooltip = "Build solution",
                 FocusMode = Control.FocusModeEnum.None
             };
-            buildButton.Connect("pressed", this, nameof(_BuildSolutionPressed));
+            buildButton.PressedSignal += _BuildSolutionPressed;
             AddControlToContainer(CustomControlContainer.Toolbar, buildButton);
 
             // External editor settings
@@ -522,7 +512,7 @@ namespace GodotTools
                                    $",Visual Studio Code:{(int)ExternalEditorId.VsCode}" +
                                    $",JetBrains Rider:{(int)ExternalEditorId.Rider}";
             }
-            else if (OS.IsUnixLike())
+            else if (OS.IsUnixLike)
             {
                 settingsHintStr += $",MonoDevelop:{(int)ExternalEditorId.MonoDevelop}" +
                                    $",Visual Studio Code:{(int)ExternalEditorId.VsCode}" +

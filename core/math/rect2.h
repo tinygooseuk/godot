@@ -105,7 +105,7 @@ struct Rect2 {
 
 	bool intersects_transformed(const Transform2D &p_xform, const Rect2 &p_rect) const;
 
-	bool intersects_segment(const Point2 &p_from, const Point2 &p_to, Point2 *r_pos = NULL, Point2 *r_normal = NULL) const;
+	bool intersects_segment(const Point2 &p_from, const Point2 &p_to, Point2 *r_pos = nullptr, Point2 *r_normal = nullptr) const;
 
 	inline bool encloses(const Rect2 &p_rect) const {
 
@@ -385,14 +385,20 @@ struct Rect2i {
 		size = end - begin;
 	}
 
+	_FORCE_INLINE_ Rect2i abs() const {
+
+		return Rect2i(Point2i(position.x + MIN(size.x, 0), position.y + MIN(size.y, 0)), size.abs());
+	}
+
 	operator String() const { return String(position) + ", " + String(size); }
 
 	operator Rect2() const { return Rect2(position, size); }
+
+	Rect2i() {}
 	Rect2i(const Rect2 &p_r2) :
 			position(p_r2.position),
 			size(p_r2.size) {
 	}
-	Rect2i() {}
 	Rect2i(int p_x, int p_y, int p_width, int p_height) :
 			position(Point2(p_x, p_y)),
 			size(Size2(p_width, p_height)) {

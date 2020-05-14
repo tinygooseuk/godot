@@ -50,7 +50,7 @@ class AudioDriverXAudio2 : public AudioDriver {
 
 		HANDLE buffer_end_event;
 		XAudio2DriverVoiceCallback() :
-				buffer_end_event(CreateEvent(NULL, FALSE, FALSE, NULL)) {}
+				buffer_end_event(CreateEvent(nullptr, FALSE, FALSE, nullptr)) {}
 		void STDMETHODCALLTYPE OnBufferEnd(void *pBufferContext) {
 			SetEvent(buffer_end_event);
 		}
@@ -64,8 +64,8 @@ class AudioDriverXAudio2 : public AudioDriver {
 		void STDMETHODCALLTYPE OnVoiceError(void *pBufferContext, HRESULT Error) {}
 	};
 
-	Thread *thread;
-	Mutex *mutex;
+	Thread *thread = nullptr;
+	Mutex mutex;
 
 	int32_t *samples_in;
 	int16_t *samples_out[AUDIO_BUFFERS];
@@ -83,9 +83,9 @@ class AudioDriverXAudio2 : public AudioDriver {
 	mutable bool exit_thread;
 	bool pcm_open;
 
-	WAVEFORMATEX wave_format;
+	WAVEFORMATEX wave_format = { 0 };
 	Microsoft::WRL::ComPtr<IXAudio2> xaudio;
-	int current_buffer;
+	int current_buffer = 0;
 	IXAudio2MasteringVoice *mastering_voice;
 	XAUDIO2_BUFFER xaudio_buffer[AUDIO_BUFFERS];
 	IXAudio2SourceVoice *source_voice;
@@ -104,7 +104,7 @@ public:
 	virtual void finish();
 
 	AudioDriverXAudio2();
-	~AudioDriverXAudio2();
+	~AudioDriverXAudio2() {}
 };
 
 #endif

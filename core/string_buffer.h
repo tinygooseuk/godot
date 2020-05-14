@@ -38,7 +38,7 @@ class StringBuffer {
 
 	CharType short_buffer[SHORT_BUFFER_SIZE];
 	String buffer;
-	int string_length;
+	int string_length = 0;
 
 	_FORCE_INLINE_ CharType *current_buffer_ptr() {
 		return static_cast<String &>(buffer).empty() ? short_buffer : buffer.ptrw();
@@ -77,10 +77,6 @@ public:
 
 	_FORCE_INLINE_ operator String() {
 		return as_string();
-	}
-
-	StringBuffer() {
-		string_length = 0;
 	}
 };
 
@@ -163,4 +159,4 @@ int64_t StringBuffer<SHORT_BUFFER_SIZE>::as_int() {
 	return String::to_int(current_buffer_ptr());
 }
 
-#endif
+#endif // STRING_BUFFER_H

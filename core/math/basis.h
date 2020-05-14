@@ -108,6 +108,9 @@ public:
 	void scale_local(const Vector3 &p_scale);
 	Basis scaled_local(const Vector3 &p_scale) const;
 
+	void make_scale_uniform();
+	float get_uniform_scale() const;
+
 	Vector3 get_scale() const;
 	Vector3 get_scale_abs() const;
 	Vector3 get_scale_local() const;
@@ -156,6 +159,7 @@ public:
 	bool is_rotation() const;
 
 	Basis slerp(const Basis &target, const real_t &t) const;
+	void rotate_sh(real_t *p_values);
 
 	operator String() const;
 

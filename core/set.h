@@ -51,12 +51,12 @@ public:
 
 	private:
 		friend class Set<T, C, A>;
-		int color;
-		Element *right;
-		Element *left;
-		Element *parent;
-		Element *_next;
-		Element *_prev;
+		int color = RED;
+		Element *right = nullptr;
+		Element *left = nullptr;
+		Element *parent = nullptr;
+		Element *_next = nullptr;
+		Element *_prev = nullptr;
 		T value;
 		//_Data *data;
 
@@ -80,22 +80,15 @@ public:
 		const T &get() const {
 			return value;
 		};
-		Element() {
-			color = RED;
-			right = NULL;
-			left = NULL;
-			parent = NULL;
-			_next = NULL;
-			_prev = NULL;
-		};
+		Element() {}
 	};
 
 private:
 	struct _Data {
 
-		Element *_root;
+		Element *_root = nullptr;
 		Element *_nil;
-		int size_cache;
+		int size_cache = 0;
 
 		_FORCE_INLINE_ _Data() {
 #ifdef GLOBALNIL_DISABLED
@@ -105,8 +98,6 @@ private:
 #else
 			_nil = (Element *)&_GlobalNilClass::_nil;
 #endif
-			_root = NULL;
-			size_cache = 0;
 		}
 
 		void _create_root() {
@@ -120,7 +111,7 @@ private:
 
 			if (_root) {
 				memdelete_allocator<Element, A>(_root);
-				_root = NULL;
+				_root = nullptr;
 			}
 		}
 
@@ -192,7 +183,7 @@ private:
 			}
 
 			if (node->parent == _data._root)
-				return NULL; // No successor, as p_node = last node
+				return nullptr; // No successor, as p_node = last node
 			return node->parent;
 		}
 	}
@@ -214,7 +205,7 @@ private:
 			}
 
 			if (node == _data._root)
-				return NULL; // No predecessor, as p_node = first node.
+				return nullptr; // No predecessor, as p_node = first node.
 			return node->parent;
 		}
 	}
@@ -233,13 +224,13 @@ private:
 				return node; // found
 		}
 
-		return NULL;
+		return nullptr;
 	}
 
 	Element *_lower_bound(const T &p_value) const {
 
 		Element *node = _data._root->left;
-		Element *prev = NULL;
+		Element *prev = nullptr;
 		C less;
 
 		while (node != _data._nil) {
@@ -253,8 +244,8 @@ private:
 				return node; // found
 		}
 
-		if (prev == NULL)
-			return NULL; // tree empty
+		if (prev == nullptr)
+			return nullptr; // tree empty
 
 		if (less(prev->value, p_value))
 			prev = prev->_next;
@@ -504,7 +495,7 @@ public:
 	const Element *find(const T &p_value) const {
 
 		if (!_data._root)
-			return NULL;
+			return nullptr;
 
 		const Element *res = _find(p_value);
 		return res;
@@ -513,7 +504,7 @@ public:
 	Element *find(const T &p_value) {
 
 		if (!_data._root)
-			return NULL;
+			return nullptr;
 
 		Element *res = _find(p_value);
 		return res;
@@ -526,7 +517,7 @@ public:
 
 	bool has(const T &p_value) const {
 
-		return find(p_value) != NULL;
+		return find(p_value) != nullptr;
 	}
 
 	Element *insert(const T &p_value) {
@@ -564,11 +555,11 @@ public:
 	Element *front() const {
 
 		if (!_data._root)
-			return NULL;
+			return nullptr;
 
 		Element *e = _data._root->left;
 		if (e == _data._nil)
-			return NULL;
+			return nullptr;
 
 		while (e->left != _data._nil)
 			e = e->left;
@@ -579,11 +570,11 @@ public:
 	Element *back() const {
 
 		if (!_data._root)
-			return NULL;
+			return nullptr;
 
 		Element *e = _data._root->left;
 		if (e == _data._nil)
-			return NULL;
+			return nullptr;
 
 		while (e->right != _data._nil)
 			e = e->right;
@@ -625,13 +616,11 @@ public:
 		_copy_from(p_set);
 	}
 
-	_FORCE_INLINE_ Set() {
-	}
+	_FORCE_INLINE_ Set() {}
 
 	~Set() {
-
 		clear();
 	}
 };
 
-#endif
+#endif // SET_H

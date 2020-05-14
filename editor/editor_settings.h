@@ -64,27 +64,19 @@ public:
 
 private:
 	struct VariantContainer {
-		int order;
+		int order = 0;
 		Variant variant;
 		Variant initial;
-		bool has_default_value;
-		bool hide_from_editor;
-		bool save;
-		bool restart_if_changed;
-		VariantContainer() :
-				order(0),
-				has_default_value(false),
-				hide_from_editor(false),
-				save(false),
-				restart_if_changed(false) {
-		}
+		bool has_default_value = false;
+		bool hide_from_editor = false;
+		bool save = false;
+		bool restart_if_changed = false;
+
+		VariantContainer() {}
+
 		VariantContainer(const Variant &p_variant, int p_order) :
 				order(p_order),
-				variant(p_variant),
-				has_default_value(false),
-				hide_from_editor(false),
-				save(false),
-				restart_if_changed(false) {
+				variant(p_variant) {
 		}
 	};
 
@@ -95,7 +87,7 @@ private:
 	int last_order;
 
 	Ref<Resource> clipboard;
-	Map<String, Ref<ShortCut> > shortcuts;
+	Map<String, Ref<ShortCut>> shortcuts;
 
 	String resource_path;
 	String settings_dir;
@@ -117,7 +109,7 @@ private:
 	void _get_property_list(List<PropertyInfo> *p_list) const;
 	void _add_property_info_bind(const Dictionary &p_info);
 
-	void _load_defaults(Ref<ConfigFile> p_extra_config = NULL);
+	void _load_defaults(Ref<ConfigFile> p_extra_config = Ref<ConfigFile>());
 	void _load_default_text_editor_theme();
 	bool _save_text_editor_theme(String p_file);
 	bool _is_default_text_editor_theme(String p_theme_name);

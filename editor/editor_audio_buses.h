@@ -54,7 +54,7 @@ class EditorAudioBus : public PanelContainer {
 
 	GDCLASS(EditorAudioBus, PanelContainer);
 
-	Ref<Texture> disabled_vu;
+	Ref<Texture2D> disabled_vu;
 	LineEdit *track_name;
 	MenuButton *bus_options;
 	VSlider *slider;
@@ -133,7 +133,7 @@ public:
 	void update_bus();
 	void update_send();
 
-	EditorAudioBus(EditorAudioBuses *p_buses = NULL, bool p_is_master = false);
+	EditorAudioBus(EditorAudioBuses *p_buses = nullptr, bool p_is_master = false);
 };
 
 class EditorAudioBusDrop : public Control {
@@ -246,10 +246,10 @@ private:
 	List<AudioNotch> notches;
 
 public:
-	float line_length;
-	float label_space;
-	float btm_padding;
-	float top_padding;
+	float line_length = 5.0f;
+	float label_space = 2.0f;
+	float btm_padding = 9.0f;
+	float top_padding = 5.0f;
 	Color notch_color;
 
 	void add_notch(float p_normalized_offset, float p_db_value, bool p_render_value = false);

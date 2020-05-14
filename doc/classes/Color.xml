@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<class name="Color" version="3.2">
+<class name="Color" version="4.0">
 	<brief_description>
 		Color in RGBA format with some support for ARGB format.
 	</brief_description>
@@ -36,6 +36,20 @@
 				Constructs a color from a 32-bit integer (each byte represents a component of the RGBA profile).
 				[codeblock]
 				var c = Color(274) # Equivalent to RGBA(0, 0, 1, 18)
+				[/codeblock]
+			</description>
+		</method>
+		<method name="Color">
+			<return type="Color">
+			</return>
+			<argument index="0" name="c" type="Color">
+			</argument>
+			<argument index="1" name="a" type="float">
+			</argument>
+			<description>
+				Constructs a color from an existing color, but with a custom alpha value.
+				[codeblock]
+				var red = Color(Color.red, 0.5) # 50% transparent red.
 				[/codeblock]
 			</description>
 		</method>
@@ -129,18 +143,6 @@
 				[/codeblock]
 			</description>
 		</method>
-		<method name="gray">
-			<return type="float">
-			</return>
-			<description>
-				Returns the color's grayscale representation.
-				The gray value is calculated as [code](r + g + b) / 3[/code].
-				[codeblock]
-				var c = Color(0.2, 0.45, 0.82)
-				var gray = c.gray() # A value of 0.466667
-				[/codeblock]
-			</description>
-		</method>
 		<method name="inverted">
 			<return type="Color">
 			</return>
@@ -161,20 +163,7 @@
 				Returns [code]true[/code] if this color and [code]color[/code] are approximately equal, by running [method @GDScript.is_equal_approx] on each component.
 			</description>
 		</method>
-		<method name="lightened">
-			<return type="Color">
-			</return>
-			<argument index="0" name="amount" type="float">
-			</argument>
-			<description>
-				Returns a new color resulting from making this color lighter by the specified percentage (ratio from 0 to 1).
-				[codeblock]
-				var green = Color(0.0, 1.0, 0.0)
-				var lightgreen = green.lightened(0.2) # 20% lighter than regular green
-				[/codeblock]
-			</description>
-		</method>
-		<method name="linear_interpolate">
+		<method name="lerp">
 			<return type="Color">
 			</return>
 			<argument index="0" name="b" type="Color">
@@ -186,7 +175,20 @@
 				[codeblock]
 				var c1 = Color(1.0, 0.0, 0.0)
 				var c2 = Color(0.0, 1.0, 0.0)
-				var li_c = c1.linear_interpolate(c2, 0.5) # A color of an RGBA(128, 128, 0, 255)
+				var li_c = c1.lerp(c2, 0.5) # A color of an RGBA(128, 128, 0, 255)
+				[/codeblock]
+			</description>
+		</method>
+		<method name="lightened">
+			<return type="Color">
+			</return>
+			<argument index="0" name="amount" type="float">
+			</argument>
+			<description>
+				Returns a new color resulting from making this color lighter by the specified percentage (ratio from 0 to 1).
+				[codeblock]
+				var green = Color(0.0, 1.0, 0.0)
+				var lightgreen = green.lightened(0.2) # 20% lighter than regular green
 				[/codeblock]
 			</description>
 		</method>
@@ -308,9 +310,6 @@
 		</member>
 	</members>
 	<constants>
-		<constant name="gray" value="Color( 0.75, 0.75, 0.75, 1 )">
-			Gray color.
-		</constant>
 		<constant name="aliceblue" value="Color( 0.94, 0.97, 1, 1 )">
 			Alice blue color.
 		</constant>
@@ -460,6 +459,9 @@
 		</constant>
 		<constant name="goldenrod" value="Color( 0.85, 0.65, 0.13, 1 )">
 			Goldenrod color.
+		</constant>
+		<constant name="gray" value="Color( 0.75, 0.75, 0.75, 1 )">
+			Gray color.
 		</constant>
 		<constant name="green" value="Color( 0, 1, 0, 1 )">
 			Green color.

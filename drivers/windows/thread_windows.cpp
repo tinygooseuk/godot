@@ -64,7 +64,7 @@ Thread *ThreadWindows::create_func_windows(ThreadCreateCallback p_callback, void
 	ThreadWindows *tr = memnew(ThreadWindows);
 	tr->callback = p_callback;
 	tr->user = p_user;
-	tr->handle = CreateEvent(NULL, TRUE, FALSE, NULL);
+	tr->handle = CreateEvent(nullptr, TRUE, FALSE, nullptr);
 
 	QueueUserWorkItem(thread_callback, tr, WT_EXECUTELONGFUNCTION);
 
@@ -88,13 +88,6 @@ void ThreadWindows::make_default() {
 	create_func = create_func_windows;
 	get_thread_id_func = get_thread_id_func_windows;
 	wait_to_finish_func = wait_to_finish_func_windows;
-}
-
-ThreadWindows::ThreadWindows() :
-		handle(NULL) {
-}
-
-ThreadWindows::~ThreadWindows() {
 }
 
 #endif

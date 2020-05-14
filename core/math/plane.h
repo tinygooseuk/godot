@@ -36,7 +36,7 @@
 class Plane {
 public:
 	Vector3 normal;
-	real_t d;
+	real_t d = 0;
 
 	void set_normal(const Vector3 &p_normal);
 	_FORCE_INLINE_ Vector3 get_normal() const { return normal; }; ///Point is coplanar, CMP_EPSILON for precision
@@ -56,7 +56,7 @@ public:
 
 	/* intersections */
 
-	bool intersect_3(const Plane &p_plane1, const Plane &p_plane2, Vector3 *r_result = 0) const;
+	bool intersect_3(const Plane &p_plane1, const Plane &p_plane2, Vector3 *r_result = nullptr) const;
 	bool intersects_ray(const Vector3 &p_from, const Vector3 &p_dir, Vector3 *p_intersection) const;
 	bool intersects_segment(const Vector3 &p_begin, const Vector3 &p_end, Vector3 *p_intersection) const;
 
@@ -69,13 +69,13 @@ public:
 
 	Plane operator-() const { return Plane(-normal, -d); }
 	bool is_equal_approx(const Plane &p_plane) const;
+	bool is_equal_approx_any_side(const Plane &p_plane) const;
 
 	_FORCE_INLINE_ bool operator==(const Plane &p_plane) const;
 	_FORCE_INLINE_ bool operator!=(const Plane &p_plane) const;
 	operator String() const;
 
-	_FORCE_INLINE_ Plane() :
-			d(0) {}
+	_FORCE_INLINE_ Plane() {}
 	_FORCE_INLINE_ Plane(real_t p_a, real_t p_b, real_t p_c, real_t p_d) :
 			normal(p_a, p_b, p_c),
 			d(p_d) {}

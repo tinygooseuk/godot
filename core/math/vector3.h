@@ -32,6 +32,7 @@
 #define VECTOR3_H
 
 #include "core/math/math_funcs.h"
+#include "core/math/vector3i.h"
 #include "core/ustring.h"
 
 class Basis;
@@ -51,7 +52,7 @@ struct Vector3 {
 			real_t z;
 		};
 
-		real_t coord[3];
+		real_t coord[3] = { 0 };
 	};
 
 	_FORCE_INLINE_ const real_t &operator[](int p_axis) const {
@@ -88,7 +89,7 @@ struct Vector3 {
 
 	/* Static Methods between 2 vector3s */
 
-	_FORCE_INLINE_ Vector3 linear_interpolate(const Vector3 &p_b, real_t p_t) const;
+	_FORCE_INLINE_ Vector3 lerp(const Vector3 &p_b, real_t p_t) const;
 	_FORCE_INLINE_ Vector3 slerp(const Vector3 &p_b, real_t p_t) const;
 	Vector3 cubic_interpolate(const Vector3 &p_b, const Vector3 &p_pre_a, const Vector3 &p_post_b, real_t p_t) const;
 	Vector3 cubic_interpolaten(const Vector3 &p_b, const Vector3 &p_pre_a, const Vector3 &p_post_b, real_t p_t) const;
@@ -147,13 +148,21 @@ struct Vector3 {
 	_FORCE_INLINE_ bool operator>=(const Vector3 &p_v) const;
 
 	operator String() const;
+	_FORCE_INLINE_ operator Vector3i() const {
+		return Vector3i(x, y, z);
+	}
 
+	_FORCE_INLINE_ Vector3() {}
+	_FORCE_INLINE_ Vector3(const Vector3i &p_ivec) {
+		x = p_ivec.x;
+		y = p_ivec.y;
+		z = p_ivec.z;
+	}
 	_FORCE_INLINE_ Vector3(real_t p_x, real_t p_y, real_t p_z) {
 		x = p_x;
 		y = p_y;
 		z = p_z;
 	}
-	_FORCE_INLINE_ Vector3() { x = y = z = 0; }
 };
 
 Vector3 Vector3::cross(const Vector3 &p_b) const {
@@ -196,7 +205,7 @@ Vector3 Vector3::round() const {
 	return Vector3(Math::round(x), Math::round(y), Math::round(z));
 }
 
-Vector3 Vector3::linear_interpolate(const Vector3 &p_b, real_t p_t) const {
+Vector3 Vector3::lerp(const Vector3 &p_b, real_t p_t) const {
 
 	return Vector3(
 			x + (p_t * (p_b.x - x)),

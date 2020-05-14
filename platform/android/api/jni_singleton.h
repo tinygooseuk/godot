@@ -54,7 +54,7 @@ class JNISingleton : public Object {
 #endif
 
 public:
-	virtual Variant call(const StringName &p_method, const Variant **p_args, int p_argcount, Variant::CallError &r_error) {
+	virtual Variant call(const StringName &p_method, const Variant **p_args, int p_argcount, Callable::CallError &r_error) {
 #ifdef ANDROID_ENABLED
 		Map<StringName, MethodData>::Element *E = method_map.find(p_method);
 
@@ -78,9 +78,9 @@ public:
 
 		ERR_FAIL_COND_V(!instance, Variant());
 
-		r_error.error = Variant::CallError::CALL_OK;
+		r_error.error = Callable::CallError::CALL_OK;
 
-		jvalue *v = NULL;
+		jvalue *v = nullptr;
 
 		if (p_argcount) {
 
@@ -118,7 +118,7 @@ public:
 
 				ret = env->CallIntMethodA(instance, E->get().method, v);
 			} break;
-			case Variant::REAL: {
+			case Variant::FLOAT: {
 
 				ret = env->CallFloatMethodA(instance, E->get().method, v);
 			} break;
@@ -128,7 +128,7 @@ public:
 				ret = jstring_to_string((jstring)o, env);
 				env->DeleteLocalRef(o);
 			} break;
-			case Variant::POOL_STRING_ARRAY: {
+			case Variant::PACKED_STRING_ARRAY: {
 
 				jobjectArray arr = (jobjectArray)env->CallObjectMethodA(instance, E->get().method, v);
 
@@ -136,35 +136,36 @@ public:
 
 				env->DeleteLocalRef(arr);
 			} break;
-			case Variant::POOL_INT_ARRAY: {
+			case Variant::PACKED_INT32_ARRAY: {
 
 				jintArray arr = (jintArray)env->CallObjectMethodA(instance, E->get().method, v);
 
 				int fCount = env->GetArrayLength(arr);
-				PoolVector<int> sarr;
+				Vector<int> sarr;
 				sarr.resize(fCount);
 
-				PoolVector<int>::Write w = sarr.write();
-				env->GetIntArrayRegion(arr, 0, fCount, w.ptr());
-				w.release();
+				int *w = sarr.ptrw();
+				env->GetIntArrayRegion(arr, 0, fCount, w);
 				ret = sarr;
 				env->DeleteLocalRef(arr);
 			} break;
-			case Variant::POOL_REAL_ARRAY: {
+			case Variant::PACKED_FLOAT32_ARRAY: {
 
 				jfloatArray arr = (jfloatArray)env->CallObjectMethodA(instance, E->get().method, v);
 
 				int fCount = env->GetArrayLength(arr);
-				PoolVector<float> sarr;
+				Vector<float> sarr;
 				sarr.resize(fCount);
 
-				PoolVector<float>::Write w = sarr.write();
-				env->GetFloatArrayRegion(arr, 0, fCount, w.ptr());
-				w.release();
+				float *w = sarr.ptrw();
+				env->GetFloatArrayRegion(arr, 0, fCount, w);
 				ret = sarr;
 				env->DeleteLocalRef(arr);
 			} break;
 
+#ifndef _MSC_VER
+#warning This is missing 64 bits arrays, I have no idea how to do it in JNI
+#endif
 			case Variant::DICTIONARY: {
 
 				jobject obj = env->CallObjectMethodA(instance, E->get().method, v);
@@ -174,7 +175,7 @@ public:
 			} break;
 			default: {
 
-				env->PopLocalFrame(NULL);
+				env->PopLocalFrame(nullptr);
 				ERR_FAIL_V(Variant());
 			} break;
 		}
@@ -184,7 +185,7 @@ public:
 			to_erase.pop_front();
 		}
 
-		env->PopLocalFrame(NULL);
+		env->PopLocalFrame(nullptr);
 
 		return ret;
 #else // ANDROID_ENABLED
@@ -233,7 +234,7 @@ public:
 
 	JNISingleton() {
 #ifdef ANDROID_ENABLED
-		instance = NULL;
+		instance = nullptr;
 #endif
 	}
 };

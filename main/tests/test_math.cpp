@@ -32,8 +32,10 @@
 
 #include "core/math/basis.h"
 #include "core/math/camera_matrix.h"
+#include "core/math/delaunay_3d.h"
 #include "core/math/math_funcs.h"
 #include "core/math/transform.h"
+#include "core/method_ptrcall.h"
 #include "core/os/file_access.h"
 #include "core/os/keyboard.h"
 #include "core/os/os.h"
@@ -43,9 +45,7 @@
 #include "core/vmap.h"
 #include "scene/main/node.h"
 #include "scene/resources/texture.h"
-#include "servers/visual/shader_language.h"
-
-#include "core/method_ptrcall.h"
+#include "servers/rendering/shader_language.h"
 
 namespace TestMath {
 
@@ -199,14 +199,24 @@ class GetClassAndNamespace {
 
 							switch (next) {
 
-								case 'b': res = 8; break;
-								case 't': res = 9; break;
-								case 'n': res = 10; break;
-								case 'f': res = 12; break;
+								case 'b':
+									res = 8;
+									break;
+								case 't':
+									res = 9;
+									break;
+								case 'n':
+									res = 10;
+									break;
+								case 'f':
+									res = 12;
+									break;
 								case 'r':
 									res = 13;
 									break;
-								case '\"': res = '\"'; break;
+								case '\"':
+									res = '\"';
+									break;
 								case '\\':
 									res = '\\';
 									break;
@@ -405,6 +415,55 @@ uint32_t ihash3(uint32_t a) {
 MainLoop *test() {
 
 	{
+		Vector<Vector3> points;
+		points.push_back(Vector3(0, 0, 0));
+		points.push_back(Vector3(0, 0, 1));
+		points.push_back(Vector3(0, 1, 0));
+		points.push_back(Vector3(0, 1, 1));
+		points.push_back(Vector3(1, 1, 0));
+		points.push_back(Vector3(1, 0, 0));
+		points.push_back(Vector3(1, 0, 1));
+		points.push_back(Vector3(1, 1, 1));
+
+		for (int i = 0; i < 800; i++) {
+			points.push_back(Vector3(Math::randf() * 2.0 - 1.0, Math::randf() * 2.0 - 1.0, Math::randf() * 2.0 - 1.0) * Vector3(25, 30, 33));
+		}
+
+		Vector<Delaunay3D::OutputSimplex> os = Delaunay3D::tetrahedralize(points);
+		print_line("simplices in the end: " + itos(os.size()));
+		for (int i = 0; i < os.size(); i++) {
+			print_line("Simplex " + itos(i) + ": ");
+			print_line(points[os[i].points[0]]);
+			print_line(points[os[i].points[1]]);
+			print_line(points[os[i].points[2]]);
+			print_line(points[os[i].points[3]]);
+		}
+
+		{
+			FileAccessRef f = FileAccess::open("res://bsp.obj", FileAccess::WRITE);
+			for (int i = 0; i < os.size(); i++) {
+				f->store_line("o Simplex" + itos(i));
+				for (int j = 0; j < 4; j++) {
+					f->store_line(vformat("v %f %f %f", points[os[i].points[j]].x, points[os[i].points[j]].y, points[os[i].points[j]].z));
+				}
+				static const int face_order[4][3] = {
+					{ 1, 2, 3 },
+					{ 1, 3, 4 },
+					{ 1, 2, 4 },
+					{ 2, 3, 4 }
+				};
+
+				for (int j = 0; j < 4; j++) {
+					f->store_line(vformat("f %d %d %d", 4 * i + face_order[j][0], 4 * i + face_order[j][1], 4 * i + face_order[j][2]));
+				}
+			}
+			f->close();
+		}
+
+		return nullptr;
+	}
+
+	{
 		float r = 1;
 		float g = 0.5;
 		float b = 0.1;
@@ -451,50 +510,42 @@ MainLoop *test() {
 		print_line("RGBE: " + Color(rd, gd, bd));
 	}
 
-	print_line("Dvectors: " + itos(MemoryPool::allocs_used));
-	print_line("Mem used: " + itos(MemoryPool::total_memory));
-	print_line("MAx mem used: " + itos(MemoryPool::max_memory));
-
-	PoolVector<int> ints;
+	Vector<int> ints;
 	ints.resize(20);
 
 	{
-		PoolVector<int>::Write w;
-		w = ints.write();
+		int *w;
+		w = ints.ptrw();
 		for (int i = 0; i < ints.size(); i++) {
 			w[i] = i;
 		}
 	}
 
-	PoolVector<int> posho = ints;
+	Vector<int> posho = ints;
 
 	{
-		PoolVector<int>::Read r = posho.read();
+		const int *r = posho.ptr();
 		for (int i = 0; i < posho.size(); i++) {
 			print_line(itos(i) + " : " + itos(r[i]));
 		}
 	}
 
-	print_line("later Dvectors: " + itos(MemoryPool::allocs_used));
-	print_line("later Mem used: " + itos(MemoryPool::total_memory));
-	print_line("Mlater Ax mem used: " + itos(MemoryPool::max_memory));
-
 	List<String> cmdlargs = OS::get_singleton()->get_cmdline_args();
 
 	if (cmdlargs.empty()) {
 		//try editor!
-		return NULL;
+		return nullptr;
 	}
 
 	String test = cmdlargs.back()->get();
 	if (test == "math") {
 		// Not a file name but the test name, abort.
 		// FIXME: This test is ugly as heck, needs fixing :)
-		return NULL;
+		return nullptr;
 	}
 
 	FileAccess *fa = FileAccess::open(test, FileAccess::READ);
-	ERR_FAIL_COND_V_MSG(!fa, NULL, "Could not open file: " + test);
+	ERR_FAIL_COND_V_MSG(!fa, nullptr, "Could not open file: " + test);
 
 	Vector<uint8_t> buf;
 	int flen = fa->get_len();
@@ -588,7 +639,7 @@ MainLoop *test() {
 
 	List<String> args;
 	args.push_back("-l");
-	Error err = OS::get_singleton()->execute("/bin/ls", args, true, NULL, &ret);
+	Error err = OS::get_singleton()->execute("/bin/ls", args, true, nullptr, &ret);
 	print_line("error: " + itos(err));
 	print_line(ret);
 
@@ -618,8 +669,8 @@ MainLoop *test() {
 	print_line("minus: " + (Vector3(1, 2, 3) - Vector3(Vector3(4, 5, 7))));
 	print_line("mul: " + (Vector3(1, 2, 3) * Vector3(Vector3(4, 5, 7))));
 	print_line("div: " + (Vector3(1, 2, 3) / Vector3(Vector3(4, 5, 7))));
-	print_line("mul scalar: " + (Vector3(1, 2, 3) * 2));
-	print_line("premul scalar: " + (2 * Vector3(1, 2, 3)));
+	print_line("mul scalar: " + (Vector3(1, 2, 3) * 2.0));
+	print_line("premul scalar: " + (2.0 * Vector3(1, 2, 3)));
 	print_line("div scalar: " + (Vector3(1, 2, 3) / 3.0));
 	print_line("length: " + rtos(Vector3(1, 2, 3).length()));
 	print_line("length squared: " + rtos(Vector3(1, 2, 3).length_squared()));
@@ -668,6 +719,6 @@ MainLoop *test() {
 		print_line("scalar /=: " + v);
 	}
 
-	return NULL;
+	return nullptr;
 }
 } // namespace TestMath

@@ -61,14 +61,14 @@ public:
 
 private:
 	Ref<EditorExportPlatform> platform;
-	ExportFilter export_filter;
+	ExportFilter export_filter = EXPORT_ALL_RESOURCES;
 	String include_filter;
 	String exclude_filter;
 	String export_path;
 
 	String exporter;
 	Set<String> selected_files;
-	bool runnable;
+	bool runnable = false;
 
 	Vector<String> patches;
 
@@ -82,7 +82,7 @@ private:
 
 	String custom_features;
 
-	int script_mode;
+	int script_mode = MODE_SCRIPT_COMPILED;
 	String script_key;
 
 protected:
@@ -136,7 +136,7 @@ public:
 
 	const List<PropertyInfo> &get_properties() const { return properties; }
 
-	EditorExportPreset();
+	EditorExportPreset() {}
 };
 
 struct SharedObject {
@@ -188,7 +188,7 @@ private:
 
 	struct FeatureContainers {
 		Set<String> features;
-		PoolVector<String> features_pv;
+		Vector<String> features_pv;
 	};
 
 	void _export_find_resources(EditorFileSystemDirectory *p_dir, Set<String> &p_paths);
@@ -212,7 +212,7 @@ protected:
 	FeatureContainers get_feature_containers(const Ref<EditorExportPreset> &p_preset);
 
 	bool exists_export_template(String template_file_name, String *err) const;
-	String find_export_template(String template_file_name, String *err = NULL) const;
+	String find_export_template(String template_file_name, String *err = nullptr) const;
 	void gen_export_flags(Vector<String> &r_flags, int p_flags);
 
 public:
@@ -236,11 +236,11 @@ public:
 
 	virtual String get_os_name() const = 0;
 	virtual String get_name() const = 0;
-	virtual Ref<Texture> get_logo() const = 0;
+	virtual Ref<Texture2D> get_logo() const = 0;
 
-	Error export_project_files(const Ref<EditorExportPreset> &p_preset, EditorExportSaveFunction p_func, void *p_udata, EditorExportSaveSharedObject p_so_func = NULL);
+	Error export_project_files(const Ref<EditorExportPreset> &p_preset, EditorExportSaveFunction p_func, void *p_udata, EditorExportSaveSharedObject p_so_func = nullptr);
 
-	Error save_pack(const Ref<EditorExportPreset> &p_preset, const String &p_path, Vector<SharedObject> *p_so_files = NULL, bool p_embed = false, int64_t *r_embedded_start = NULL, int64_t *r_embedded_size = NULL);
+	Error save_pack(const Ref<EditorExportPreset> &p_preset, const String &p_path, Vector<SharedObject> *p_so_files = nullptr, bool p_embed = false, int64_t *r_embedded_start = nullptr, int64_t *r_embedded_size = nullptr);
 	Error save_zip(const Ref<EditorExportPreset> &p_preset, const String &p_path);
 
 	virtual bool poll_export() { return false; }
@@ -259,7 +259,7 @@ public:
 	};
 
 	virtual Error run(const Ref<EditorExportPreset> &p_preset, int p_device, int p_debug_flags) { return OK; }
-	virtual Ref<Texture> get_run_icon() const { return get_logo(); }
+	virtual Ref<Texture2D> get_run_icon() const { return get_logo(); }
 
 	String test_etc2() const; //generic test for etc2 since most platforms use it
 	virtual bool can_export(const Ref<EditorExportPreset> &p_preset, String &r_error, bool &r_missing_templates) const = 0;
@@ -270,6 +270,7 @@ public:
 	virtual Error export_zip(const Ref<EditorExportPreset> &p_preset, bool p_debug, const String &p_path, int p_flags = 0);
 	virtual void get_platform_features(List<String> *r_features) = 0;
 	virtual void resolve_platform_feature_priorities(const Ref<EditorExportPreset> &p_preset, Set<String> &p_features) = 0;
+	virtual String get_debug_protocol() const { return "tcp://"; }
 
 	EditorExportPlatform();
 };
@@ -311,8 +312,8 @@ class EditorExportPlugin : public Reference {
 		ios_cpp_code = "";
 	}
 
-	void _export_file_script(const String &p_path, const String &p_type, const PoolVector<String> &p_features);
-	void _export_begin_script(const PoolVector<String> &p_features, bool p_debug, const String &p_path, int p_flags);
+	void _export_file_script(const String &p_path, const String &p_type, const Vector<String> &p_features);
+	void _export_begin_script(const Vector<String> &p_features, bool p_debug, const String &p_path, int p_flags);
 	void _export_end_script();
 
 protected:
@@ -350,9 +351,9 @@ public:
 class EditorExport : public Node {
 	GDCLASS(EditorExport, Node);
 
-	Vector<Ref<EditorExportPlatform> > export_platforms;
-	Vector<Ref<EditorExportPreset> > export_presets;
-	Vector<Ref<EditorExportPlugin> > export_plugins;
+	Vector<Ref<EditorExportPlatform>> export_platforms;
+	Vector<Ref<EditorExportPreset>> export_presets;
+	Vector<Ref<EditorExportPlugin>> export_plugins;
 
 	Timer *save_timer;
 	bool block_save;
@@ -382,7 +383,7 @@ public:
 
 	void add_export_plugin(const Ref<EditorExportPlugin> &p_plugin);
 	void remove_export_plugin(const Ref<EditorExportPlugin> &p_plugin);
-	Vector<Ref<EditorExportPlugin> > get_export_plugins();
+	Vector<Ref<EditorExportPlugin>> get_export_plugins();
 
 	void load_config();
 
@@ -423,7 +424,7 @@ public:
 
 	virtual String get_name() const;
 	virtual String get_os_name() const;
-	virtual Ref<Texture> get_logo() const;
+	virtual Ref<Texture2D> get_logo() const;
 
 	virtual bool can_export(const Ref<EditorExportPreset> &p_preset, String &r_error, bool &r_missing_templates) const;
 	virtual List<String> get_binary_extensions(const Ref<EditorExportPreset> &p_preset) const;
@@ -434,7 +435,7 @@ public:
 	void set_name(const String &p_name);
 	void set_os_name(const String &p_name);
 
-	void set_logo(const Ref<Texture> &p_logo);
+	void set_logo(const Ref<Texture2D> &p_logo);
 
 	void set_release_64(const String &p_file);
 	void set_release_32(const String &p_file);
