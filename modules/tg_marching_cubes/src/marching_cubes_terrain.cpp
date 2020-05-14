@@ -7,7 +7,11 @@
 
 #include "marching_cubes_algorithm.h"
 
+#if TOOLS_ENABLED
+#define MC_REPORT_ERRORS 1
+#else
 #define MC_REPORT_ERRORS 0
+#endif
 
 #if MC_REPORT_ERRORS
 #define MC_ERR_FAIL_COND(cond) ERR_FAIL_COND(cond)
@@ -92,22 +96,41 @@ String MarchingCubesTerrain::get_configuration_warning() const {
 }
 
 float MarchingCubesTerrain::get_value_at(const Vector3 &p_position) const {
+	MC_ERR_FAIL_COND_V(terrain_data.is_null(), 0.0f);
+	MC_ERR_FAIL_COND_V(terrain_data->width < p_position.x, 0.0f);
+	MC_ERR_FAIL_COND_V(terrain_data->height < p_position.y, 0.0f);
+	MC_ERR_FAIL_COND_V(terrain_data->depth < p_position.z, 0.0f);
+
 	const int index = coord_to_index(p_position);
 	if (index == -1) {
 		return 0.0f;
 	}
 
+	MC_ERR_FAIL_COND_V(terrain_data->data.size() <= index, 0.0f);
+
 	return terrain_data->data.read()[index];
 }
 void MarchingCubesTerrain::set_value_at(const Vector3 &p_position, float p_value) {
+	MC_ERR_FAIL_COND(terrain_data.is_null());
+	MC_ERR_FAIL_COND(terrain_data->width < p_position.x);
+	MC_ERR_FAIL_COND(terrain_data->height < p_position.y);
+	MC_ERR_FAIL_COND(terrain_data->depth < p_position.z);
+	MC_ERR_FAIL_COND(terrain_data->data.size() <= coord_to_index(p_position));
+
 	const int index = coord_to_index(p_position);
 
 	if (index != -1) {
+		MC_ERR_FAIL_COND(terrain_data->data.size() <= index);
 		terrain_data->data.write()[index] = clamp(p_value, -1.0f, +1.0f);
 	}
 }
 
 int MarchingCubesTerrain::get_colour_at(const Vector3 &p_position) const {
+	MC_ERR_FAIL_COND_V(terrain_data.is_null(), 0);
+	MC_ERR_FAIL_COND_V(terrain_data->width < p_position.x, 0);
+	MC_ERR_FAIL_COND_V(terrain_data->height < p_position.y, 0);
+	MC_ERR_FAIL_COND_V(terrain_data->depth < p_position.z, 0);
+	MC_ERR_FAIL_COND_V(terrain_data->data.size() <= coord_to_index(p_position), 0);
 	MC_ERR_FAIL_COND_V(!terrain_data->use_colour, 0);
 
 	const int index = coord_to_index(p_position);
@@ -115,14 +138,21 @@ int MarchingCubesTerrain::get_colour_at(const Vector3 &p_position) const {
 		return 0;
 	}
 
+	MC_ERR_FAIL_COND_V(terrain_data->data.size() <= index, 0);
 	return terrain_data->colour_data.read()[index];
 }
 void MarchingCubesTerrain::set_colour_at(const Vector3 &p_position, int p_colour) {
+	MC_ERR_FAIL_COND(terrain_data.is_null());
+	MC_ERR_FAIL_COND(terrain_data->width < p_position.x);
+	MC_ERR_FAIL_COND(terrain_data->height < p_position.y);
+	MC_ERR_FAIL_COND(terrain_data->depth < p_position.z);
+	MC_ERR_FAIL_COND(terrain_data->data.size() <= coord_to_index(p_position));
 	MC_ERR_FAIL_COND(!terrain_data->use_colour);
 
 	const int index = coord_to_index(p_position);
 
 	if (index != -1) {
+		MC_ERR_FAIL_COND(terrain_data->data.size() <= index);
 		terrain_data->colour_data.write()[index] = p_colour;
 	}
 }
@@ -540,7 +570,7 @@ CollisionShape *MarchingCubesTerrain::find_collision_sibling() const {
 void MarchingCubesTerrain::clear_mesh() {
 	auto data_write = terrain_data->data.write();
 	for (int i = 0; i < terrain_data->data.size(); i++) {
-		data_write[i] = 0.0f;
+		data_write[i] = 1.0f;
 	}
 }
 

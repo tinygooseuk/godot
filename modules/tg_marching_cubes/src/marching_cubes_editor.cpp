@@ -140,7 +140,7 @@ void MarchingCubesEditor::menu_option(int p_option) {
 			ur->add_do_method(node->get_parent(), "add_child", mesh_instance);
 			ur->add_do_method(node->get_parent(), "move_child", mesh_instance, node->get_index() + 1);
 
-			ur->add_do_method(mesh_instance, "set_owner", node->get_parent()->get_owner());
+			ur->add_do_method(mesh_instance, "set_owner", node->get_owner());
 			ur->add_do_reference(mesh_instance);
 			ur->add_undo_method(node, "remove_child", mesh_instance);
 			ur->commit_action();
