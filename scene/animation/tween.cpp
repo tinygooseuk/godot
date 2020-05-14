@@ -253,9 +253,9 @@ void Tween::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("targeting_property", "object", "property", "initial", "initial_val", "final_val", "duration", "trans_type", "ease_type", "delay"), &Tween::targeting_property, DEFVAL(TRANS_LINEAR), DEFVAL(EASE_IN_OUT), DEFVAL(0));
 	ClassDB::bind_method(D_METHOD("targeting_method", "object", "method", "initial", "initial_method", "final_val", "duration", "trans_type", "ease_type", "delay"), &Tween::targeting_method, DEFVAL(TRANS_LINEAR), DEFVAL(EASE_IN_OUT), DEFVAL(0));
 
-	//TINYGOOSE change:
+	// -- TINYGOOSE change:
 	ClassDB::bind_method(D_METHOD("run_equation", "trans_type", "ease_type", "alpha",  "initial_value", "final_value"), &Tween::run_equation, DEFVAL(TRANS_LINEAR), DEFVAL(EASE_IN_OUT), DEFVAL(real_t(0)), DEFVAL(real_t(0)), DEFVAL(real_t(0)));
-	//TINYGOOSE end.
+	// -- TINYGOOSE end.
 	
 	// Add the Tween signals
 	ADD_SIGNAL(MethodInfo("tween_started", PropertyInfo(Variant::OBJECT, "object"), PropertyInfo(Variant::NODE_PATH, "key")));
@@ -428,11 +428,11 @@ Variant &Tween::_get_delta_val(InterpolateData &p_data) {
 	return p_data.initial_val;
 }
 
-//TINYGOOSE changed:
+// -- TINYGOOSE change:
 real_t Tween::run_equation(TransitionType p_trans_type, EaseType p_ease_type, real_t alpha, real_t initial_value, real_t target_value) {
 	return _run_equation(p_trans_type, p_ease_type, alpha, initial_value, target_value - initial_value, 1.0f);
 }
-//TINYGOOSE end.
+// -- TINYGOOSE end.
 
 Variant Tween::_run_equation(InterpolateData &p_data) {
 	// Get the initial and delta values from the data

@@ -131,9 +131,9 @@ private:
 	typedef real_t (*interpolater)(real_t t, real_t b, real_t c, real_t d);
 	static interpolater interpolaters[TRANS_COUNT][EASE_COUNT];
 
-	//TINYGOOSE changed:
+	// -- TINYGOOSE change:
 	real_t run_equation(TransitionType p_trans_type, EaseType p_ease_type, real_t alpha, real_t initial_value, real_t target_value);
-	//TINYGOOSE end
+	// -- TINYGOOSE end.
 	real_t _run_equation(TransitionType p_trans_type, EaseType p_ease_type, real_t t, real_t b, real_t c, real_t d);
 	Variant &_get_delta_val(InterpolateData &p_data);
 	Variant _get_initial_val(const InterpolateData &p_data) const;

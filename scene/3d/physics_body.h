@@ -338,7 +338,10 @@ public:
 	bool is_on_ceiling() const;
 	Vector3 get_floor_normal() const;
 	Vector3 get_floor_velocity() const;
+	
+// -- TINYGOOSE change:
 	PhysicsBody *get_floor_body() const;
+// -- TINYGOOSE end.
 
 	int get_slide_count() const;
 	Collision get_slide_collision(int p_bounce) const;

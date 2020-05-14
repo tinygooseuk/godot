@@ -419,7 +419,7 @@ void CSGShapeSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 	}
 }
 
-
+// -- TINYGOOSE change:
 void EditorPluginCSG::_bake() {
 	if (csg_shape == NULL) {
 		return;
@@ -479,11 +479,13 @@ void EditorPluginCSG::_bind_methods() {
 
 	ClassDB::bind_method("_bake", &EditorPluginCSG::_bake);
 }
+// -- TINYGOOSE end.
 
 EditorPluginCSG::EditorPluginCSG(EditorNode *p_editor) {
 	Ref<CSGShapeSpatialGizmoPlugin> gizmo_plugin = Ref<CSGShapeSpatialGizmoPlugin>(memnew(CSGShapeSpatialGizmoPlugin));
 	SpatialEditor::get_singleton()->add_gizmo_plugin(gizmo_plugin);
 
+// -- TINYGOOSE change:
 	editor = p_editor;
 
 	bake = memnew(ToolButton);
@@ -493,7 +495,5 @@ EditorPluginCSG::EditorPluginCSG(EditorNode *p_editor) {
 	bake->connect("pressed", this, "_bake");
 	add_control_to_container(CONTAINER_SPATIAL_EDITOR_MENU, bake);
 	csg_shape = NULL;
-}
-
-EditorPluginCSG::~EditorPluginCSG() {
+// -- TINYGOOSE end.
 }

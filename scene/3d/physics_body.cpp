@@ -1298,6 +1298,7 @@ Vector3 KinematicBody::get_floor_velocity() const {
 	return floor_velocity;
 }
 
+// -- TINYGOOSE change:
 PhysicsBody *KinematicBody::get_floor_body() const {
 
 	if (!on_floor_body.is_valid()) {
@@ -1308,6 +1309,7 @@ PhysicsBody *KinematicBody::get_floor_body() const {
 	Object *obj = ObjectDB::get_instance(instance_id);
 	return Object::cast_to<PhysicsBody>(obj);
 }
+// -- TINYGOOSE end.
 
 bool KinematicBody::test_move(const Transform &p_from, const Vector3 &p_motion, bool p_infinite_inertia) {
 
@@ -1422,7 +1424,10 @@ void KinematicBody::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("is_on_wall"), &KinematicBody::is_on_wall);
 	ClassDB::bind_method(D_METHOD("get_floor_normal"), &KinematicBody::get_floor_normal);
 	ClassDB::bind_method(D_METHOD("get_floor_velocity"), &KinematicBody::get_floor_velocity);
+
+// -- TINYGOOSE change:
 	ClassDB::bind_method(D_METHOD("get_floor_body"), &KinematicBody::get_floor_body);
+// -- TINYGOOSE end.
 
 	ClassDB::bind_method(D_METHOD("set_axis_lock", "axis", "lock"), &KinematicBody::set_axis_lock);
 	ClassDB::bind_method(D_METHOD("get_axis_lock", "axis"), &KinematicBody::get_axis_lock);

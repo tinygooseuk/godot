@@ -1,4 +1,6 @@
 #pragma once
+
+// -- TINYGOOSE change:
 #include <core/class_db.h>
 
 template <typename T>
@@ -40,3 +42,5 @@ constexpr T clamp(T value, T min_v, T max_v) {
 	ClassDB::bind_method("get_" #name, &cpp_class::get_##name);          \
 	ClassDB::bind_method("set_" #name, &cpp_class::set_##name);          \
 	ClassDB::add_property(#cpp_class, PropertyInfo(Variant::OBJECT, #name, PROPERTY_HINT_RESOURCE_TYPE, #type_hint), "set_" #name, "get_" #name);
+
+// -- TINYGOOSE end.
