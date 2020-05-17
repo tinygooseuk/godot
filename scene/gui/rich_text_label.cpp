@@ -2083,6 +2083,13 @@ Error RichTextLabel::append_bbcode(const String &p_bbcode) {
 		if (tag.begins_with("/") && tag_stack.size()) {
 
 			bool tag_ok = tag_stack.size() && tag_stack.front()->get() == tag.substr(1, tag.length());
+// -- TINYGOOSE change:
+			if (!tag_ok) {
+				// TG: Also allow closing [img] with [/emoji] tag. Really not very clever, but should work
+				//     Without this, emoji tags must be closed with img, like this: [emoji]alien[/img]
+				tag_ok |= tag_stack.size() && tag_stack.front()->get() == "img" && tag.substr(1, tag.length()) == "emoji";
+			}
+// -- TINYGOOSE end.
 
 			if (tag_stack.front()->get() == "b")
 				in_bold = false;
@@ -2099,7 +2106,9 @@ Error RichTextLabel::append_bbcode(const String &p_bbcode) {
 
 			tag_stack.pop_front();
 			pos = brk_end + 1;
-			if (tag != "/img")
+// -- TINYGOOSE change:
+			if (tag != "/img" && tag != "/emoji")
+// -- TINYGOOSE end.
 				pop();
 
 		} else if (tag == "b") {
@@ -2227,6 +2236,22 @@ Error RichTextLabel::append_bbcode(const String &p_bbcode) {
 
 			pos = end;
 			tag_stack.push_front(tag);
+// -- TINYGOOSE change:
+		} else if (tag == "emoji") {
+
+			int end = p_bbcode.find("[", brk_end);
+			if (end == -1)
+				end = p_bbcode.length();
+
+			String image = String("Textures/Emoji/") + p_bbcode.substr(brk_end + 1, end - brk_end - 1) + ".png";
+
+			Ref<Texture> texture = ResourceLoader::load(image, "Texture");
+			if (texture.is_valid())
+				add_image(texture);
+
+			pos = end;
+			tag_stack.push_front("img");
+// -- TINYGOOSE end.
 		} else if (tag.begins_with("img=")) {
 
 			int width = 0;
