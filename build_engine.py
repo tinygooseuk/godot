@@ -5,7 +5,7 @@ import shutil
 
 ##### CONSTS #########################
 DEFAULT_COMMAND = "glue"
-VERSION = "3.2.2.rc.mono"
+VERSION = "3.2.2.beta.mono"
 
 
 
