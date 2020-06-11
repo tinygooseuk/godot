@@ -42,7 +42,6 @@
 #include <stdarg.h>
 
 class OS {
-
 	static OS *singleton;
 	String _execpath;
 	List<String> _cmdline;
@@ -59,7 +58,6 @@ class OS {
 	bool _allow_layered = false;
 	bool _use_vsync;
 	bool _vsync_via_compositor;
-	bool _disable_wintab;
 
 	char *last_error;
 
@@ -149,7 +147,11 @@ public:
 
 	bool is_layered_allowed() const { return _allow_layered; }
 	bool is_hidpi_allowed() const { return _allow_hidpi; }
-	bool is_wintab_disabled() const { return _disable_wintab; }
+
+	virtual int get_tablet_driver_count() const { return 0; };
+	virtual String get_tablet_driver_name(int p_driver) const { return ""; };
+	virtual String get_current_tablet_driver() const { return ""; };
+	virtual void set_current_tablet_driver(const String &p_driver){};
 
 	void ensure_user_data_dir();
 
@@ -185,7 +187,6 @@ public:
 	};
 
 	struct Date {
-
 		int year;
 		Month month;
 		int day;
@@ -194,7 +195,6 @@ public:
 	};
 
 	struct Time {
-
 		int hour;
 		int min;
 		int sec;

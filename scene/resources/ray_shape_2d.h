@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  CustomSSLSocketFactory.java                                          */
+/*  ray_shape_2d.h                                                       */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,45 +28,34 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-package org.godotengine.godot.plugin.payment.utils;
+#ifndef RAY_SHAPE_2D_H
+#define RAY_SHAPE_2D_H
 
-import java.io.IOException;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
+#include "scene/resources/shape_2d.h"
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
+class RayShape2D : public Shape2D {
+	GDCLASS(RayShape2D, Shape2D);
 
-import org.apache.http.conn.ssl.SSLSocketFactory;
+	real_t length;
+	bool slips_on_slope;
 
-/**
- *
- * @author Luis Linietsky <luis.linietsky@gmail.com>
- */
-public class CustomSSLSocketFactory extends SSLSocketFactory {
-	SSLContext sslContext = SSLContext.getInstance("TLS");
+	void _update_shape();
 
-	public CustomSSLSocketFactory(KeyStore truststore) throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException {
-		super(truststore);
+protected:
+	static void _bind_methods();
 
-		TrustManagerFactory tmf = TrustManagerFactory.getInstance("X509");
-		tmf.init(truststore);
+public:
+	void set_length(real_t p_length);
+	real_t get_length() const;
 
-		sslContext.init(null, tmf.getTrustManagers(), null);
-	}
+	void set_slips_on_slope(bool p_active);
+	bool get_slips_on_slope() const;
 
-	@Override
-	public Socket createSocket(Socket socket, String host, int port, boolean autoClose) throws IOException, UnknownHostException {
-		return sslContext.getSocketFactory().createSocket(socket, host, port, autoClose);
-	}
+	virtual void draw(const RID &p_to_rid, const Color &p_color);
+	virtual Rect2 get_rect() const;
+	virtual real_t get_enclosing_radius() const;
 
-	@Override
-	public Socket createSocket() throws IOException {
-		return sslContext.getSocketFactory().createSocket();
-	}
-}
+	RayShape2D();
+};
+
+#endif // RAY_SHAPE_2D_H

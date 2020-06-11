@@ -149,6 +149,7 @@ static NSCursor *_cursorFromSelector(SEL selector, SEL fallback = nil) {
 	Variant meta;
 	bool checkable;
 }
+
 @end
 
 @implementation GlobalMenuItem
@@ -277,13 +278,17 @@ static NSCursor *_cursorFromSelector(SEL selector, SEL fallback = nil) {
 }
 
 - (BOOL)windowShouldClose:(id)sender {
-	ERR_FAIL_COND_V(!DS_OSX->windows.has(window_id), YES);
+	if (!DS_OSX || !DS_OSX->windows.has(window_id)) {
+		return YES;
+	}
 	DS_OSX->_send_window_event(DS_OSX->windows[window_id], DisplayServerOSX::WINDOW_EVENT_CLOSE_REQUEST);
 	return NO;
 }
 
 - (void)windowWillClose:(NSNotification *)notification {
-	ERR_FAIL_COND(!DS_OSX->windows.has(window_id));
+	if (!DS_OSX || !DS_OSX->windows.has(window_id)) {
+		return;
+	}
 	DisplayServerOSX::WindowData &wd = DS_OSX->windows[window_id];
 
 	while (wd.transient_children.size()) {
@@ -309,7 +314,9 @@ static NSCursor *_cursorFromSelector(SEL selector, SEL fallback = nil) {
 }
 
 - (void)windowDidEnterFullScreen:(NSNotification *)notification {
-	ERR_FAIL_COND(!DS_OSX->windows.has(window_id));
+	if (!DS_OSX || !DS_OSX->windows.has(window_id)) {
+		return;
+	}
 	DisplayServerOSX::WindowData &wd = DS_OSX->windows[window_id];
 
 	wd.fullscreen = true;
@@ -319,8 +326,9 @@ static NSCursor *_cursorFromSelector(SEL selector, SEL fallback = nil) {
 }
 
 - (void)windowDidExitFullScreen:(NSNotification *)notification {
-	if (!DS_OSX || !DS_OSX->windows.has(window_id))
+	if (!DS_OSX || !DS_OSX->windows.has(window_id)) {
 		return;
+	}
 	DisplayServerOSX::WindowData &wd = DS_OSX->windows[window_id];
 
 	wd.fullscreen = false;
@@ -382,8 +390,9 @@ static NSCursor *_cursorFromSelector(SEL selector, SEL fallback = nil) {
 }
 
 - (void)windowDidResize:(NSNotification *)notification {
-	if (!DS_OSX || !DS_OSX->windows.has(window_id))
+	if (!DS_OSX || !DS_OSX->windows.has(window_id)) {
 		return;
+	}
 	DisplayServerOSX::WindowData &wd = DS_OSX->windows[window_id];
 
 #if defined(OPENGL_ENABLED)
@@ -424,11 +433,26 @@ static NSCursor *_cursorFromSelector(SEL selector, SEL fallback = nil) {
 }
 
 - (void)windowDidMove:(NSNotification *)notification {
+	if (!DS_OSX || !DS_OSX->windows.has(window_id)) {
+		return;
+	}
+	DisplayServerOSX::WindowData &wd = DS_OSX->windows[window_id];
+
 	DS_OSX->_release_pressed_events();
+
+	if (!wd.rect_changed_callback.is_null()) {
+		Variant size = Rect2i(DS_OSX->window_get_position(window_id), DS_OSX->window_get_size(window_id));
+		Variant *sizep = &size;
+		Variant ret;
+		Callable::CallError ce;
+		wd.rect_changed_callback.call((const Variant **)&sizep, 1, ret, ce);
+	}
 }
 
 - (void)windowDidBecomeKey:(NSNotification *)notification {
-	ERR_FAIL_COND(!DS_OSX->windows.has(window_id));
+	if (!DS_OSX || !DS_OSX->windows.has(window_id)) {
+		return;
+	}
 	DisplayServerOSX::WindowData &wd = DS_OSX->windows[window_id];
 
 	const CGFloat backingScaleFactor = (OS::get_singleton()->is_hidpi_allowed()) ? [wd.window_view backingScaleFactor] : 1.0;
@@ -440,7 +464,9 @@ static NSCursor *_cursorFromSelector(SEL selector, SEL fallback = nil) {
 }
 
 - (void)windowDidResignKey:(NSNotification *)notification {
-	ERR_FAIL_COND(!DS_OSX->windows.has(window_id));
+	if (!DS_OSX || !DS_OSX->windows.has(window_id)) {
+		return;
+	}
 	DisplayServerOSX::WindowData &wd = DS_OSX->windows[window_id];
 
 	DS_OSX->window_focused = false;
@@ -450,7 +476,9 @@ static NSCursor *_cursorFromSelector(SEL selector, SEL fallback = nil) {
 }
 
 - (void)windowDidMiniaturize:(NSNotification *)notification {
-	ERR_FAIL_COND(!DS_OSX->windows.has(window_id));
+	if (!DS_OSX || !DS_OSX->windows.has(window_id)) {
+		return;
+	}
 	DisplayServerOSX::WindowData &wd = DS_OSX->windows[window_id];
 
 	DS_OSX->window_focused = false;
@@ -460,7 +488,9 @@ static NSCursor *_cursorFromSelector(SEL selector, SEL fallback = nil) {
 }
 
 - (void)windowDidDeminiaturize:(NSNotification *)notification {
-	ERR_FAIL_COND(!DS_OSX->windows.has(window_id));
+	if (!DS_OSX || !DS_OSX->windows.has(window_id)) {
+		return;
+	}
 	DisplayServerOSX::WindowData &wd = DS_OSX->windows[window_id];
 
 	DS_OSX->window_focused = true;
@@ -921,7 +951,6 @@ static void _mouseDownEvent(DisplayServer::WindowID window_id, NSEvent *event, i
 }
 
 static bool isNumpadKey(unsigned int key) {
-
 	static const unsigned int table[] = {
 		0x41, /* kVK_ANSI_KeypadDecimal */
 		0x43, /* kVK_ANSI_KeypadMultiply */
@@ -954,7 +983,6 @@ static bool isNumpadKey(unsigned int key) {
 // Translates a OS X keycode to a Godot keycode
 //
 static int translateKey(unsigned int key) {
-
 	// Keyboard symbol translation table
 	static const unsigned int table[128] = {
 		/* 00 */ KEY_A,
@@ -1424,6 +1452,7 @@ inline void sendPanEvent(DisplayServer::WindowID window_id, double dx, double dy
 
 @interface GodotWindow : NSWindow {
 }
+
 @end
 
 @implementation GodotWindow
@@ -2148,7 +2177,7 @@ Rect2i DisplayServerOSX::screen_get_usable_rect(int p_screen) const {
 
 		Point2i position = Point2i(nsrect.origin.x, nsrect.origin.y + nsrect.size.height) * displayScale - _get_screens_origin();
 		position.y *= -1;
-		Size2i size = Size2i(nsrect.size.width, nsrect.size.height) / displayScale;
+		Size2i size = Size2i(nsrect.size.width, nsrect.size.height) * displayScale;
 
 		return Rect2i(position, size);
 	}
@@ -3011,7 +3040,6 @@ DisplayServerOSX::LatinKeyboardVariant DisplayServerOSX::get_latin_keyboard_vari
 	static LatinKeyboardVariant layout = LATIN_KEYBOARD_QWERTY;
 
 	if (keyboard_layout_dirty) {
-
 		layout = LATIN_KEYBOARD_QWERTY;
 
 		CGKeyCode keys[] = { kVK_ANSI_Q, kVK_ANSI_W, kVK_ANSI_E, kVK_ANSI_R, kVK_ANSI_T, kVK_ANSI_Y };
@@ -3553,7 +3581,6 @@ DisplayServerOSX::DisplayServerOSX(const String &p_rendering_driver, WindowMode 
 #endif
 #if defined(VULKAN_ENABLED)
 	if (rendering_driver == "vulkan") {
-
 		context_vulkan = memnew(VulkanContextOSX);
 		if (context_vulkan->initialize() != OK) {
 			memdelete(context_vulkan);
@@ -3613,7 +3640,6 @@ DisplayServerOSX::~DisplayServerOSX() {
 	//destroy drivers
 #if defined(VULKAN_ENABLED)
 	if (rendering_driver == "vulkan") {
-
 		if (rendering_device_vulkan) {
 			rendering_device_vulkan->finalize();
 			memdelete(rendering_device_vulkan);

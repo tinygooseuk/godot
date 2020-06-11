@@ -190,13 +190,6 @@
 			<description>
 			</description>
 		</method>
-		<method name="expand_x2_hq2x">
-			<return type="void">
-			</return>
-			<description>
-				Stretches the image and enlarges it by a factor of 2. No interpolation is done.
-			</description>
-		</method>
 		<method name="fill">
 			<return type="void">
 			</return>
@@ -441,6 +434,12 @@
 			</argument>
 			<description>
 				Saves the image as a PNG file to [code]path[/code].
+			</description>
+		</method>
+		<method name="save_png_to_buffer" qualifiers="const">
+			<return type="PackedByteArray">
+			</return>
+			<description>
 			</description>
 		</method>
 		<method name="set_pixel">

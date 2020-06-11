@@ -33,7 +33,6 @@
 #include "editor/editor_inspector.h"
 
 class EditorDebuggerRemoteObject : public Object {
-
 	GDCLASS(EditorDebuggerRemoteObject, Object);
 
 protected:
@@ -65,12 +64,12 @@ public:
 };
 
 class EditorDebuggerInspector : public EditorInspector {
-
 	GDCLASS(EditorDebuggerInspector, EditorInspector);
 
 private:
 	ObjectID inspected_object_id;
 	Map<ObjectID, EditorDebuggerRemoteObject *> remote_objects;
+	Set<RES> remote_dependencies;
 	EditorDebuggerRemoteObject *variables;
 
 	void _object_selected(ObjectID p_object);

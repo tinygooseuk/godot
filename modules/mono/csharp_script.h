@@ -66,7 +66,6 @@ TScriptInstance *cast_script_instance(ScriptInstance *p_inst) {
 #define CAST_CSHARP_INSTANCE(m_inst) (cast_script_instance<CSharpInstance, CSharpLanguage>(m_inst))
 
 class CSharpScript : public Script {
-
 	GDCLASS(CSharpScript, Script);
 
 public:
@@ -139,6 +138,10 @@ private:
 	virtual void _placeholder_erased(PlaceHolderScriptInstance *p_placeholder);
 #endif
 
+#if defined(TOOLS_ENABLED) || defined(DEBUG_ENABLED)
+	Set<StringName> exported_members_names;
+#endif
+
 	Map<StringName, PropertyInfo> member_info;
 
 	void _clear();
@@ -192,6 +195,8 @@ public:
 	virtual void get_script_property_list(List<PropertyInfo> *p_list) const;
 	virtual void update_exports();
 
+	void get_members(Set<StringName> *p_members) override;
+
 	virtual bool is_tool() const { return tool; }
 	virtual bool is_valid() const { return valid; }
 
@@ -231,7 +236,6 @@ public:
 };
 
 class CSharpInstance : public ScriptInstance {
-
 	friend class CSharpScript;
 	friend class CSharpLanguage;
 
@@ -340,7 +344,6 @@ class ManagedCallableMiddleman : public Object {
 };
 
 class CSharpLanguage : public ScriptLanguage {
-
 	friend class CSharpScript;
 	friend class CSharpInstance;
 
@@ -367,7 +370,6 @@ class CSharpLanguage : public ScriptLanguage {
 	ManagedCallableMiddleman *managed_callable_middleman = memnew(ManagedCallableMiddleman);
 
 	struct StringNameCache {
-
 		StringName _signal_callback;
 		StringName _set;
 		StringName _get;

@@ -100,7 +100,6 @@ public:
 	};
 
 	struct Node {
-
 		enum Type {
 			TYPE_CLASS,
 			TYPE_FUNCTION,
@@ -139,7 +138,6 @@ public:
 	struct OperatorNode;
 
 	struct ClassNode : public Node {
-
 		bool tool;
 		StringName name;
 		bool extends_used;
@@ -200,7 +198,6 @@ public:
 	};
 
 	struct FunctionNode : public Node {
-
 		bool _static;
 		MultiplayerAPI::RPCMode rpc_mode;
 		bool has_yield;
@@ -229,12 +226,13 @@ public:
 	};
 
 	struct BlockNode : public Node {
-
 		ClassNode *parent_class = nullptr;
 		BlockNode *parent_block = nullptr;
 		List<Node *> statements;
 		Map<StringName, LocalVarNode *> variables;
 		bool has_return = false;
+		bool can_break = false;
+		bool can_continue = false;
 
 		Node *if_condition = nullptr; //tiny hack to improve code completion on if () blocks
 
@@ -316,7 +314,6 @@ public:
 	};
 
 	struct DictionaryNode : public Node {
-
 		struct Pair {
 			Node *key;
 			Node *value;
@@ -406,7 +403,6 @@ public:
 	};
 
 	struct PatternNode : public Node {
-
 		enum PatternType {
 			PT_CONSTANT,
 			PT_BIND,
@@ -647,14 +643,16 @@ private:
 	void _check_block_types(BlockNode *p_block);
 	_FORCE_INLINE_ void _mark_line_as_safe(int p_line) const {
 #ifdef DEBUG_ENABLED
-		if (safe_lines)
+		if (safe_lines) {
 			safe_lines->insert(p_line);
+		}
 #endif // DEBUG_ENABLED
 	}
 	_FORCE_INLINE_ void _mark_line_as_unsafe(int p_line) const {
 #ifdef DEBUG_ENABLED
-		if (safe_lines)
+		if (safe_lines) {
 			safe_lines->erase(p_line);
+		}
 #endif // DEBUG_ENABLED
 	}
 

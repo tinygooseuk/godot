@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  RequestParams.java                                                   */
+/*  test_class_db.h                                                      */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,58 +28,15 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-package org.godotengine.godot.plugin.payment.utils;
+#ifndef GODOT_TEST_CLASS_DB_H
+#define GODOT_TEST_CLASS_DB_H
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+#include "core/os/main_loop.h"
 
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
+namespace TestClassDB {
 
-/**
- *
- * @author Luis Linietsky <luis.linietsky@gmail.com>
- */
-public class RequestParams {
+MainLoop *test();
 
-	private HashMap<String, String> params;
-	private String url;
-
-	public RequestParams() {
-		params = new HashMap<String, String>();
-	}
-
-	public void put(String key, String value) {
-		params.put(key, value);
-	}
-
-	public String get(String key) {
-		return params.get(key);
-	}
-
-	public void remove(Object key) {
-		params.remove(key);
-	}
-
-	public boolean has(String key) {
-		return params.containsKey(key);
-	}
-
-	public List<NameValuePair> toPairsList() {
-		List<NameValuePair> fields = new ArrayList<NameValuePair>();
-
-		for (String key : params.keySet()) {
-			fields.add(new BasicNameValuePair(key, this.get(key)));
-		}
-		return fields;
-	}
-
-	public String getUrl() {
-		return url;
-	}
-
-	public void setUrl(String url) {
-		this.url = url;
-	}
 }
+
+#endif //GODOT_TEST_CLASS_DB_H

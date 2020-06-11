@@ -39,7 +39,6 @@
 #include "step_3d_sw.h"
 
 class PhysicsServer3DSW : public PhysicsServer3D {
-
 	GDCLASS(PhysicsServer3DSW, PhysicsServer3D);
 
 	friend class PhysicsDirectSpaceState3DSW;
@@ -74,7 +73,6 @@ public:
 	static PhysicsServer3DSW *singleton;
 
 	struct CollCbkData {
-
 		int max;
 		int amount;
 		Vector3 *ptr;
@@ -367,7 +365,7 @@ public:
 	virtual void set_active(bool p_active);
 	virtual void init();
 	virtual void step(real_t p_step);
-	virtual void sync();
+	virtual void sync() {}
 	virtual void flush_queries();
 	virtual void finish();
 
@@ -376,7 +374,7 @@ public:
 	int get_process_info(ProcessInfo p_info);
 
 	PhysicsServer3DSW();
-	~PhysicsServer3DSW();
+	~PhysicsServer3DSW() {}
 };
 
 #endif

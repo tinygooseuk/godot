@@ -43,7 +43,6 @@ class EditorFileSystemDirectory;
 struct EditorProgress;
 
 class EditorExportPreset : public Reference {
-
 	GDCLASS(EditorExportPreset, Reference);
 
 public:
@@ -94,6 +93,8 @@ public:
 	Ref<EditorExportPlatform> get_platform() const;
 
 	bool has(const StringName &p_property) const { return values.has(p_property); }
+
+	void update_files_to_export();
 
 	Vector<String> get_files_to_export() const;
 
@@ -152,7 +153,6 @@ struct SharedObject {
 };
 
 class EditorExportPlatform : public Reference {
-
 	GDCLASS(EditorExportPlatform, Reference);
 
 public:
@@ -161,7 +161,6 @@ public:
 
 private:
 	struct SavedData {
-
 		uint64_t ofs;
 		uint64_t size;
 		Vector<uint8_t> md5;
@@ -173,7 +172,6 @@ private:
 	};
 
 	struct PackData {
-
 		FileAccess *f;
 		Vector<SavedData> file_ofs;
 		EditorProgress *ep;
@@ -181,7 +179,6 @@ private:
 	};
 
 	struct ZipData {
-
 		void *zip;
 		EditorProgress *ep;
 	};
@@ -232,6 +229,7 @@ public:
 	virtual Ref<EditorExportPreset> create_preset();
 
 	virtual void get_export_options(List<ExportOption> *r_options) = 0;
+	virtual bool should_update_export_options() { return false; }
 	virtual bool get_option_visibility(const String &p_option, const Map<StringName, Variant> &p_options) const { return true; }
 
 	virtual String get_os_name() const = 0;
@@ -355,6 +353,8 @@ class EditorExport : public Node {
 	Vector<Ref<EditorExportPreset>> export_presets;
 	Vector<Ref<EditorExportPlugin>> export_plugins;
 
+	StringName _export_presets_updated;
+
 	Timer *save_timer;
 	bool block_save;
 
@@ -386,7 +386,7 @@ public:
 	Vector<Ref<EditorExportPlugin>> get_export_plugins();
 
 	void load_config();
-
+	void update_export_presets();
 	bool poll_export_platforms();
 
 	EditorExport();
@@ -394,7 +394,6 @@ public:
 };
 
 class EditorExportPlatformPC : public EditorExportPlatform {
-
 	GDCLASS(EditorExportPlatformPC, EditorExportPlatform);
 
 public:
@@ -456,7 +455,6 @@ public:
 };
 
 class EditorExportTextSceneToBinaryPlugin : public EditorExportPlugin {
-
 	GDCLASS(EditorExportTextSceneToBinaryPlugin, EditorExportPlugin);
 
 public:
