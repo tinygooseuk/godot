@@ -16,7 +16,16 @@
 #if TOOLS_ENABLED
 
 #define _USE_MATH_DEFINES
+
+#ifdef _MSC_VER
+#include <math.h>
+#else
 #include <cmath>
+#endif
+
+#ifndef M_PI_2
+#define M_PI_2 (M_PI * 2.0f)
+#endif
 
 void MarchingCubesEditor::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("menu_option", "option"), &MarchingCubesEditor::menu_option);
