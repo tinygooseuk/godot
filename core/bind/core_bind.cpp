@@ -573,6 +573,26 @@ String _OS::get_latin_keyboard_variant() const {
 	}
 }
 
+int _OS::keyboard_get_layout_count() const {
+	return OS::get_singleton()->keyboard_get_layout_count();
+}
+
+int _OS::keyboard_get_current_layout() const {
+	return OS::get_singleton()->keyboard_get_current_layout();
+}
+
+void _OS::keyboard_set_current_layout(int p_index) {
+	OS::get_singleton()->keyboard_set_current_layout(p_index);
+}
+
+String _OS::keyboard_get_layout_language(int p_index) const {
+	return OS::get_singleton()->keyboard_get_layout_language(p_index);
+}
+
+String _OS::keyboard_get_layout_name(int p_index) const {
+	return OS::get_singleton()->keyboard_get_layout_name(p_index);
+}
+
 String _OS::get_model_name() const {
 
 	return OS::get_singleton()->get_model_name();
@@ -1182,6 +1202,22 @@ Vector<String> _OS::get_granted_permissions() const {
 	return OS::get_singleton()->get_granted_permissions();
 }
 
+int _OS::get_tablet_driver_count() const {
+	return OS::get_singleton()->get_tablet_driver_count();
+}
+
+String _OS::get_tablet_driver_name(int p_driver) const {
+	return OS::get_singleton()->get_tablet_driver_name(p_driver);
+}
+
+String _OS::get_current_tablet_driver() const {
+	return OS::get_singleton()->get_current_tablet_driver();
+}
+
+void _OS::set_current_tablet_driver(const String &p_driver) {
+	OS::get_singleton()->set_current_tablet_driver(p_driver);
+}
+
 _OS *_OS::singleton = NULL;
 
 void _OS::_bind_methods() {
@@ -1311,6 +1347,12 @@ void _OS::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_latin_keyboard_variant"), &_OS::get_latin_keyboard_variant);
 	ClassDB::bind_method(D_METHOD("get_model_name"), &_OS::get_model_name);
 
+	ClassDB::bind_method(D_METHOD("keyboard_get_layout_count"), &_OS::keyboard_get_layout_count);
+	ClassDB::bind_method(D_METHOD("keyboard_get_current_layout"), &_OS::keyboard_get_current_layout);
+	ClassDB::bind_method(D_METHOD("keyboard_set_current_layout", "index"), &_OS::keyboard_set_current_layout);
+	ClassDB::bind_method(D_METHOD("keyboard_get_layout_language", "index"), &_OS::keyboard_get_layout_language);
+	ClassDB::bind_method(D_METHOD("keyboard_get_layout_name", "index"), &_OS::keyboard_get_layout_name);
+
 	ClassDB::bind_method(D_METHOD("can_draw"), &_OS::can_draw);
 	ClassDB::bind_method(D_METHOD("is_userfs_persistent"), &_OS::is_userfs_persistent);
 	ClassDB::bind_method(D_METHOD("is_stdout_verbose"), &_OS::is_stdout_verbose);
@@ -1374,6 +1416,13 @@ void _OS::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("request_permission", "name"), &_OS::request_permission);
 	ClassDB::bind_method(D_METHOD("request_permissions"), &_OS::request_permissions);
 	ClassDB::bind_method(D_METHOD("get_granted_permissions"), &_OS::get_granted_permissions);
+
+	ClassDB::bind_method(D_METHOD("get_tablet_driver_count"), &_OS::get_tablet_driver_count);
+	ClassDB::bind_method(D_METHOD("get_tablet_driver_name", "idx"), &_OS::get_tablet_driver_name);
+	ClassDB::bind_method(D_METHOD("get_current_tablet_driver"), &_OS::get_current_tablet_driver);
+	ClassDB::bind_method(D_METHOD("set_current_tablet_driver", "name"), &_OS::set_current_tablet_driver);
+
+	ADD_PROPERTY(PropertyInfo(Variant::STRING, "tablet_driver"), "set_current_tablet_driver", "get_current_tablet_driver");
 
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "clipboard"), "set_clipboard", "get_clipboard");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "current_screen"), "set_current_screen", "get_current_screen");
