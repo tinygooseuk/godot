@@ -2460,6 +2460,13 @@ void SpatialEditorViewport::_notification(int p_what) {
 
 		bool shrink = view_menu->get_popup()->is_item_checked(view_menu->get_popup()->get_item_index(VIEW_HALF_RESOLUTION));
 
+		// -- TINYGOOSE change:		
+		// Also turn on half-res mode when unfocused (perf on Linux)
+	#ifdef __linux__
+		shrink |= !OS::get_singleton()->is_window_focused(); 
+	#endif //__linux__
+		// -- TINYGOOSE end.
+
 		if (shrink != (viewport_container->get_stretch_shrink() > 1)) {
 			viewport_container->set_stretch_shrink(shrink ? 2 : 1);
 		}
