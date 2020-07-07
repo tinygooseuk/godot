@@ -3,10 +3,11 @@ import sys
 import os
 import shutil
 
+import version
+
 ##### CONSTS #########################
 DEFAULT_COMMAND = "glue"
-VERSION = "3.2.2.beta.mono"
-
+VERSION = str(version.major) + "." + str(version.minor) + "." + str(version.patch) + "." + version.status + ".mono"
 
 
 ##### GENERIC HELPER FUNCS #########################
