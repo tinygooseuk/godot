@@ -8,7 +8,7 @@
 #include "marching_cubes_algorithm.h"
 
 #if TOOLS_ENABLED
-#define MC_REPORT_ERRORS 1
+#define MC_REPORT_ERRORS 0
 #else
 #define MC_REPORT_ERRORS 0
 #endif
